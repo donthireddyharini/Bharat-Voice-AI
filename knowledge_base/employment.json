@@ -1,0 +1,72 @@
+[
+  {
+    "id": "emp-001",
+    "title": "PM Kaushal Vikas Yojana (PMKVY)",
+    "category": "Employment",
+    "description": "Flagship skill development scheme offering short-term training and certification to help youth gain industry-relevant skills for employment.",
+    "eligibility": [
+      "Indian citizen, generally between 15 and 45 years of age",
+      "School or college dropouts and unemployed youth are prioritised",
+      "No specific educational qualification required for most short-term courses"
+    ],
+    "benefits": [
+      "Free skill training aligned to National Skill Qualification Framework",
+      "Certification recognized across industry",
+      "Placement assistance in partner companies",
+      "Monetary reward for eligible candidates completing training under RPL"
+    ],
+    "documents_required": [
+      "Aadhaar card",
+      "Bank account details",
+      "Passport size photograph",
+      "Educational certificates (if any)"
+    ],
+    "application_process": [
+      "Locate the nearest PMKVY training centre via the Skill India portal",
+      "Register and choose a job role/sector",
+      "Attend training and assessment",
+      "Receive certification and placement support"
+    ],
+    "source": "Ministry of Skill Development & Entrepreneurship, Govt of India (pmkvyofficial.org)",
+    "url": "https://www.pmkvyofficial.org",
+    "last_updated": "2025-12-11",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": []
+  },
+  {
+    "id": "emp-002",
+    "title": "PM Employment Generation Programme (PMEGP)",
+    "category": "Employment",
+    "description": "Credit-linked subsidy scheme to help set up micro-enterprises and generate self-employment opportunities.",
+    "eligibility": [
+      "Individuals above 18 years of age",
+      "Minimum Class 8 pass for projects above Rs. 10 lakh (manufacturing) or Rs. 5 lakh (service)",
+      "Only new units are eligible; existing units cannot avail this scheme again"
+    ],
+    "benefits": [
+      "Margin money subsidy of 15% to 35% of project cost depending on category and area",
+      "Bank loan for the remaining project cost",
+      "Support for setting up manufacturing or service micro-enterprises"
+    ],
+    "documents_required": [
+      "Aadhaar card",
+      "Project report",
+      "Educational qualification proof",
+      "Caste/category certificate (if applicable)",
+      "Bank loan application documents"
+    ],
+    "application_process": [
+      "Apply online through the PMEGP e-portal",
+      "Prepare and submit a detailed project report",
+      "Attend interview by the district task force committee",
+      "Loan sanction by the identified bank and subsidy release by the implementing agency"
+    ],
+    "source": "Khadi & Village Industries Commission, Ministry of MSME (kviconline.gov.in)",
+    "url": "https://www.kviconline.gov.in",
+    "last_updated": "2025-10-30",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": []
+  }
+]

@@ -1,0 +1,231 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Sora', 'Noto Sans Devanagari', 'Noto Sans Telugu', 'Noto Sans Kannada', sans-serif;
+  --font-body: 'Inter', 'Noto Sans Devanagari', 'Noto Sans Telugu', 'Noto Sans Kannada', sans-serif;
+}
+
+html, body {
+  background-color: #030712;
+  color: #F8FAFC;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  selection-background-color: #FF7800;
+  selection-color: #FFFFFF;
+}
+
+::selection {
+  background: rgba(255, 120, 0, 0.35);
+  color: #FFFFFF;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 120, 0, 0.45); }
+
+/* Masterpiece Luxury Glassmorphism */
+.glass {
+  background: rgba(11, 19, 41, 0.58);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.38);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-strong {
+  background: rgba(8, 14, 32, 0.82);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px 0 rgba(0, 0, 0, 0.65), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-neon {
+  background: rgba(11, 19, 41, 0.75);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid rgba(0, 229, 255, 0.28);
+  box-shadow: 0 0 35px rgba(0, 229, 255, 0.18), inset 0 0 20px rgba(0, 229, 255, 0.06);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.smooth-all {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.smooth-transform {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Masterpiece Living Text Gradient */
+.text-gradient {
+  background: linear-gradient(125deg, #FF7800 0%, #FF2E79 35%, #8040F5 70%, #00E5FF 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientShift 6s ease infinite;
+}
+
+/* Morphing Gradient Mesh */
+.gradient-mesh {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at 15% 50%, rgba(255, 120, 0, 0.18), transparent 45%),
+              radial-gradient(circle at 85% 30%, rgba(128, 64, 245, 0.2), transparent 45%),
+              radial-gradient(circle at 50% 80%, rgba(0, 229, 255, 0.15), transparent 50%);
+  filter: blur(50px);
+  animation: morphBlob 16s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Particle Field */
+.particle-field {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+.particle-field::before, .particle-field::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 200%;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: particleRise 24s linear infinite;
+}
+.particle-field::after {
+  background-image: radial-gradient(rgba(0, 229, 255, 0.15) 1.5px, transparent 1.5px);
+  background-size: 80px 80px;
+  animation: particleRise 36s linear infinite;
+  opacity: 0.6;
+}
+
+/* Masterpiece Neon Border Glow */
+.border-glow {
+  position: relative;
+  z-index: 1;
+}
+.border-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  background: linear-gradient(45deg, #FF7800, #FF2E79, #8040F5, #00E5FF);
+  background-size: 300% 300%;
+  z-index: -1;
+  animation: gradientShift 5s ease infinite;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  padding: 1.5px;
+}
+
+/* 3D Scene */
+.scene-3d {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+}
+
+/* Tilt Card with Refined Shadow */
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
+}
+.tilt-card:hover {
+  transform: rotateX(6deg) rotateY(-6deg) translateY(-8px) translateZ(16px);
+  box-shadow: -15px 15px 40px -10px rgba(0, 229, 255, 0.25), 
+               15px -15px 40px -10px rgba(128, 64, 245, 0.25);
+}
+
+/* Typewriter */
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid #FF7800;
+  animation: typing 3s steps(40, end), blink 0.75s step-end infinite;
+}
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+@keyframes blink {
+  from, to { border-color: transparent }
+  50% { border-color: #FF7800; }
+}
+
+/* Reveal */
+.reveal {
+  opacity: 0;
+  animation: fadeIn 1s ease-out forwards;
+}
+
+/* Float 3D */
+.float-3d {
+  animation: float3D 6s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+/* Shimmer */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent);
+  transform: rotate(30deg);
+  animation: shimmer 3s infinite linear;
+}
+
+/* Breathing Glow */
+.breathe-glow {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* Orbit Rings */
+.orbit-ring {
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.08);
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: orbit 20s linear infinite;
+}
+
+/* Interactive Button Transitions & Micro-interactions */
+button, [role="button"] {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+button:active:not(:disabled), [role="button"]:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,69 @@
+[
+  {
+    "id": "edu-001",
+    "title": "Samagra Shiksha Abhiyan",
+    "category": "Education",
+    "description": "An integrated scheme for school education covering pre-school to senior secondary level, aiming at improving school effectiveness and equitable learning outcomes.",
+    "eligibility": [
+      "Applicable to all government and government-aided schools",
+      "Special focus on children with disabilities, girls, and children from disadvantaged groups"
+    ],
+    "benefits": [
+      "Free textbooks and uniforms for eligible students",
+      "Infrastructure support including classrooms and toilets",
+      "Special training for out-of-school children",
+      "Support for children with special needs"
+    ],
+    "documents_required": [
+      "School enrollment record",
+      "Aadhaar card (if available)",
+      "Disability certificate (if applicable)"
+    ],
+    "application_process": [
+      "No individual application needed; benefits are routed through the school",
+      "Parents can confirm eligibility with the school head teacher",
+      "District education office can be contacted for grievances"
+    ],
+    "source": "Department of School Education & Literacy, Ministry of Education (samagra.education.gov.in)",
+    "url": "https://samagra.education.gov.in",
+    "last_updated": "2025-11-05",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": ["Pre-school to Class 12"]
+  },
+  {
+    "id": "edu-002",
+    "title": "PM Vidyalaxmi Education Loan Scheme",
+    "category": "Education",
+    "description": "Collateral-free education loan scheme for students securing admission into top-ranked higher education institutions, with interest subvention for economically weaker students.",
+    "eligibility": [
+      "Admission into a Quality Higher Education Institution as notified under the scheme",
+      "Indian citizen with valid admission letter",
+      "Interest subvention applicable for family income up to Rs. 8,00,000 per annum"
+    ],
+    "benefits": [
+      "Loans up to Rs. 10 lakh without collateral",
+      "3% interest subvention during the moratorium period for eligible students",
+      "Simplified digital application through the portal"
+    ],
+    "documents_required": [
+      "Admission letter",
+      "Income certificate",
+      "Aadhaar card",
+      "Academic mark sheets",
+      "Bank KYC documents"
+    ],
+    "application_process": [
+      "Apply on the PM Vidyalaxmi portal",
+      "Select participating bank and loan amount",
+      "Upload documents for verification",
+      "Bank sanctions loan after due diligence"
+    ],
+    "source": "Department of Higher Education, Ministry of Education (pmvidyalaxmi.gov.in)",
+    "url": "https://pmvidyalaxmi.gov.in",
+    "last_updated": "2026-01-02",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": ["Undergraduate", "Postgraduate"]
+  }
+]

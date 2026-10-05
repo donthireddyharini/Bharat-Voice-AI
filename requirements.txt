@@ -1,0 +1,24 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.9.0
+sqlalchemy>=2.0.30
+python-multipart>=0.0.9
+requests>=2.32.0
+
+# RAG stack
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-huggingface>=0.1.0
+faiss-cpu>=1.7.4
+sentence-transformers>=3.0.0
+
+# Document understanding
+pypdf>=5.0.0
+pytesseract>=0.3.10
+Pillow>=10.0.0
+
+# Optional server-side TTS
+gTTS>=2.5.0
+
+# Numpy - allow 2.x for Python 3.14 compatibility
+numpy>=1.26.0

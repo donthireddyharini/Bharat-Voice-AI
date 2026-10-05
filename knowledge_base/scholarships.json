@@ -1,0 +1,106 @@
+[
+  {
+    "id": "sch-001",
+    "title": "National Means-cum-Merit Scholarship",
+    "category": "Scholarships",
+    "description": "Financial assistance for meritorious students from economically weaker sections to prevent dropout at the secondary stage and encourage them to continue education.",
+    "eligibility": [
+      "Student must be studying in class 9 to 12 in a government, government-aided or local body school",
+      "Family income should not exceed the notified income ceiling",
+      "Student must have scored at least 55% marks in the qualifying examination"
+    ],
+    "benefits": [
+      "Scholarship amount of Rs. 12,000 per year (Rs. 1,000 per month)",
+      "Disbursed directly to the student's bank account"
+    ],
+    "documents_required": [
+      "Income certificate",
+      "Previous year mark sheet",
+      "Aadhaar card",
+      "Bank passbook (Aadhaar linked)",
+      "School bonafide certificate"
+    ],
+    "application_process": [
+      "Register on the National Scholarship Portal (NSP)",
+      "Fill personal, academic and bank details",
+      "Upload required documents",
+      "Submit application before the deadline",
+      "Track status through the portal"
+    ],
+    "source": "National Scholarship Portal, Ministry of Education, Govt of India (scholarships.gov.in)",
+    "url": "https://scholarships.gov.in",
+    "last_updated": "2026-01-15",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": ["Class 9-12"]
+  },
+  {
+    "id": "sch-002",
+    "title": "AICTE Pragati Scholarship for Girl Students",
+    "category": "Scholarships",
+    "description": "Scholarship scheme to support girl students pursuing technical education (diploma or degree) at AICTE-approved institutions.",
+    "eligibility": [
+      "Applicant must be a girl student admitted to 1st year of a Degree/Diploma course in an AICTE approved institution",
+      "Only two girl children per family are eligible",
+      "Family annual income should not exceed Rs. 8,00,000"
+    ],
+    "benefits": [
+      "Rs. 50,000 per annum for tuition fee and other essentials",
+      "Coverage for the entire duration of the course, subject to satisfactory academic performance"
+    ],
+    "documents_required": [
+      "Admission proof",
+      "Income certificate",
+      "Aadhaar card",
+      "Bank account details",
+      "Passing certificate of qualifying exam"
+    ],
+    "application_process": [
+      "Apply through the National Scholarship Portal under AICTE schemes",
+      "Fill in institution and course details",
+      "Upload the required certificates",
+      "Verification by the institution nodal officer",
+      "Disbursal after state/AICTE approval"
+    ],
+    "source": "All India Council for Technical Education - AICTE (scholarships.gov.in)",
+    "url": "https://scholarships.gov.in",
+    "last_updated": "2026-01-10",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": ["B.Tech", "Diploma", "Degree"]
+  },
+  {
+    "id": "sch-003",
+    "title": "Andhra Pradesh Vidya Deevena (Fee Reimbursement)",
+    "category": "Scholarships",
+    "description": "State scheme reimbursing tuition fees for students pursuing Intermediate, Degree, Engineering, Medical and other professional courses in Andhra Pradesh.",
+    "eligibility": [
+      "Student must be a resident of Andhra Pradesh",
+      "Family annual income should be below Rs. 2,50,000 (rural) or applicable urban ceiling",
+      "Admission in a recognized government or private college within AP"
+    ],
+    "benefits": [
+      "Full or partial reimbursement of tuition fees directly to college",
+      "Applicable across Intermediate, Degree, B.Tech, and professional courses"
+    ],
+    "documents_required": [
+      "Income and caste certificate",
+      "Aadhaar card",
+      "College admission and fee receipt",
+      "Ration card",
+      "Bank passbook"
+    ],
+    "application_process": [
+      "Apply through the AP Government Jnanabhumi portal",
+      "Enter Aadhaar and family details for verification",
+      "College nodal officer confirms enrollment",
+      "Fee is reimbursed directly to the institution"
+    ],
+    "source": "Higher Education Department, Government of Andhra Pradesh (navasakam.ap.gov.in)",
+    "url": "https://navasakam.ap.gov.in",
+    "last_updated": "2025-12-20",
+    "language": "en",
+    "states": ["Andhra Pradesh"],
+    "education_level": ["Intermediate", "B.Tech", "Degree", "Medical"]
+  }
+]

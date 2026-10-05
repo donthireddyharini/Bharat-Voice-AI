@@ -1,0 +1,66 @@
+[
+  {
+    "id": "gov-001",
+    "title": "Aadhaar Enrollment and Update Services",
+    "category": "Government Services",
+    "description": "Aadhaar is a 12-digit unique identity number issued by UIDAI, required to access most government schemes and services.",
+    "eligibility": [
+      "Available to all residents of India, including children",
+      "No income or category restriction"
+    ],
+    "benefits": [
+      "Single identity proof accepted across government and private services",
+      "Enables direct benefit transfer for subsidies and scholarships",
+      "Free updates for demographic details within the prescribed window"
+    ],
+    "documents_required": [
+      "Proof of identity (e.g. passport, PAN, voter ID)",
+      "Proof of address (e.g. utility bill, ration card)",
+      "Proof of date of birth for new enrollment"
+    ],
+    "application_process": [
+      "Book an appointment at the nearest Aadhaar Seva Kendra or enrollment centre",
+      "Carry original documents for verification",
+      "Complete biometric capture (fingerprints, iris, photograph)",
+      "Aadhaar is generated and dispatched by post, also downloadable online"
+    ],
+    "source": "Unique Identification Authority of India - UIDAI (uidai.gov.in)",
+    "url": "https://uidai.gov.in",
+    "last_updated": "2025-09-14",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": []
+  },
+  {
+    "id": "gov-002",
+    "title": "Income and Caste Certificate Services",
+    "category": "Government Services",
+    "description": "Income and caste certificates issued by the revenue department are required for scholarships, reservations, and welfare schemes.",
+    "eligibility": [
+      "Resident of the state applying for the certificate",
+      "Caste certificate requires proof of belonging to the specific community"
+    ],
+    "benefits": [
+      "Required document for scholarships, fee reimbursement and reservation benefits",
+      "Digitally verifiable certificate in most states"
+    ],
+    "documents_required": [
+      "Aadhaar card",
+      "Ration card or residence proof",
+      "Self-declaration form",
+      "Community certificate of parent (for caste certificate)"
+    ],
+    "application_process": [
+      "Apply through the state e-Seva/Meeseva/Common Service Centre portal",
+      "Upload supporting documents",
+      "Field verification by revenue officials if required",
+      "Certificate issued digitally or physically within stipulated days"
+    ],
+    "source": "State Revenue Department & Digital Seva Portal (digitalseva.csc.gov.in)",
+    "url": "https://digitalseva.csc.gov.in",
+    "last_updated": "2025-08-22",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": []
+  }
+]

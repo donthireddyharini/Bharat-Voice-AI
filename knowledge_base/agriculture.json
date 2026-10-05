@@ -1,0 +1,68 @@
+[
+  {
+    "id": "agr-001",
+    "title": "PM-KISAN Samman Nidhi",
+    "category": "Agriculture",
+    "description": "Income support scheme providing direct cash transfers to landholding farmer families to help meet input costs for agriculture.",
+    "eligibility": [
+      "Small and marginal farmer families with cultivable landholding",
+      "Excludes institutional landholders and higher income tax payees",
+      "Farmer's land records must be updated in the state revenue database"
+    ],
+    "benefits": [
+      "Rs. 6,000 per year paid in three equal installments of Rs. 2,000",
+      "Direct benefit transfer to the farmer's bank account"
+    ],
+    "documents_required": [
+      "Aadhaar card",
+      "Land ownership records",
+      "Bank account details",
+      "Farmer registration on the PM-KISAN portal"
+    ],
+    "application_process": [
+      "Register through the PM-KISAN portal or nearest Common Service Centre",
+      "Provide land record and Aadhaar details",
+      "Village revenue officer verifies land ownership",
+      "Approved beneficiaries receive installments via DBT"
+    ],
+    "source": "Ministry of Agriculture & Farmers Welfare, Govt of India (pmkisan.gov.in)",
+    "url": "https://pmkisan.gov.in",
+    "last_updated": "2025-12-28",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": []
+  },
+  {
+    "id": "agr-002",
+    "title": "Pradhan Mantri Fasal Bima Yojana",
+    "category": "Agriculture",
+    "description": "Crop insurance scheme protecting farmers against yield losses due to natural calamities, pests and diseases.",
+    "eligibility": [
+      "All farmers growing notified crops in notified areas, including sharecroppers and tenant farmers",
+      "Enrollment is compulsory for loanee farmers and voluntary for non-loanee farmers"
+    ],
+    "benefits": [
+      "Comprehensive risk cover for pre-sowing to post-harvest losses",
+      "Low uniform premium for farmers (as low as 1.5% to 5% of sum insured)",
+      "Use of technology for quick claim assessment"
+    ],
+    "documents_required": [
+      "Aadhaar card",
+      "Land records or tenancy agreement",
+      "Bank account details",
+      "Sowing declaration"
+    ],
+    "application_process": [
+      "Apply through bank, insurance company, or the national crop insurance portal",
+      "Submit land and crop sowing details before the cut-off date",
+      "Premium is deducted or paid directly",
+      "Claim is triggered automatically for notified calamities"
+    ],
+    "source": "Ministry of Agriculture & Farmers Welfare, Govt of India (pmfby.gov.in)",
+    "url": "https://pmfby.gov.in",
+    "last_updated": "2025-11-18",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": []
+  }
+]

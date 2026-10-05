@@ -1,0 +1,65 @@
+[
+  {
+    "id": "wel-001",
+    "title": "Ayushman Bharat - PM Jan Arogya Yojana",
+    "category": "Welfare",
+    "description": "Health insurance scheme providing cashless treatment coverage to economically vulnerable families at empanelled hospitals.",
+    "eligibility": [
+      "Families identified as deprived under the Socio-Economic Caste Census",
+      "No cap on family size or age of members"
+    ],
+    "benefits": [
+      "Health cover of Rs. 5 lakh per family per year",
+      "Cashless and paperless treatment at empanelled public and private hospitals",
+      "Covers pre and post hospitalization expenses"
+    ],
+    "documents_required": [
+      "Aadhaar card",
+      "Ration card",
+      "SECC verification document or Ayushman card"
+    ],
+    "application_process": [
+      "Check eligibility on the Ayushman Bharat portal or nearest Common Service Centre",
+      "Generate the Ayushman Card (e-KYC through Aadhaar)",
+      "Present the card at an empanelled hospital for cashless treatment"
+    ],
+    "source": "National Health Authority, Ministry of Health & Family Welfare (nha.gov.in)",
+    "url": "https://nha.gov.in",
+    "last_updated": "2025-12-05",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": []
+  },
+  {
+    "id": "wel-002",
+    "title": "National Social Assistance Programme - Old Age Pension",
+    "category": "Welfare",
+    "description": "Monthly pension support for senior citizens belonging to below poverty line households.",
+    "eligibility": [
+      "Applicant must be 60 years of age or above",
+      "Belong to a household identified as below poverty line",
+      "No other regular pension or family support"
+    ],
+    "benefits": [
+      "Monthly pension amount (varies by state, typically Rs. 200 to Rs. 2000)",
+      "Direct transfer to bank or post office account"
+    ],
+    "documents_required": [
+      "Age proof",
+      "BPL certificate",
+      "Aadhaar card",
+      "Bank/post office account details"
+    ],
+    "application_process": [
+      "Apply at the gram panchayat, municipal office or social welfare department",
+      "Submit age and income proof for verification",
+      "Approved applications are added to the pension disbursal list"
+    ],
+    "source": "Ministry of Rural Development, Govt of India (nsap.nic.in)",
+    "url": "https://nsap.nic.in",
+    "last_updated": "2025-07-19",
+    "language": "en",
+    "states": ["All India"],
+    "education_level": []
+  }
+]
