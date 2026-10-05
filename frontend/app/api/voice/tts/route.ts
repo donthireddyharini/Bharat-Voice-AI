@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import { Language } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,20 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
+// Studio-grade Human Neural Voice models for Indian languages
+const NEURAL_VOICE_MAP: Partial<Record<Language, string>> = {
+  te: "te-IN-ShrutiNeural",           // Authentic, 100% human-natural fluent Telugu
+  hi: "hi-IN-SwaraNeural",            // Authentic, 100% human-natural fluent Hindi
+  kn: "kn-IN-SapnaNeural",            // Authentic, 100% human-natural fluent Kannada
+  ta: "ta-IN-PallaviNeural",          // Authentic, 100% human-natural fluent Tamil
+  ml: "ml-IN-SobhanaNeural",          // Authentic, 100% human-natural fluent Malayalam
+  mr: "mr-IN-AarohiNeural",           // Authentic, 100% human-natural fluent Marathi
+  bn: "bn-IN-TanishaaNeural",         // Authentic, 100% human-natural fluent Bengali
+  gu: "gu-IN-DhwaniNeural",           // Authentic, 100% human-natural fluent Gujarati
+  en: "en-IN-NeerjaExpressiveNeural", // Authentic, 100% human-natural Indian English
+};
+
+// Fallback Google TTS locale codes
 const GOOGLE_TTS_LANG_MAP: Record<Language, string | null> = {
   en: "en-IN",
   hi: "hi",
@@ -20,41 +35,148 @@ const GOOGLE_TTS_LANG_MAP: Record<Language, string | null> = {
   gu: "gu",
   ml: "ml",
   pa: "pa",
-  or: null, // Odia handled by browser SpeechSynthesis
+  or: null,
 };
+
+// In-memory cache for ultra-fast instant audio delivery of common voice phrases
+const AUDIO_CACHE = new Map<string, Buffer>();
+const MAX_CACHE_SIZE = 100;
 
 function cleanTextForSpeech(text: string, language: Language = "en"): string {
   let cleaned = text
     .replace(/https?:\/\/\S+/g, "")
-    .replace(/[*_#`~>\[\]\(\)\{\}]/g, " ")
+    .replace(/[*_#`~>\[\]\(\)\{\}|\\^]/g, " ")
     .replace(/[\u200B-\u200D\uFEFF]/g, "")
-    .replace(/[•\-\–]/g, " ")
+    .replace(/[•\-\–—]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
+  // Clean currency and measurement symbols for human natural pronunciation
   if (language === "te") {
-    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "రూపాయలు ").replace(/రూ\.\s*/g, "రూపాయలు ");
-  } else if (language === "hi" || language === "mr") {
-    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "रुपये ").replace(/रु\.\s*/g, "रुपये ");
+    cleaned = cleaned
+      .replace(/[₹\u20B9]\s*/g, "రూపాయలు ")
+      .replace(/రూ\.\s*/g, "రూపాయలు ")
+      .replace(/రూ\s+/g, "రూపాయలు ")
+      .replace(/%/g, " శాతం ")
+      .replace(/km\s*/gi, " కిలోమీటర్లు ")
+      .replace(/AI\b/g, "ఏఐ");
+  } else if (language === "hi") {
+    cleaned = cleaned
+      .replace(/[₹\u20B9]\s*/g, "रुपये ")
+      .replace(/रु\.\s*/g, "रुपये ")
+      .replace(/रु\s+/g, "रुपये ")
+      .replace(/%/g, " प्रतिशत ")
+      .replace(/km\s*/gi, " किलोमीटर ")
+      .replace(/AI\b/g, "एआई");
   } else if (language === "kn") {
-    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ರೂಪಾಯಿ ");
+    cleaned = cleaned
+      .replace(/[₹\u20B9]\s*/g, "ರೂಪಾಯಿ ")
+      .replace(/ರೂ\.\s*/g, "ರೂಪಾಯಿ ")
+      .replace(/%/g, " ಪ್ರತಿಶತ ");
   } else if (language === "ta") {
-    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ரூபாய் ");
+    cleaned = cleaned
+      .replace(/[₹\u20B9]\s*/g, "ரூபாய் ")
+      .replace(/ரூ\.\s*/g, "ரூபாய் ")
+      .replace(/%/g, " சதவீதம் ");
+  } else if (language === "mr") {
+    cleaned = cleaned
+      .replace(/[₹\u20B9]\s*/g, "रुपये ")
+      .replace(/रु\.\s*/g, "रुपये ");
+  } else if (language === "bn") {
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "টাকা ");
+  } else if (language === "gu") {
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "રૂપિયા ");
+  } else if (language === "ml") {
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "രൂപ ");
   } else {
-    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "Rupees ").replace(/Rs\.\s*/gi, "Rupees ");
+    cleaned = cleaned
+      .replace(/[₹\u20B9]\s*/g, "Rupees ")
+      .replace(/Rs\.\s*/gi, "Rupees ")
+      .replace(/Govt\.\s*/gi, "Government ");
   }
 
-  // Pick first 1-2 sentences for instant natural vocal delivery
-  const sentences = cleaned.split(/(?<=[.!?।])\s+/);
-  if (sentences.length > 2 && cleaned.length > 200) {
+  // Pick first 2-3 sentences for natural, concise vocal delivery (max 380 chars)
+  const sentences = cleaned.split(/(?<=[.!?।])\s+/).filter(Boolean);
+  if (sentences.length > 2 && cleaned.length > 320) {
     cleaned = sentences.slice(0, 2).join(" ");
   }
-  // Hard cap to prevent URL truncation in upstream TTS
-  if (cleaned.length > 220) {
-    cleaned = cleaned.slice(0, 217) + "...";
+  if (cleaned.length > 380) {
+    // Find last sentence ending punctuation before 380
+    const sub = cleaned.slice(0, 380);
+    const lastPunct = Math.max(sub.lastIndexOf("."), sub.lastIndexOf("!"), sub.lastIndexOf("?"), sub.lastIndexOf("।"));
+    if (lastPunct > 150) {
+      cleaned = sub.slice(0, lastPunct + 1);
+    } else {
+      cleaned = sub.trim();
+    }
   }
 
-  return cleaned;
+  return cleaned.trim();
+}
+
+/**
+ * Generate human-like studio speech via Microsoft Azure/Edge Neural TTS
+ */
+async function generateNeuralTTS(text: string, voiceName: string): Promise<Buffer> {
+  const tts = new MsEdgeTTS();
+  await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+
+  return new Promise((resolve, reject) => {
+    const stream = tts.toStream(text, {
+      rate: 0,
+      pitch: "+0Hz",
+    });
+
+    const chunks: Buffer[] = [];
+    const timeout = setTimeout(() => {
+      reject(new Error("Neural TTS stream timeout"));
+    }, 9000);
+
+    stream.audioStream.on("data", (chunk: Buffer) => {
+      chunks.push(chunk);
+    });
+
+    stream.audioStream.on("end", () => {
+      clearTimeout(timeout);
+      resolve(Buffer.concat(chunks));
+    });
+
+    stream.audioStream.on("error", (err: any) => {
+      clearTimeout(timeout);
+      reject(err);
+    });
+  });
+}
+
+/**
+ * Secondary fallback to Google TTS
+ */
+async function generateGoogleTTS(text: string, ttsLang: string): Promise<Buffer | null> {
+  try {
+    const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
+      text
+    )}&tl=${encodeURIComponent(ttsLang)}&client=tw-ob`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(googleTtsUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        Referer: "https://translate.google.com/",
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const arrayBuf = await res.arrayBuffer();
+      return Buffer.from(arrayBuf);
+    }
+  } catch (err) {
+    console.warn("[TTS] Google TTS fallback notice:", err);
+  }
+  return null;
 }
 
 export async function OPTIONS() {
@@ -72,45 +194,67 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ detail: "Empty text" }, { status: 400, headers: CORS_HEADERS });
     }
 
-    const ttsLang = GOOGLE_TTS_LANG_MAP[language];
-    if (!ttsLang) {
-      // Return 404 to let client fallback seamlessly to browser neural voice
-      return NextResponse.json({ detail: "Use client speech synthesis" }, { status: 404, headers: CORS_HEADERS });
+    // Check cache
+    const cacheKey = `${language}:${cleaned}`;
+    if (AUDIO_CACHE.has(cacheKey)) {
+      const cached = AUDIO_CACHE.get(cacheKey)!;
+      return new NextResponse(cached, {
+        status: 200,
+        headers: {
+          ...CORS_HEADERS,
+          "Content-Type": "audio/mpeg",
+          "Content-Length": cached.length.toString(),
+          "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
+        },
+      });
     }
 
-    const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
-      cleaned
-    )}&tl=${encodeURIComponent(ttsLang)}&client=tw-ob`;
+    // 1. Primary: Studio-grade Human-Natural Neural TTS (Microsoft Azure Neural)
+    const neuralVoice = NEURAL_VOICE_MAP[language];
+    if (neuralVoice) {
+      try {
+        const audioBuffer = await generateNeuralTTS(cleaned, neuralVoice);
+        if (audioBuffer && audioBuffer.length > 500) {
+          // Cache audio
+          if (AUDIO_CACHE.size >= MAX_CACHE_SIZE) {
+            const firstKey = AUDIO_CACHE.keys().next().value;
+            if (firstKey) AUDIO_CACHE.delete(firstKey);
+          }
+          AUDIO_CACHE.set(cacheKey, audioBuffer);
 
-    const upstreamRes = await fetch(googleTtsUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Referer: "https://translate.google.com/",
-      },
-    });
-
-    if (!upstreamRes.ok) {
-      return NextResponse.json(
-        { detail: "Upstream synthesis unavailable" },
-        { status: upstreamRes.status, headers: CORS_HEADERS }
-      );
+          return new NextResponse(audioBuffer, {
+            status: 200,
+            headers: {
+              ...CORS_HEADERS,
+              "Content-Type": "audio/mpeg",
+              "Content-Length": audioBuffer.length.toString(),
+              "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
+            },
+          });
+        }
+      } catch (neuralErr) {
+        console.warn(`[TTS] Neural synthesis failed for ${language}, attempting fallback:`, neuralErr);
+      }
     }
 
-    const audioBuffer = await upstreamRes.arrayBuffer();
+    // 2. Fallback: Google TTS
+    const googleLang = GOOGLE_TTS_LANG_MAP[language] || "en-IN";
+    const googleAudio = await generateGoogleTTS(cleaned, googleLang);
+    if (googleAudio && googleAudio.length > 500) {
+      return new NextResponse(googleAudio, {
+        status: 200,
+        headers: {
+          ...CORS_HEADERS,
+          "Content-Type": "audio/mpeg",
+          "Content-Length": googleAudio.length.toString(),
+          "Cache-Control": "public, max-age=86400",
+        },
+      });
+    }
 
-    return new NextResponse(audioBuffer, {
-      status: 200,
-      headers: {
-        ...CORS_HEADERS,
-        "Content-Type": "audio/mpeg",
-        "Cache-Control": "public, max-age=86400, s-maxage=86400",
-      },
-    });
+    return NextResponse.json({ detail: "Use client speech synthesis" }, { status: 404, headers: CORS_HEADERS });
   } catch (err: any) {
-    return NextResponse.json(
-      { detail: "TTS synthesis failed", error: String(err?.message || err) },
-      { status: 500, headers: CORS_HEADERS }
-    );
+    console.error("[TTS] Handler error:", err);
+    return NextResponse.json({ detail: "TTS generation error" }, { status: 500, headers: CORS_HEADERS });
   }
 }

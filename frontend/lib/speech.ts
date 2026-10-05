@@ -96,13 +96,24 @@ function cleanTextForSpeech(text: string, language: Language): string {
     .trim();
 
   if (language === "te") {
-    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "రూపాయలు ").replace(/రూ\.\s*/g, "రూపాయలు ").replace(/రూ\s+/g, "రూపాయలు ");
-  } else if (language === "hi" || language === "mr") {
-    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "रुपये ").replace(/रु\.\s*/g, "रुपये ").replace(/रु\s+/g, "रुपये ");
+    cleaned = cleaned
+      .replace(/[₹\u20B9]\s*/g, "రూపాయలు ")
+      .replace(/రూ\.\s*/g, "రూపాయలు ")
+      .replace(/రూ\s+/g, "రూపాయలు ")
+      .replace(/%/g, " శాతం ")
+      .replace(/km\s*/gi, " కిలోమీటర్లు ")
+      .replace(/AI\b/g, "ఏఐ");
+  } else if (language === "hi") {
+    cleaned = cleaned
+      .replace(/[₹\u20B9]\s*/g, "रुपये ")
+      .replace(/रु\.\s*/g, "रुपये ")
+      .replace(/रु\s+/g, "रुपये ")
+      .replace(/%/g, " प्रतिशत ")
+      .replace(/AI\b/g, "एआई");
   } else if (language === "kn") {
-    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ರೂಪಾಯಿ ").replace(/ರೂ\.\s*/g, "ರೂಪಾಯಿ ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ರೂಪಾಯಿ ").replace(/రూ\.\s*/g, "ರೂಪಾಯಿ ").replace(/%/g, " ಪ್ರತಿಶತ ");
   } else if (language === "ta") {
-    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ரூபாய் ").replace(/ரூ\.\s*/g, "ரூபாய் ").replace(/ரூ\s+/g, "ரூபாய் ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ரூபாய் ").replace(/ரூ\.\s*/g, "ரூபாய் ").replace(/%/g, " சதவீதம் ");
   } else if (language === "bn") {
     cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "টাকা ").replace(/টাকা\s*/g, "টাকা ");
   } else if (language === "gu") {
@@ -118,7 +129,22 @@ function cleanTextForSpeech(text: string, language: Language): string {
     cleaned = cleaned.replace(/Govt\.\s*/gi, "Government ");
   }
 
-  return cleaned;
+  // Pick first 2-3 sentences for natural, concise vocal delivery (max 380 chars)
+  const sentences = cleaned.split(/(?<=[.!?।])\s+/).filter(Boolean);
+  if (sentences.length > 2 && cleaned.length > 320) {
+    cleaned = sentences.slice(0, 2).join(" ");
+  }
+  if (cleaned.length > 380) {
+    const sub = cleaned.slice(0, 380);
+    const lastPunct = Math.max(sub.lastIndexOf("."), sub.lastIndexOf("!"), sub.lastIndexOf("?"), sub.lastIndexOf("।"));
+    if (lastPunct > 150) {
+      cleaned = sub.slice(0, lastPunct + 1);
+    } else {
+      cleaned = sub.trim();
+    }
+  }
+
+  return cleaned.trim();
 }
 
 let cachedVoices: SpeechSynthesisVoice[] = [];
@@ -174,17 +200,17 @@ function scoreVoice(v: SpeechSynthesisVoice, language: Language): number {
   if (name.includes("siri") || name.includes("apple")) score += 110;
 
   // Preferred fluent regional voice models
-  if (language === "te" && (name.includes("mohan") || name.includes("shruti") || name.includes("telugu"))) score += 60;
+  if (language === "te" && (name.includes("shruti") || name.includes("mohan") || name.includes("telugu"))) score += 60;
   if (language === "hi" && (name.includes("swara") || name.includes("madhur") || name.includes("hindi"))) score += 60;
-  if (language === "kn" && (name.includes("gagan") || name.includes("sapna") || name.includes("kannada"))) score += 60;
-  if (language === "ta" && (name.includes("valluvar") || name.includes("iniya") || name.includes("tamil"))) score += 60;
+  if (language === "kn" && (name.includes("sapna") || name.includes("gagan") || name.includes("kannada"))) score += 60;
+  if (language === "ta" && (name.includes("pallavi") || name.includes("valluvar") || name.includes("tamil"))) score += 60;
   if (language === "mr" && (name.includes("aarohi") || name.includes("manohar") || name.includes("marathi"))) score += 60;
-  if (language === "bn" && (name.includes("bashkar") || name.includes("tanishaa") || name.includes("bengali"))) score += 60;
+  if (language === "bn" && (name.includes("tanishaa") || name.includes("bashkar") || name.includes("bengali"))) score += 60;
   if (language === "gu" && (name.includes("dhwani") || name.includes("niranjan") || name.includes("gujarati"))) score += 60;
-  if (language === "ml" && (name.includes("midhun") || name.includes("sobha") || name.includes("malayalam"))) score += 60;
+  if (language === "ml" && (name.includes("sobhana") || name.includes("midhun") || name.includes("malayalam"))) score += 60;
   if (language === "pa" && (name.includes("harman") || name.includes("punjabi"))) score += 60;
   if (language === "or" && (name.includes("odia") || name.includes("oriya"))) score += 60;
-  if (language === "en" && (name.includes("india") || name.includes("neerja") || name.includes("prabhat"))) score += 60;
+  if (language === "en" && (name.includes("neerja") || name.includes("prabhat") || name.includes("india"))) score += 60;
 
   return score;
 }
@@ -274,7 +300,7 @@ export function startListening(
 
 /**
  * Speaks text aloud using high-definition Neural TTS from backend (/api/voice/tts).
- * Delivers authentic, 100% fluent native regional accents for Telugu, Hindi, Kannada, and English.
+ * Delivers authentic, 100% human-natural regional accents for Telugu, Hindi, Kannada, Tamil, etc.
  * Falls back seamlessly to browser SpeechSynthesis if offline.
  */
 export async function speak(text: string, language: Language, onEnd?: () => void) {
@@ -295,20 +321,26 @@ export async function speak(text: string, language: Language, onEnd?: () => void
     }
   };
 
-  // 1. Primary: Studio-grade Gemini/Google Neural TTS (/api/voice/tts)
+  // 1. Primary: Studio-grade Human-Natural Neural TTS (/api/voice/tts)
   if (typeof window !== "undefined") {
     try {
       const audioUrl = `/api/voice/tts?text=${encodeURIComponent(cleanedText)}&language=${encodeURIComponent(language)}`;
-      const audio = new Audio(audioUrl);
+      const audio = new Audio();
       currentAudio = audio;
+      audio.preload = "auto";
+      audio.src = audioUrl;
 
       audio.onended = finish;
-      audio.onerror = () => {
+      audio.onerror = (e) => {
+        console.warn("[TTS] Neural stream notice, using browser fallback:", e);
         currentAudio = null;
         fallbackBrowserSpeak(cleanedText, language, finish);
       };
 
-      await audio.play();
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        await playPromise;
+      }
       return;
     } catch (err) {
       console.warn("[TTS] Neural stream notice, using browser fallback:", err);
