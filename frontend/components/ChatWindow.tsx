@@ -148,23 +148,60 @@ export default function ChatWindow({
   onFollowupsChange,
   onNewChat,
 }: ChatWindowProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversationId, setConversationId] = useState<string | undefined>(() => {
+    if (activeSessionId) return activeSessionId;
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("bharathvoice_active_session_id") || undefined;
+    }
+    return undefined;
+  });
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    if (typeof window !== "undefined") {
+      const activeId = activeSessionId || localStorage.getItem("bharathvoice_active_session_id");
+      if (activeId) {
+        const saved = getChatSessionById(activeId);
+        if (saved && saved.messages && saved.messages.length > 0) {
+          return saved.messages;
+        }
+      }
+    }
+    return [];
+  });
+
   const [input, setInput] = useState("");
   const [assistantState, setAssistantState] = useState<AssistantState>("idle");
   const [isListening, setIsListening] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const [errorText, setErrorText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastFailedQuery = useRef<string | null>(null);
 
+  // Sync sources and followups on initial mount from persisted active session
   useEffect(() => {
-    if (activeSessionId) {
-      const savedSession = getChatSessionById(activeSessionId);
+    if (typeof window !== "undefined") {
+      const activeId = activeSessionId || localStorage.getItem("bharathvoice_active_session_id");
+      if (activeId) {
+        const saved = getChatSessionById(activeId);
+        if (saved) {
+          if (saved.sources && saved.sources.length > 0) onSourcesChange?.(saved.sources);
+          if (saved.followups && saved.followups.length > 0) onFollowupsChange?.(saved.followups);
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const targetId = activeSessionId || (typeof window !== "undefined" ? localStorage.getItem("bharathvoice_active_session_id") : null);
+    if (targetId) {
+      const savedSession = getChatSessionById(targetId);
       if (savedSession) {
         setConversationId(savedSession.id);
         setMessages(savedSession.messages || []);
         onSourcesChange?.(savedSession.sources || []);
         onFollowupsChange?.(savedSession.followups || []);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("bharathvoice_active_session_id", savedSession.id);
+        }
         return;
       }
     }
@@ -177,6 +214,10 @@ export default function ChatWindow({
     onFollowupsChange?.([]);
     if (typeof window !== "undefined") {
       localStorage.removeItem("bharathvoice_active_session_id");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("session");
+      url.searchParams.delete("chat");
+      window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
     }
     onNewChat?.();
   }
@@ -242,7 +283,7 @@ export default function ChatWindow({
           language: result.language || language,
           sources: result.sources || [],
           followups: result.suggested_followups || [],
-          title: query.slice(0, 50),
+          title: prev[0]?.content ? prev[0].content.slice(0, 50) : query.slice(0, 50),
         });
         if (typeof window !== "undefined") {
           localStorage.setItem("bharathvoice_active_session_id", currentConvId);
@@ -317,7 +358,7 @@ export default function ChatWindow({
             language: fallback.language || language,
             sources: fallback.sources || [],
             followups: fallback.suggested_followups || [],
-            title: query.slice(0, 50),
+            title: prev[0]?.content ? prev[0].content.slice(0, 50) : query.slice(0, 50),
           });
           return nextMessages;
         });

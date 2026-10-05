@@ -28,7 +28,12 @@ function AssistantContent() {
   const [rightTab, setRightTab] = useState<"sources" | "documents" | "guide" | "history">("sources");
   const [history, setHistory] = useState<SearchHistoryEntry[]>([]);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("bharathvoice_active_session_id") || null;
+    }
+    return null;
+  });
   const [mobileTab, setMobileTab] = useState<"chat" | "tools">("chat");
   const [externalQuery, setExternalQuery] = useState<{ text: string; nonce: number } | null>(null);
   const [showMoreOnboardingLangs, setShowMoreOnboardingLangs] = useState(false);
@@ -65,15 +70,29 @@ function AssistantContent() {
     const sessionParam = searchParams.get("session") || searchParams.get("chat");
     if (sessionParam) {
       setActiveSessionId(sessionParam);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("bharathvoice_active_session_id", sessionParam);
+      }
     }
 
     const q = searchParams.get("q") || searchParams.get("query");
     if (q) {
       setExternalQuery({ text: q, nonce: Date.now() });
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("q");
+        url.searchParams.delete("query");
+        window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+      }
     } else {
       const category = searchParams.get("category");
       if (category) {
         setExternalQuery({ text: `Tell me about ${category.replace("_", " ")} related services.`, nonce: Date.now() });
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("category");
+          window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+        }
       }
     }
   }, [searchParams]);
@@ -154,21 +173,26 @@ function AssistantContent() {
             </button>
           </div>
 
-          {/* Main Card (Chat or Mobile Tools) */}
-          {mobileTab === "chat" ? (
-            <div className="flex-1 glass-strong rounded-2xl sm:rounded-[2rem] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] p-3 sm:p-5 h-[calc(100dvh-150px)] sm:min-h-[70vh] relative overflow-hidden group">
-              <div className="absolute inset-0 rounded-2xl sm:rounded-[2rem] border border-transparent group-hover:border-saffron/20 transition-colors duration-700 pointer-events-none" />
-              <ChatWindow
-                language={language}
-                externalQuery={externalQuery}
-                activeSessionId={activeSessionId}
-                onNewChat={() => setActiveSessionId(null)}
-                onSourcesChange={setSources}
-                onFollowupsChange={setFollowups}
-              />
-            </div>
-          ) : (
-            <div className="lg:hidden flex-1 glass-strong rounded-2xl border border-white/10 p-4 space-y-4 overflow-y-auto">
+          {/* Main Card (Chat) — ALWAYS MOUNTED so chat is never lost/reset on tab switch or search */}
+          <div className={`flex-1 glass-strong rounded-2xl sm:rounded-[2rem] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] p-3 sm:p-5 h-[calc(100dvh-150px)] sm:min-h-[70vh] relative overflow-hidden group ${mobileTab === "chat" ? "flex flex-col" : "hidden lg:flex lg:flex-col"}`}>
+            <div className="absolute inset-0 rounded-2xl sm:rounded-[2rem] border border-transparent group-hover:border-saffron/20 transition-colors duration-700 pointer-events-none" />
+            <ChatWindow
+              language={language}
+              externalQuery={externalQuery}
+              activeSessionId={activeSessionId}
+              onNewChat={() => {
+                setActiveSessionId(null);
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("bharathvoice_active_session_id");
+                }
+              }}
+              onSourcesChange={setSources}
+              onFollowupsChange={setFollowups}
+            />
+          </div>
+
+          {/* Mobile Tools Drawer — shown when mobileTab is 'tools' */}
+          <div className={`lg:hidden flex-1 glass-strong rounded-2xl border border-white/10 p-4 space-y-4 overflow-y-auto ${mobileTab === "tools" ? "block" : "hidden"}`}>
               <div className="flex gap-1 p-1 glass rounded-xl border border-white/10 overflow-x-auto">
                 {(["sources", "documents", "guide", "history"] as const).map((tab) => (
                   <button
@@ -267,6 +291,9 @@ function AssistantContent() {
                             type="button"
                             onClick={() => {
                               setActiveSessionId(session.id);
+                              if (typeof window !== "undefined") {
+                                localStorage.setItem("bharathvoice_active_session_id", session.id);
+                              }
                               setMobileTab("chat");
                             }}
                             className="w-full py-1.5 px-3 rounded-lg bg-gradient-to-r from-saffron to-gulal text-white text-[11px] font-bold shadow-glow hover:opacity-95 active:scale-95 transition-all text-center flex items-center justify-center gap-1"
@@ -429,6 +456,9 @@ function AssistantContent() {
                               type="button"
                               onClick={() => {
                                 setActiveSessionId(session.id);
+                                if (typeof window !== "undefined") {
+                                  localStorage.setItem("bharathvoice_active_session_id", session.id);
+                                }
                               }}
                               className="text-[11px] font-bold text-cyber hover:text-saffron flex items-center gap-1 transition-colors"
                             >
