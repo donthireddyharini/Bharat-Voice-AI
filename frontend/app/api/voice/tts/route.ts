@@ -72,7 +72,7 @@ function cleanTextForSpeech(text: string, language: Language = "en"): string {
     cleaned = cleaned
       .replace(/[₹\u20B9]\s*/g, "ರೂಪಾಯಿ ")
       .replace(/ರೂ\.\s*/g, "ರೂಪಾಯಿ ")
-      .replace(/%/g, " ಪ್ರತಿಶತ ");
+      .replace(/%/g, " ప్రతిశత ");
   } else if (language === "ta") {
     cleaned = cleaned
       .replace(/[₹\u20B9]\s*/g, "ரூபாய் ")
@@ -101,7 +101,6 @@ function cleanTextForSpeech(text: string, language: Language = "en"): string {
     cleaned = sentences.slice(0, 2).join(" ");
   }
   if (cleaned.length > 380) {
-    // Find last sentence ending punctuation before 380
     const sub = cleaned.slice(0, 380);
     const lastPunct = Math.max(sub.lastIndexOf("."), sub.lastIndexOf("!"), sub.lastIndexOf("?"), sub.lastIndexOf("।"));
     if (lastPunct > 150) {
@@ -118,33 +117,45 @@ function cleanTextForSpeech(text: string, language: Language = "en"): string {
  * Generate human-like studio speech via Microsoft Azure/Edge Neural TTS
  */
 async function generateNeuralTTS(text: string, voiceName: string): Promise<Buffer> {
-  const tts = new MsEdgeTTS();
-  await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-
   return new Promise((resolve, reject) => {
-    const stream = tts.toStream(text, {
-      rate: 0,
-      pitch: "+0Hz",
-    });
+    try {
+      const tts = new MsEdgeTTS();
+      const timeout = setTimeout(() => {
+        reject(new Error("Neural TTS timeout"));
+      }, 4500);
 
-    const chunks: Buffer[] = [];
-    const timeout = setTimeout(() => {
-      reject(new Error("Neural TTS stream timeout"));
-    }, 9000);
+      tts
+        .setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3)
+        .then(() => {
+          try {
+            const stream = tts.toStream(text, { rate: 0, pitch: "+0Hz" });
+            const chunks: Buffer[] = [];
 
-    stream.audioStream.on("data", (chunk: Buffer) => {
-      chunks.push(chunk);
-    });
+            stream.audioStream.on("data", (chunk: Buffer) => {
+              chunks.push(chunk);
+            });
 
-    stream.audioStream.on("end", () => {
-      clearTimeout(timeout);
-      resolve(Buffer.concat(chunks));
-    });
+            stream.audioStream.on("end", () => {
+              clearTimeout(timeout);
+              resolve(Buffer.concat(chunks));
+            });
 
-    stream.audioStream.on("error", (err: any) => {
-      clearTimeout(timeout);
+            stream.audioStream.on("error", (err: any) => {
+              clearTimeout(timeout);
+              reject(err);
+            });
+          } catch (streamErr) {
+            clearTimeout(timeout);
+            reject(streamErr);
+          }
+        })
+        .catch((metaErr) => {
+          clearTimeout(timeout);
+          reject(metaErr);
+        });
+    } catch (err) {
       reject(err);
-    });
+    }
   });
 }
 
@@ -158,7 +169,7 @@ async function generateGoogleTTS(text: string, ttsLang: string): Promise<Buffer 
     )}&tl=${encodeURIComponent(ttsLang)}&client=tw-ob`;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
+    const timeout = setTimeout(() => controller.abort(), 4000);
     const res = await fetch(googleTtsUrl, {
       headers: {
         "User-Agent":
@@ -215,7 +226,6 @@ export async function GET(req: NextRequest) {
       try {
         const audioBuffer = await generateNeuralTTS(cleaned, neuralVoice);
         if (audioBuffer && audioBuffer.length > 500) {
-          // Cache audio
           if (AUDIO_CACHE.size >= MAX_CACHE_SIZE) {
             const firstKey = AUDIO_CACHE.keys().next().value;
             if (firstKey) AUDIO_CACHE.delete(firstKey);
@@ -233,7 +243,7 @@ export async function GET(req: NextRequest) {
           });
         }
       } catch (neuralErr) {
-        console.warn(`[TTS] Neural synthesis failed for ${language}, attempting fallback:`, neuralErr);
+        console.warn(`[TTS] Neural synthesis failed for ${language}, falling back to Google TTS:`, neuralErr);
       }
     }
 
