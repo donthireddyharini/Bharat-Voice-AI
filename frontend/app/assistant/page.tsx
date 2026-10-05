@@ -13,6 +13,7 @@ import BrandLogo from "@/components/BrandLogo";
 import { Language, SourceRef } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/useLanguage";
+import { getSearchHistory, deleteSearchHistoryItem, clearSearchHistory, SearchHistoryEntry, HISTORY_UPDATED_EVENT } from "@/lib/history";
 
 const LANGUAGE_ONBOARDING_KEY = "bharathvoice_onboarded";
 
@@ -23,10 +24,22 @@ function AssistantContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [sources, setSources] = useState<SourceRef[]>([]);
   const [followups, setFollowups] = useState<string[]>([]);
-  const [rightTab, setRightTab] = useState<"sources" | "documents" | "guide">("sources");
+  const [rightTab, setRightTab] = useState<"sources" | "documents" | "guide" | "history">("sources");
+  const [history, setHistory] = useState<SearchHistoryEntry[]>([]);
   const [mobileTab, setMobileTab] = useState<"chat" | "tools">("chat");
   const [externalQuery, setExternalQuery] = useState<{ text: string; nonce: number } | null>(null);
   const [showMoreOnboardingLangs, setShowMoreOnboardingLangs] = useState(false);
+
+  useEffect(() => {
+    setHistory(getSearchHistory());
+    const onHistoryUpdate = () => setHistory(getSearchHistory());
+    window.addEventListener(HISTORY_UPDATED_EVENT, onHistoryUpdate);
+    window.addEventListener("storage", onHistoryUpdate);
+    return () => {
+      window.removeEventListener(HISTORY_UPDATED_EVENT, onHistoryUpdate);
+      window.removeEventListener("storage", onHistoryUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     const onboarded = localStorage.getItem(LANGUAGE_ONBOARDING_KEY);
@@ -38,9 +51,14 @@ function AssistantContent() {
       setShowOnboarding(false);
     }
 
-    const category = searchParams.get("category");
-    if (category) {
-      setExternalQuery({ text: `Tell me about ${category.replace("_", " ")} related services.`, nonce: Date.now() });
+    const q = searchParams.get("q") || searchParams.get("query");
+    if (q) {
+      setExternalQuery({ text: q, nonce: Date.now() });
+    } else {
+      const category = searchParams.get("category");
+      if (category) {
+        setExternalQuery({ text: `Tell me about ${category.replace("_", " ")} related services.`, nonce: Date.now() });
+      }
     }
   }, [searchParams]);
 
@@ -133,18 +151,18 @@ function AssistantContent() {
             </div>
           ) : (
             <div className="lg:hidden flex-1 glass-strong rounded-2xl border border-white/10 p-4 space-y-4 overflow-y-auto">
-              <div className="flex gap-1 p-1 glass rounded-xl border border-white/10">
-                {(["sources", "documents", "guide"] as const).map((tab) => (
+              <div className="flex gap-1 p-1 glass rounded-xl border border-white/10 overflow-x-auto">
+                {(["sources", "documents", "guide", "history"] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setRightTab(tab)}
-                    className={`flex-1 text-xs py-2 rounded-lg font-semibold capitalize transition-all ${
+                    className={`flex-1 text-xs py-2 px-2 rounded-lg font-semibold capitalize whitespace-nowrap transition-all ${
                       rightTab === tab
                         ? "bg-saffron/20 text-saffron border border-saffron/40"
                         : "text-mist hover:text-bone"
                     }`}
                   >
-                    {tab}
+                    {tab === "history" ? `History (${history.length})` : tab}
                   </button>
                 ))}
               </div>
@@ -167,24 +185,87 @@ function AssistantContent() {
                   setMobileTab("chat");
                 }} />
               )}
+
+              {rightTab === "history" && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display font-semibold text-xs text-mist">
+                      Search History ({history.length})
+                    </h3>
+                    {history.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => clearSearchHistory()}
+                        className="text-[10px] text-red-300 hover:text-red-200 px-2 py-0.5 rounded glass border border-red-500/20"
+                      >
+                        Clear All
+                      </button>
+                    )}
+                  </div>
+                  {history.length === 0 ? (
+                    <p className="text-xs text-mist/60 glass p-4 rounded-xl text-center">
+                      No searches recorded yet. Search or ask a voice query to build history.
+                    </p>
+                  ) : (
+                    history.map((item) => (
+                      <div key={item.id} className="glass p-3 rounded-xl border border-white/10 space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-mist/60">
+                          <span className="font-mono text-cyber/90">📅 {item.formattedDate}</span>
+                          <button
+                            type="button"
+                            onClick={() => deleteSearchHistoryItem(item.id)}
+                            className="text-red-400 text-xs px-1"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <p
+                          onClick={() => {
+                            setExternalQuery({ text: item.query, nonce: Date.now() });
+                            setMobileTab("chat");
+                          }}
+                          className="text-xs font-semibold text-bone hover:text-saffron cursor-pointer"
+                        >
+                          "{item.query}"
+                        </p>
+                        {item.answerSummary && (
+                          <p className="text-[11px] text-mist/70 line-clamp-2">{item.answerSummary}</p>
+                        )}
+                        <div className="flex justify-end pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setExternalQuery({ text: item.query, nonce: Date.now() });
+                              setMobileTab("chat");
+                            }}
+                            className="text-[10px] text-cyber font-semibold"
+                          >
+                            Ask Again →
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           )}
         </main>
 
         {/* Desktop Right Panel */}
         <aside className="hidden lg:flex flex-col gap-5 border-l border-white/5 px-5 py-6 bg-void/40 backdrop-blur-md">
-          <div className="flex gap-2 p-1 glass rounded-xl border border-white/5">
-            {(["sources", "documents", "guide"] as const).map((tab) => (
+          <div className="flex gap-1.5 p-1 glass rounded-xl border border-white/5 overflow-x-auto">
+            {(["sources", "documents", "guide", "history"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setRightTab(tab)}
-                className={`flex-1 text-xs px-3 py-2 rounded-lg font-medium capitalize transition-all duration-300 ${
+                className={`flex-1 text-xs px-2.5 py-2 rounded-lg font-medium capitalize whitespace-nowrap transition-all duration-300 ${
                   rightTab === tab 
                     ? "bg-saffron/15 text-saffron border border-saffron/30 shadow-[0_0_15px_rgba(255,153,51,0.15)]" 
                     : "border border-transparent text-mist hover:text-bone hover:bg-white/5"
                 }`}
               >
-                {tab}
+                {tab === "history" ? `History (${history.length})` : tab}
               </button>
             ))}
           </div>
@@ -238,6 +319,90 @@ function AssistantContent() {
             {rightTab === "guide" && (
               <div className="animate-fade-in">
                 <EligibilityFlow onComplete={(query) => setExternalQuery({ text: query, nonce: Date.now() })} />
+              </div>
+            )}
+
+            {rightTab === "history" && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-display font-semibold text-sm text-mist flex items-center gap-2">
+                    <span className="w-1 h-4 rounded-full bg-saffron" />
+                    Search History ({history.length})
+                  </h3>
+                  {history.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => clearSearchHistory()}
+                      className="text-[10px] text-red-300 hover:text-red-200 transition-colors px-2 py-0.5 rounded-lg glass border border-red-500/20"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
+
+                {history.length === 0 ? (
+                  <div className="glass p-4 rounded-xl border border-white/5 border-dashed flex flex-col items-center justify-center text-center gap-2 min-h-[140px]">
+                    <span className="text-2xl opacity-50">🕒</span>
+                    <p className="text-xs text-mist/60">Your recent searches will appear here with dates and times.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {history.map((item) => (
+                      <div
+                        key={item.id}
+                        className="glass-strong rounded-xl p-3 border border-white/10 hover:border-saffron/30 transition-all group relative"
+                      >
+                        <div className="flex items-center justify-between text-[10px] text-mist/60 mb-1.5">
+                          <span className="flex items-center gap-1 font-mono text-cyber/90">
+                            📅 {item.formattedDate}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 uppercase text-[9px]">
+                              {item.viaVoice ? "🎙️ Voice" : "🔍 Search"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteSearchHistoryItem(item.id);
+                              }}
+                              className="text-mist/40 hover:text-red-400 text-xs px-1"
+                              title="Delete from history"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+
+                        <p
+                          onClick={() => setExternalQuery({ text: item.query, nonce: Date.now() })}
+                          className="text-xs font-semibold text-bone hover:text-saffron cursor-pointer transition-colors leading-relaxed line-clamp-2"
+                        >
+                          "{item.query}"
+                        </p>
+
+                        {item.answerSummary && (
+                          <p className="text-[11px] text-mist/70 mt-1 line-clamp-2 leading-relaxed">
+                            {item.answerSummary}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-white/5">
+                          <span className="text-[9px] text-saffron uppercase font-bold tracking-wider">
+                            {item.category || "Scheme Info"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setExternalQuery({ text: item.query, nonce: Date.now() })}
+                            className="text-[10px] text-cyber hover:underline font-semibold"
+                          >
+                            Ask Again →
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

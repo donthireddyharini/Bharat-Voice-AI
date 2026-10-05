@@ -8,6 +8,7 @@ import { fetchConversations } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/useLanguage";
 import { speak } from "@/lib/speech";
+import { getSearchHistory, deleteSearchHistoryItem, clearSearchHistory, SearchHistoryEntry, HISTORY_UPDATED_EVENT } from "@/lib/history";
 
 type DashboardTab = "overview" | "voice" | "schemes" | "history";
 
@@ -15,11 +16,21 @@ export default function DashboardPage() {
   const { user, logout } = useAuth();
   const { language, t } = useLanguage();
   const [conversations, setConversations] = useState<any[]>([]);
+  const [searchHistory, setSearchHistory] = useState<SearchHistoryEntry[]>([]);
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [speakingQuery, setSpeakingQuery] = useState<string | null>(null);
 
   useEffect(() => {
     fetchConversations().then(setConversations).catch(() => {});
+    setSearchHistory(getSearchHistory());
+
+    const onHistoryUpdate = () => setSearchHistory(getSearchHistory());
+    window.addEventListener(HISTORY_UPDATED_EVENT, onHistoryUpdate);
+    window.addEventListener("storage", onHistoryUpdate);
+    return () => {
+      window.removeEventListener(HISTORY_UPDATED_EVENT, onHistoryUpdate);
+      window.removeEventListener("storage", onHistoryUpdate);
+    };
   }, []);
 
   const handleQuickVoicePrompt = (text: string) => {
@@ -175,9 +186,9 @@ export default function DashboardPage() {
           >
             <span>💬</span>
             <span>{t.dashTabHistory}</span>
-            {conversations.length > 0 && (
-              <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded-full">
-                {conversations.length}
+            {(searchHistory.length > 0 || conversations.length > 0) && (
+              <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded-full font-bold">
+                {searchHistory.length || conversations.length}
               </span>
             )}
           </button>
@@ -267,6 +278,58 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
+
+            {/* Recent Searches Activity */}
+            {searchHistory.length > 0 && (
+              <div className="glass-strong rounded-2xl p-6 border border-white/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-display font-bold text-base text-bone flex items-center gap-2">
+                    <span>🕒</span>
+                    <span>Recent Searches with Timestamps</span>
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("history")}
+                    className="text-xs text-saffron hover:underline font-semibold"
+                  >
+                    View All ({searchHistory.length}) →
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {searchHistory.slice(0, 3).map((item) => (
+                    <div
+                      key={item.id}
+                      className="glass p-3.5 rounded-xl border border-white/5 hover:border-saffron/30 transition-all flex items-center justify-between gap-3"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-[10px] text-cyber font-semibold">
+                            📅 {item.formattedDate}
+                          </span>
+                          <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-white/5 border border-white/10 text-mist">
+                            {item.viaVoice ? "🎙️ Voice" : "🔍 Search"}
+                          </span>
+                        </div>
+                        <Link
+                          href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
+                          className="text-xs font-semibold text-bone hover:text-saffron truncate block"
+                        >
+                          "{item.query}"
+                        </Link>
+                      </div>
+
+                      <Link
+                        href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
+                        className="text-xs text-saffron hover:text-gulal font-bold whitespace-nowrap"
+                      >
+                        Ask Again →
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -377,53 +440,127 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* TAB 4: RECENT HISTORY */}
+        {/* TAB 4: RECENT SEARCH & VOICE HISTORY */}
         {activeTab === "history" && (
-          <div className="glass-strong rounded-2xl p-6 border border-white/10 animate-fadeIn">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display font-semibold text-sm text-mist tracking-wide uppercase flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amethyst" />
-                {t.dashRecentTitle}
-              </h3>
-              {conversations.length > 0 && (
-                <span className="text-xs text-mist/70">{conversations.length} sessions</span>
-              )}
+          <div className="glass-strong rounded-2xl p-6 border border-white/10 animate-fadeIn space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-white/10">
+              <div>
+                <h3 className="font-display font-bold text-base text-bone flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-saffron shadow-glow" />
+                  <span>Search &amp; Voice History</span>
+                </h3>
+                <p className="text-xs text-mist mt-0.5">
+                  Chronological record of citizen queries with verified timestamps and source references.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {searchHistory.length > 0 && (
+                  <>
+                    <span className="text-xs font-semibold text-cyber glass px-2.5 py-1 rounded-lg border border-cyber/20">
+                      {searchHistory.length} searches
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm("Are you sure you want to clear your search history?")) {
+                          clearSearchHistory();
+                        }
+                      }}
+                      className="text-xs text-red-300 hover:text-red-200 px-3 py-1 rounded-lg glass border border-red-500/20 hover:bg-red-500/10 transition-all cursor-pointer"
+                    >
+                      Clear All
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
-            {conversations.length === 0 ? (
+            {searchHistory.length === 0 && conversations.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 glass rounded-2xl border border-white/5 border-dashed">
-                <span className="text-4xl mb-3 opacity-50">💬</span>
-                <p className="text-sm text-mist/80 mb-4">{t.dashNoConversations}</p>
+                <span className="text-4xl mb-3 opacity-50">🕒</span>
+                <p className="text-sm text-mist/80 mb-1">No search history recorded yet.</p>
+                <p className="text-xs text-mist/60 mb-4 text-center max-w-sm">
+                  Every question you search or speak will be securely saved here along with the date and time.
+                </p>
                 <Link
                   href={`/assistant?lang=${language}`}
                   className="px-6 py-2.5 rounded-full bg-gradient-to-r from-saffron to-gulal text-white text-xs font-bold shadow-glow hover:scale-105 active:scale-95 transition-all"
                 >
-                  {t.dashLaunchVoice}
+                  Start Your First Search →
                 </Link>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {conversations.map((c) => (
-                  <Link
-                    key={c.id}
-                    href={`/assistant?lang=${language}`}
-                    className="flex items-center justify-between text-sm px-4 py-3.5 rounded-xl hover:bg-white/8 border border-white/5 hover:border-saffron/30 transition-all active:scale-[0.99] group cursor-pointer"
+              <div className="space-y-3">
+                {searchHistory.map((item) => (
+                  <div
+                    key={item.id}
+                    className="glass-strong rounded-xl p-4 border border-white/10 hover:border-saffron/30 transition-all group flex flex-col justify-between"
                   >
-                    <div className="flex items-center gap-3 truncate mr-4">
-                      <span className="text-base text-saffron">💬</span>
-                      <span className="font-medium text-bone group-hover:text-saffron transition-colors truncate">
-                        {c.title}
-                      </span>
+                    <div className="flex items-center justify-between text-xs text-mist/70 mb-2 flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1.5 font-mono text-cyber font-semibold text-[11px] bg-cyber/10 border border-cyber/25 px-2.5 py-0.5 rounded-full">
+                          <span>📅</span>
+                          <span>{item.formattedDate}</span>
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase font-bold text-bone">
+                          {item.viaVoice ? "🎙️ Voice Query" : "🔍 Search Query"}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-saffron/10 border border-saffron/20 text-[10px] uppercase font-bold text-saffron">
+                          {item.language.toUpperCase()}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteSearchHistoryItem(item.id)}
+                        className="text-mist/40 hover:text-red-400 text-sm px-2 py-0.5 rounded hover:bg-white/5 transition-all"
+                        title="Delete from history"
+                      >
+                        ✕
+                      </button>
                     </div>
-                    <span className="glass px-2.5 py-1 rounded-lg text-mist/70 text-[11px] whitespace-nowrap border border-white/5">
-                      {c.message_count} messages
-                    </span>
-                  </Link>
+
+                    <div className="mb-2">
+                      <Link
+                        href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
+                        className="font-semibold text-sm sm:text-base text-bone group-hover:text-saffron transition-colors block cursor-pointer"
+                      >
+                        "{item.query}"
+                      </Link>
+                      {item.answerSummary && (
+                        <p className="text-xs text-mist/80 mt-1 line-clamp-2 leading-relaxed">
+                          {item.answerSummary}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-white/5 flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        {item.category && (
+                          <span className="text-[10px] text-amethyst font-semibold uppercase tracking-wider bg-amethyst/10 px-2 py-0.5 rounded border border-amethyst/20">
+                            🏷️ {item.category}
+                          </span>
+                        )}
+                        {item.sourcesCount && item.sourcesCount > 0 ? (
+                          <span className="text-[10px] text-mist/70">
+                            📚 {item.sourcesCount} verified sources
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <Link
+                        href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
+                        className="text-xs font-bold text-saffron hover:text-gulal flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
+                      >
+                        <span>Ask Assistant Again</span>
+                        <span>→</span>
+                      </Link>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
-          </div>
-        )}
 
       </main>
     </div>

@@ -8,6 +8,7 @@ import { generateKnowledgeResponse } from "@/lib/knowledgeEngine";
 import { getLocalizedScheme } from "@/lib/schemeLocalization";
 import { startListening, speak, isSpeechRecognitionSupported } from "@/lib/speech";
 import { isSupabaseConfigured, storeConversationInSupabase, storeMessageInSupabase } from "@/lib/supabase";
+import { saveSearchToHistory } from "@/lib/history";
 import MessageBubble from "./MessageBubble";
 import ThinkingAnimation from "./ThinkingAnimation";
 import VoiceButton from "./VoiceButton";
@@ -199,6 +200,16 @@ export default function ChatWindow({ language, externalQuery, onSourcesChange, o
       onSourcesChange?.(result.sources || []);
       onFollowupsChange?.(result.suggested_followups || []);
 
+      // Store search query in history with date & details
+      saveSearchToHistory({
+        query,
+        answerSummary: result.answer?.summary || "",
+        category: result.answer?.category || (result.sources?.[0]?.title),
+        language: result.language || language,
+        viaVoice,
+        sourcesCount: result.sources?.length || 0,
+      });
+
       // Silently sync conversation and message to Supabase cloud database if connected
       if (isSupabaseConfigured()) {
         try {
@@ -246,6 +257,15 @@ export default function ChatWindow({ language, externalQuery, onSourcesChange, o
         setMessages((prev) => [...prev, fallbackMessage]);
         onSourcesChange?.(fallback.sources);
         onFollowupsChange?.(fallback.suggested_followups);
+
+        saveSearchToHistory({
+          query,
+          answerSummary: fallback.answer.summary,
+          category: fallback.answer.category,
+          language: fallback.language || language,
+          viaVoice,
+          sourcesCount: fallback.sources?.length || 0,
+        });
       } catch {}
       setAssistantState("idle");
       lastFailedQuery.current = null;
