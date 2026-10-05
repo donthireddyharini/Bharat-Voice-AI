@@ -9,13 +9,33 @@ import { useLanguage } from "@/lib/useLanguage";
 export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
 
   const NAV_ITEMS = [
-    { href: "/dashboard", label: t.navDashboard, icon: "📊", desc: "Overview & quick actions" },
-    { href: "/services", label: t.navServices, icon: "🏛️", desc: "Government schemes & welfare" },
-    { href: "/assistant", label: t.navAssistant, icon: "🎙️", desc: "Talk in your language" },
-    { href: "/profile", label: t.navProfile, icon: "👤", desc: "Account & preferences" },
+    {
+      href: "/dashboard",
+      label: t.navDashboard,
+      icon: "📊",
+      desc: language === "te" ? "సమీక్ష & శీఘ్ర చర్యలు" : language === "hi" ? "अवलोकन और त्वरित कार्य" : "Overview & quick actions",
+    },
+    {
+      href: "/services",
+      label: t.navServices,
+      icon: "🏛️",
+      desc: language === "te" ? "ప్రభుత్వ సంక్షేమ పథకాలు" : language === "hi" ? "सरकारी योजनाएं और सेवाएं" : "Government schemes & welfare",
+    },
+    {
+      href: "/assistant",
+      label: t.navAssistant,
+      icon: "🎙️",
+      desc: language === "te" ? "మీ మాతృభాషలో మాట్లాడండి" : language === "hi" ? "अपनी मातृभाषा में बात करें" : "Talk in your language",
+    },
+    {
+      href: "/profile",
+      label: t.navProfile,
+      icon: "👤",
+      desc: language === "te" ? "ఖాతా మరియు ప్రాధాన్యతలు" : language === "hi" ? "खाता और प्राथमिकताएं" : "Account & preferences",
+    },
   ];
 
   return (
@@ -41,7 +61,9 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex flex-col gap-1.5 flex-1">
-        <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-mist/50 px-3 mb-1">Navigation</div>
+        <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-mist/50 px-3 mb-1">
+          {language === "te" ? "నావిగేషన్" : language === "hi" ? "नेविगेशन" : "Navigation"}
+        </div>
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -66,6 +88,17 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Active Language Status Indicator */}
+      <div className="glass px-3.5 py-2.5 rounded-xl border border-white/10 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <span>🌐</span>
+          <span className="text-mist/80 text-[11px]">Active Language:</span>
+        </div>
+        <span className="font-bold text-saffron text-[11px] uppercase bg-saffron/10 px-2 py-0.5 rounded-full border border-saffron/20">
+          {t.langNative}
+        </span>
+      </div>
     </aside>
   );
 }

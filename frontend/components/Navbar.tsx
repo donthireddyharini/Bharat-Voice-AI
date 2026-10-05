@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import BrandLogo from "@/components/BrandLogo";
+import DashboardLanguageSelector from "@/components/DashboardLanguageSelector";
 import { useLanguage } from "@/lib/useLanguage";
 
 export default function Navbar() {
   const { user, isLoggedIn, logout } = useAuth();
-  const { t } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <header className="sticky top-0 z-50 glass backdrop-blur-2xl border-b border-white/10 transition-all duration-300 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
@@ -18,8 +19,11 @@ export default function Navbar() {
           <BrandLogo size="md" />
         </Link>
 
-        {/* RIGHT: Minimal actions based on auth state */}
+        {/* RIGHT: Language Selector & Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Universal Language Selector directly in header */}
+          <DashboardLanguageSelector value={language} onChange={setLanguage} />
+
           {isLoggedIn ? (
             <>
               {/* Home */}

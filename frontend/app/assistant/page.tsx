@@ -123,20 +123,17 @@ function AssistantContent() {
                 <BrandLogo size="sm" showText={false} />
               </Link>
               <h1 className="font-display text-lg sm:text-2xl font-bold bg-gradient-to-r from-bone to-mist bg-clip-text text-transparent drop-shadow-sm truncate">
-                Voice Assistant
+                {t.navAssistant || "Voice Assistant"}
               </h1>
             </div>
             
             <div className="flex items-center gap-1.5 sm:gap-3">
-              <div className="glass px-1.5 py-0.5 rounded-full border border-white/10 shadow-inner-light">
-                <LanguageSelector value={language} onChange={setLanguage} compact />
-              </div>
               <Link
                 href="/"
                 className="flex items-center gap-1 px-3 py-1.5 rounded-full glass border border-white/15 text-xs font-semibold text-bone hover:border-saffron/40 hover:bg-white/5 active:scale-95 transition-all shadow-sm"
               >
                 <span>🏠</span>
-                <span className="hidden sm:inline">Home</span>
+                <span className="hidden sm:inline">{t.navHome || "Home"}</span>
               </Link>
               <button
                 type="button"
@@ -144,7 +141,7 @@ function AssistantContent() {
                 className="flex items-center gap-1 px-3 py-1.5 rounded-full glass border border-red-500/20 text-xs font-semibold text-red-200 hover:bg-red-500/10 hover:border-red-500/40 active:scale-95 transition-all cursor-pointer shadow-sm"
               >
                 <span>🚪</span>
-                <span className="hidden sm:inline">Sign Out</span>
+                <span className="hidden sm:inline">{t.navSignOut || "Sign Out"}</span>
               </button>
             </div>
           </div>
