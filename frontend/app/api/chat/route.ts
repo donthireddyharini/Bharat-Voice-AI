@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateKnowledgeResponse } from "@/lib/knowledgeEngine";
+import { getUniversalAnswer } from "@/lib/universalAI";
 import { Language } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -48,17 +48,17 @@ export async function POST(req: NextRequest) {
           return NextResponse.json(data, { headers: CORS_HEADERS });
         }
       } catch {
-        // Fall back gracefully to built-in knowledge engine
+        // Fall back gracefully to built-in universal AI engine
       }
     }
 
-    // 2. Built-in Next.js Grounded RAG Knowledge Engine (zero latency, works for everyone)
-    const result = generateKnowledgeResponse(trimmedQuery, lang, conversation_id);
+    // 2. Built-in Universal AI Engine (responds to ANY question in 11 Indian languages)
+    const result = await getUniversalAnswer(trimmedQuery, lang, conversation_id);
 
     return NextResponse.json(result, { headers: CORS_HEADERS });
   } catch (err: any) {
     // Zero-failure fallback even if unexpected error happens
-    const fallbackResult = generateKnowledgeResponse("government schemes", "en");
+    const fallbackResult = await getUniversalAnswer("hello", "en");
     return NextResponse.json(fallbackResult, { headers: CORS_HEADERS });
   }
 }
