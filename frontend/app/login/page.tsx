@@ -26,7 +26,7 @@ export default function LoginPage() {
   const [showKeyModal, setShowKeyModal] = useState(false);
 
   useEffect(() => {
-    const envClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1019729069767-e25nhunud2ig850s11no8rau15mvj4np.apps.googleusercontent.com";
+    const envClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "403671615206-4lotouho6netfaf8d84h4vi5ko37tnsn.apps.googleusercontent.com";
     const storedClientId = typeof window !== "undefined" ? localStorage.getItem("bharathvoice_google_client_id") || "" : "";
     const activeClientId = storedClientId || envClientId;
     setGoogleClientId(activeClientId);

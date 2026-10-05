@@ -82,7 +82,7 @@ export default function LandingPage() {
   }, [isLoggedIn]);
 
   // Google OAuth Initialization via Google Identity Services
-  const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1019729069767-e25nhunud2ig850s11no8rau15mvj4np.apps.googleusercontent.com";
+  const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "403671615206-4lotouho6netfaf8d84h4vi5ko37tnsn.apps.googleusercontent.com";
 
   useEffect(() => {
     if (typeof window === "undefined" || isLoggedIn) return;
