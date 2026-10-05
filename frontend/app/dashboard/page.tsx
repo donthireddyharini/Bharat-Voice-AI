@@ -195,9 +195,9 @@ export default function DashboardPage() {
           >
             <span>💬</span>
             <span>{t.dashTabHistory}</span>
-            {(chatSessions.length > 0 || searchHistory.length > 0 || conversations.length > 0) && (
+            {chatSessions.length > 0 && (
               <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded-full font-bold">
-                {chatSessions.length + searchHistory.length || conversations.length}
+                {chatSessions.length}
               </span>
             )}
           </button>
@@ -449,32 +449,31 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* TAB 4: RECENT SEARCH & VOICE HISTORY */}
+        {/* TAB 4: SAVED CONVERSATIONS */}
         {activeTab === "history" && (
           <div className="glass-strong rounded-2xl p-6 border border-white/10 animate-fadeIn space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-white/10">
               <div>
                 <h3 className="font-display font-bold text-base text-bone flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-saffron shadow-glow" />
-                  <span>Conversations &amp; Search History</span>
+                  <span>Saved Conversations</span>
                 </h3>
                 <p className="text-xs text-mist mt-0.5">
-                  Complete conversations and queries saved chronologically with dates, timestamps, and full scheme responses.
+                  Complete conversations saved chronologically with dates, timestamps, and full scheme responses.
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
-                {(chatSessions.length > 0 || searchHistory.length > 0) && (
+                {chatSessions.length > 0 && (
                   <>
                     <span className="text-xs font-semibold text-cyber glass px-2.5 py-1 rounded-lg border border-cyber/20">
-                      {chatSessions.length} chats · {searchHistory.length} searches
+                      {chatSessions.length} conversations
                     </span>
                     <button
                       type="button"
                       onClick={() => {
-                        if (confirm("Are you sure you want to clear all saved conversations and search history?")) {
+                        if (confirm("Are you sure you want to clear all saved conversations?")) {
                           clearAllChatSessions();
-                          clearSearchHistory();
                         }
                       }}
                       className="text-xs text-red-300 hover:text-red-200 px-3 py-1 rounded-lg glass border border-red-500/20 hover:bg-red-500/10 transition-all cursor-pointer"
@@ -486,19 +485,24 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* SECTION 1: FULL SAVED CHAT SESSIONS */}
+            {/* FULL SAVED CHAT SESSIONS */}
             <div className="space-y-3">
-              <h4 className="font-display font-bold text-sm text-bone flex items-center gap-2">
-                <span>💬</span>
-                <span>Saved Full Conversations ({chatSessions.length})</span>
-              </h4>
-
               {chatSessions.length === 0 ? (
-                <div className="p-4 rounded-xl glass border border-white/5 text-center text-xs text-mist/70">
-                  No full chat sessions saved yet. Start talking with the Voice Assistant to save conversations automatically.
+                <div className="flex flex-col items-center justify-center py-12 glass rounded-2xl border border-white/5 border-dashed">
+                  <span className="text-4xl mb-3 opacity-50">💬</span>
+                  <p className="text-sm text-mist/80 mb-1">No saved conversations yet.</p>
+                  <p className="text-xs text-mist/60 mb-4 text-center max-w-sm">
+                    Every voice conversation with BharathVoice AI will be securely saved here along with the date and time.
+                  </p>
+                  <Link
+                    href={`/assistant?lang=${language}`}
+                    className="px-6 py-2.5 rounded-full bg-gradient-to-r from-saffron to-gulal text-white text-xs font-bold shadow-glow hover:scale-105 active:scale-95 transition-all"
+                  >
+                    Start Your First Conversation →
+                  </Link>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   {chatSessions.map((session) => (
                     <div
                       key={session.id}
@@ -539,90 +543,6 @@ export default function DashboardPage() {
                           className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-saffron to-gulal text-white text-xs font-bold shadow-glow hover:scale-105 active:scale-95 transition-all flex items-center gap-1"
                         >
                           <span>Open Full Chat 💬</span>
-                          <span>→</span>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* SECTION 2: SEARCH QUERIES */}
-            <div className="space-y-3 pt-4 border-t border-white/10">
-              <h4 className="font-display font-bold text-sm text-bone flex items-center gap-2">
-                <span>🔍</span>
-                <span>Recent Queries ({searchHistory.length})</span>
-              </h4>
-
-              {searchHistory.length === 0 ? (
-                <div className="p-4 rounded-xl glass border border-white/5 text-center text-xs text-mist/70">
-                  No individual search queries recorded yet.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {searchHistory.map((item) => (
-                    <div
-                      key={item.id}
-                      className="glass-strong rounded-xl p-4 border border-white/10 hover:border-saffron/30 transition-all group flex flex-col justify-between"
-                    >
-                      <div className="flex items-center justify-between text-xs text-mist/70 mb-2 flex-wrap gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="flex items-center gap-1.5 font-mono text-cyber font-semibold text-[11px] bg-cyber/10 border border-cyber/25 px-2.5 py-0.5 rounded-full">
-                            <span>📅</span>
-                            <span>{item.formattedDate}</span>
-                          </span>
-                          <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase font-bold text-bone">
-                            {item.viaVoice ? "🎙️ Voice Query" : "🔍 Search Query"}
-                          </span>
-                          <span className="px-2 py-0.5 rounded-full bg-saffron/10 border border-saffron/20 text-[10px] uppercase font-bold text-saffron">
-                            {item.language.toUpperCase()}
-                          </span>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => deleteSearchHistoryItem(item.id)}
-                          className="text-mist/40 hover:text-red-400 text-sm px-2 py-0.5 rounded hover:bg-white/5 transition-all"
-                          title="Delete from history"
-                        >
-                          ✕
-                        </button>
-                      </div>
-
-                      <div className="mb-2">
-                        <Link
-                          href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
-                          className="font-semibold text-sm sm:text-base text-bone group-hover:text-saffron transition-colors block cursor-pointer"
-                        >
-                          "{item.query}"
-                        </Link>
-                        {item.answerSummary && (
-                          <p className="text-xs text-mist/80 mt-1 line-clamp-2 leading-relaxed">
-                            {item.answerSummary}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5 flex-wrap gap-2">
-                        <div className="flex items-center gap-2">
-                          {item.category && (
-                            <span className="text-[10px] text-amethyst font-semibold uppercase tracking-wider bg-amethyst/10 px-2 py-0.5 rounded border border-amethyst/20">
-                              🏷️ {item.category}
-                            </span>
-                          )}
-                          {item.sourcesCount && item.sourcesCount > 0 ? (
-                            <span className="text-[10px] text-mist/70">
-                              📚 {item.sourcesCount} verified sources
-                            </span>
-                          ) : null}
-                        </div>
-
-                        <Link
-                          href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
-                          className="text-xs font-bold text-saffron hover:text-gulal flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
-                        >
-                          <span>Ask Assistant Again</span>
                           <span>→</span>
                         </Link>
                       </div>

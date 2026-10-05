@@ -180,7 +180,7 @@ function AssistantContent() {
                         : "text-mist hover:text-bone"
                     }`}
                   >
-                    {tab === "history" ? `History (${history.length})` : tab}
+                    {tab === "history" ? `Saved Chats (${chatSessions.length})` : tab}
                   </button>
                 ))}
               </div>
@@ -209,15 +209,14 @@ function AssistantContent() {
                   <div className="flex items-center justify-between">
                     <h3 className="font-display font-semibold text-xs text-mist flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-saffron" />
-                      Chat History &amp; Searches
+                      Saved Chats ({chatSessions.length})
                     </h3>
-                    {(chatSessions.length > 0 || history.length > 0) && (
+                    {chatSessions.length > 0 && (
                       <button
                         type="button"
                         onClick={() => {
-                          if (confirm("Clear all saved chat conversations and search history?")) {
+                          if (confirm("Clear all saved chat conversations?")) {
                             clearAllChatSessions();
-                            clearSearchHistory();
                           }
                         }}
                         className="text-[10px] text-red-300 hover:text-red-200 px-2 py-0.5 rounded glass border border-red-500/20"
@@ -229,13 +228,12 @@ function AssistantContent() {
 
                   {/* Saved Full Chat Sessions */}
                   <div className="space-y-2">
-                    <div className="text-[11px] font-bold text-cyber flex items-center justify-between uppercase tracking-wider">
-                      <span>💬 Saved Full Chats ({chatSessions.length})</span>
-                    </div>
                     {chatSessions.length === 0 ? (
-                      <p className="text-[11px] text-mist/60 glass p-3 rounded-xl text-center">
-                        No saved chats yet. Your complete conversation will be saved here automatically.
-                      </p>
+                      <div className="glass p-4 rounded-xl border border-white/5 border-dashed flex flex-col items-center justify-center text-center gap-2 min-h-[140px]">
+                        <span className="text-2xl opacity-50">💬</span>
+                        <p className="text-xs text-mist/60">No saved chats yet.</p>
+                        <p className="text-[10px] text-mist/50">Your complete conversation will be saved here automatically.</p>
+                      </div>
                     ) : (
                       chatSessions.map((session) => (
                         <div
@@ -280,42 +278,6 @@ function AssistantContent() {
                       ))
                     )}
                   </div>
-
-                  {/* Recent Search Queries */}
-                  <div className="space-y-2 pt-2 border-t border-white/5">
-                    <div className="text-[11px] font-bold text-mist/80 flex items-center justify-between uppercase tracking-wider">
-                      <span>🔍 Search Queries ({history.length})</span>
-                    </div>
-                    {history.length === 0 ? (
-                      <p className="text-[11px] text-mist/60 glass p-3 rounded-xl text-center">
-                        No individual queries recorded yet.
-                      </p>
-                    ) : (
-                      history.slice(0, 8).map((item) => (
-                        <div key={item.id} className="glass p-2.5 rounded-xl border border-white/10 space-y-1">
-                          <div className="flex items-center justify-between text-[10px] text-mist/60">
-                            <span className="font-mono text-cyber/90">📅 {item.formattedDate}</span>
-                            <button
-                              type="button"
-                              onClick={() => deleteSearchHistoryItem(item.id)}
-                              className="text-red-400 text-xs px-1"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                          <p
-                            onClick={() => {
-                              setExternalQuery({ text: item.query, nonce: Date.now() });
-                              setMobileTab("chat");
-                            }}
-                            className="text-xs font-semibold text-bone hover:text-saffron cursor-pointer line-clamp-1"
-                          >
-                            "{item.query}"
-                          </p>
-                        </div>
-                      ))
-                    )}
-                  </div>
                 </div>
               )}
             </div>
@@ -335,7 +297,7 @@ function AssistantContent() {
                     : "border border-transparent text-mist hover:text-bone hover:bg-white/5"
                 }`}
               >
-                {tab === "history" ? `History (${history.length})` : tab}
+                {tab === "history" ? `Saved Chats (${chatSessions.length})` : tab}
               </button>
             ))}
           </div>
@@ -397,15 +359,14 @@ function AssistantContent() {
                 <div className="flex items-center justify-between">
                   <h3 className="font-display font-semibold text-sm text-mist flex items-center gap-2">
                     <span className="w-1.5 h-4 rounded-full bg-saffron" />
-                    Chat History &amp; Searches
+                    Saved Chats ({chatSessions.length})
                   </h3>
-                  {(chatSessions.length > 0 || history.length > 0) && (
+                  {chatSessions.length > 0 && (
                     <button
                       type="button"
                       onClick={() => {
-                        if (confirm("Clear all saved chat conversations and search history?")) {
+                        if (confirm("Clear all saved chat conversations?")) {
                           clearAllChatSessions();
-                          clearSearchHistory();
                         }
                       }}
                       className="text-[10px] text-red-300 hover:text-red-200 transition-colors px-2 py-0.5 rounded-lg glass border border-red-500/20"
@@ -415,24 +376,20 @@ function AssistantContent() {
                   )}
                 </div>
 
-                {/* Section 1: Full Chat Conversations */}
+                {/* Saved Full Chat Sessions */}
                 <div className="space-y-2">
-                  <div className="text-xs font-bold text-cyber flex items-center justify-between uppercase tracking-wider">
-                    <span>💬 Full Saved Chats ({chatSessions.length})</span>
-                  </div>
-
                   {chatSessions.length === 0 ? (
-                    <div className="glass p-3.5 rounded-xl border border-white/5 border-dashed flex flex-col items-center justify-center text-center gap-1.5 min-h-[100px]">
-                      <span className="text-xl opacity-60">💬</span>
-                      <p className="text-xs text-mist/70">Complete conversations will appear here.</p>
-                      <p className="text-[10px] text-mist/50">You can reopen full chats anytime with 1-click.</p>
+                    <div className="glass p-5 rounded-xl border border-white/5 border-dashed flex flex-col items-center justify-center text-center gap-2 min-h-[140px]">
+                      <span className="text-2xl opacity-60">💬</span>
+                      <p className="text-xs text-mist/70">No saved chats yet.</p>
+                      <p className="text-[10px] text-mist/50">Your complete conversation will be saved here automatically.</p>
                     </div>
                   ) : (
-                    <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+                    <div className="space-y-2.5 max-h-[calc(100vh-260px)] overflow-y-auto pr-1 custom-scrollbar">
                       {chatSessions.map((session) => (
                         <div
                           key={session.id}
-                          className={`glass-strong rounded-xl p-3 border transition-all group relative ${
+                          className={`glass-strong rounded-xl p-3.5 border transition-all group relative ${
                             activeSessionId === session.id
                               ? "border-saffron/70 bg-saffron/10 shadow-[0_0_15px_rgba(255,153,51,0.15)]"
                               : "border-white/10 hover:border-saffron/40"
@@ -477,61 +434,6 @@ function AssistantContent() {
                             >
                               <span>Open Full Chat 💬</span>
                               <span>→</span>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Section 2: Recent Search Queries */}
-                <div className="space-y-2 pt-2 border-t border-white/10">
-                  <div className="text-xs font-bold text-mist/80 flex items-center justify-between uppercase tracking-wider">
-                    <span>🔍 Search Queries ({history.length})</span>
-                  </div>
-
-                  {history.length === 0 ? (
-                    <p className="text-xs text-mist/60 glass p-3 rounded-xl text-center">
-                      No search queries recorded yet.
-                    </p>
-                  ) : (
-                    <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-                      {history.slice(0, 8).map((item) => (
-                        <div
-                          key={item.id}
-                          className="glass rounded-xl p-2.5 border border-white/10 hover:border-saffron/30 transition-all group"
-                        >
-                          <div className="flex items-center justify-between text-[10px] text-mist/60 mb-1">
-                            <span className="font-mono text-cyber/90">📅 {item.formattedDate}</span>
-                            <div className="flex items-center gap-1">
-                              <span className="px-1 py-0.2 rounded bg-white/5 text-[9px] uppercase">
-                                {item.viaVoice ? "🎙️ Voice" : "🔍 Search"}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => deleteSearchHistoryItem(item.id)}
-                                className="text-mist/40 hover:text-red-400 text-xs px-1"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          </div>
-
-                          <p
-                            onClick={() => setExternalQuery({ text: item.query, nonce: Date.now() })}
-                            className="text-xs font-semibold text-bone hover:text-saffron cursor-pointer line-clamp-1"
-                          >
-                            "{item.query}"
-                          </p>
-
-                          <div className="flex justify-end pt-1">
-                            <button
-                              type="button"
-                              onClick={() => setExternalQuery({ text: item.query, nonce: Date.now() })}
-                              className="text-[10px] text-cyber hover:underline font-semibold"
-                            >
-                              Ask Again →
                             </button>
                           </div>
                         </div>

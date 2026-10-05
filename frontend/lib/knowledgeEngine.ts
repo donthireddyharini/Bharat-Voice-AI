@@ -258,6 +258,74 @@ export function searchSchemes(query: string, limit = 4): { scheme: SchemeRecord;
   const words = qLower.split(/[\s,?.!;:()\[\]{}]+/).filter((w) => w.length > 1);
   const isGeneralQuery = GENERAL_SCHEME_WORDS.some((gw) => qLower.includes(gw.toLowerCase()));
 
+  const SCHEME_KEYWORD_RULES: Record<string, string[]> = {
+    "agr-001": [
+      "kisan", "pm-kisan", "pmkisan", "rythu", "raithu", "raithulu", "rythulu", "farmer", "farmers", "agriculture", "6000",
+      "రైతు", "రైతులు", "రైతులకు", "కిసాన్", "వ్యవసాయం", "పెట్టుబడి", "రైతు భరోసా", "సాగు", "సమ్మాన్ నిధి",
+      "किसान", "किसान सम्मान", "खेती", "कृषि", "रैत", "ಕೃಷಿ", "ರೈತ", "விவசாயி"
+    ],
+    "agr-002": [
+      "fasal", "bima", "pmfby", "crop insurance", "crop loss", "damage", "flood", "drought",
+      "పంట బీమా", "పంట నష్టం", "ఫసల్ బీమా", "వరి", "వర్షాభావం", "ఫసల్", "భీమా",
+      "फसल बीमा", "फसल", "नुकसान", "ಬೆಳೆ ವಿಮೆ", "பயிர் காப்பீடு"
+    ],
+    "wel-001": [
+      "ayushman", "ayushman bharat", "pmjay", "pm-jay", "jan arogya", "health card", "golden card", "hospital", "hospitals", "treatment", "cashless", "surgery", "medicine", "medical", "doctor", "health", "healthcare", "aarogya", "arogya", "aarogyasri", "arogyasri", "asupatri", "aspathri",
+      "ఆయుష్మాన్", "ఆయుష్మాన్ భారత్", "ఆరోగ్యం", "ఆరోగ్యశ్రీ", "ఆసుపత్రి", "ఆస్పత్రి", "వైద్యం", "చికిత్స", "ఉచిత వైద్యం", "హెల్త్ కార్డు", "మందులు", "శస్త్రచికిత్స", "జబ్బు", "రోగం", "రోగి",
+      "आयुष्मान", "आयुष्मान भारत", "अस्पताल", "इलाज", "दवा", "आरोग्य", "ಆಸ್ಪತ್ರೆ", "ಚಿಕಿತ್ಸೆ", "மருத்துவமனை", "சிகிச்சை"
+    ],
+    "wel-002": [
+      "pension", "pensions", "old age", "senior citizen", "senior", "elderly", "retire", "ignoaps", "nsap", "vridhapya", "vruddhapya", "avvatata", "musali",
+      "పెన్షన్", "పింఛన్", "వృద్ధాప్య", "వృద్ధాప్య పింఛను", "వృద్ధులు", "ముసలి", "అవ్వాతాత", "జీవన భృతి", "పించన్", "పెన్షన్లు",
+      "पेंशन", "वृद्धावस्था", "बुजुर्ग", "वरिष्ठ नागरिक", "ಪಿಂಚಣಿ", "ವೃದ್ಧಾಪ್ಯ", "ஓய்வூதியம்"
+    ],
+    "sch-001": [
+      "nmms", "nmmss", "merit scholarship", "8th class", "9th class", "school scholarship", "scholarship", "scholarships",
+      "స్కాలర్‌షిప్", "స్కాలర్షిప్", "ఎన్ఎమ్ఎమ్ఎస్", "మెరిట్ స్కాలర్‌షిప్", "ఉపకార వేతనం",
+      "छात्रवृत्ति", "एनएमएमएस", "ವಿದ್ಯಾರ್ಥಿವೇತನ", "கல்வி உதவித்தொகை"
+    ],
+    "sch-002": [
+      "pragati", "aicte", "girl scholarship", "girl student", "female scholarship", "girls", "ammayi", "aadabidda",
+      "ప్రగతి", "బాలికల స్కాలర్‌షిప్", "అమ్మాయిల స్కాలర్‌షిప్", "ప్రగతి స్కాలర్షిప్",
+      "प्रगति", "बालिका छात्रवृत्ति", "छात्राओं"
+    ],
+    "sch-003": [
+      "vidya deevena", "deevena", "fee reimbursement", "college fee", "tuition fee", "fee", "jagananna", "vidya", "vasathi deevena", "degree fee",
+      "విద్యా దీవెన", "ఫీజు రీయింబర్స్‌మెంట్", "ఫీజు", "కాలేజ్ ఫీజు", "డిగ్రీ ఫీజు", "జగనన్న విద్యా దీవెన", "వసతి దీవెన", "చదువు",
+      "फीस प्रतिपूर्ति", "कॉलेज फीस"
+    ],
+    "edu-001": [
+      "samagra shiksha", "school", "schools", "textbooks", "uniform", "midday meal", "primary school",
+      "సమగ్ర శిక్షా", "పాఠశాల", "ఉచిత పుస్తకాలు", "యూనిఫాం", "మధ్యాహ్న భోజనం", "బడి", "పుస్తకాలు",
+      "समग्र शिक्षा", "स्कूल"
+    ],
+    "edu-002": [
+      "vidyalaxmi", "education loan", "study loan", "student loan", "college loan", "abroad study", "higher education loan",
+      "విద్యా రుణం", "ఎడ్యుకేషన్ లోన్", "చదువు లోన్", "విద్యాలక్ష్మి", "స్టడీ లోన్",
+      "विद्यालक्ष्मी", "शिक्षा ऋण"
+    ],
+    "emp-001": [
+      "kaushal", "kaushal vikas", "pmkvy", "skill", "skills", "skill development", "training", "free training", "certificate course", "job training",
+      "నైపుణ్య శిక్షణ", "కౌశల్ వికాస్", "ఉచిత శిక్షణ", "జాబ్ ట్రైనింగ్", "సర్టిఫికేట్ కోర్స్", "కౌశల్",
+      "कौशल विकास", "कौशल", "ट्रेनिंग"
+    ],
+    "emp-002": [
+      "pmegp", "business loan", "startup loan", "mudra", "mudra loan", "loan", "loans", "subsidy loan", "self employment", "shop loan", "small business", "runam", "appu", "vyaparam", "vyapar",
+      "వ్యాపార రుణం", "వ్యాపారం", "లోన్", "సబ్సిడీ రుణం", "స్వయం ఉపాధి", "పీఎంఈజీపీ", "ముద్రా రుణం", "అప్పు", "రుణం", "చేతివృత్తులు",
+      "पीएमईजीपी", "बिजनेस लोन", "मुद्रा लोन", "व्यापार ऋण", "स्वरोजगार"
+    ],
+    "gov-001": [
+      "aadhaar", "aadhar", "uidai", "aadhaar card", "biometric", "fingerprint", "address update", "dob change",
+      "ఆధార్", "ఆధార్ కార్డు", "బయోమెట్రిక్", "అడ్రస్ మార్పు", "ఆధార్ అప్‌డేట్",
+      "आधार", "आधार कार्ड"
+    ],
+    "gov-002": [
+      "caste certificate", "income certificate", "residence certificate", "certificate", "certificates", "meeseva", "sachivalayam", "tahsildar",
+      "కుల ధృవీకరణ", "ఆదాయ ధృవీకరణ", "సర్టిఫికేట్", "మీసేవా", "సచివాలయం", "కులం", "ఆదాయం",
+      "जाति प्रमाण पत्र", "आय प्रमाण पत्र", "प्रमाणपत्र"
+    ]
+  };
+
   const scored = ALL_SCHEMES.map((scheme) => {
     let score = isGeneralQuery ? 15 : 0;
     const sId = scheme.id.toLowerCase();
@@ -266,14 +334,15 @@ export function searchSchemes(query: string, limit = 4): { scheme: SchemeRecord;
     const sDesc = scheme.description.toLowerCase();
     const sAll = `${sTitle} ${sCat} ${sDesc} ${(scheme.eligibility || []).join(" ")} ${(scheme.benefits || []).join(" ")}`.toLowerCase();
 
-    // Direct scheme ID / alias boosts
-    if ((qLower.includes("kisan") || qLower.includes("rythu") || qLower.includes("raithu")) && sId === "agr-001") score += 80;
-    if ((qLower.includes("fasal") || qLower.includes("crop")) && sId === "agr-002") score += 80;
-    if ((qLower.includes("ayushman") || qLower.includes("pmjay") || qLower.includes("hospital") || qLower.includes("arogya") || qLower.includes("aarogya")) && sId === "hlt-001") score += 80;
-    if ((qLower.includes("mudra") || (qLower.includes("loan") && qLower.includes("business"))) && sId === "emp-001") score += 80;
-    if ((qLower.includes("awas") || qLower.includes("housing") || qLower.includes("illu") || qLower.includes("indlu")) && sId === "wel-001") score += 80;
-    if ((qLower.includes("sukanya") || qLower.includes("girl")) && sId === "wel-002") score += 80;
-    if ((qLower.includes("scholarship") || qLower.includes("vidya") || qLower.includes("student")) && sId.includes("edu")) score += 80;
+    // Check specific keyword rules (+90 boost for target scheme)
+    const ruleKeywords = SCHEME_KEYWORD_RULES[sId] || [];
+    for (const kw of ruleKeywords) {
+      const kwLower = kw.toLowerCase();
+      if (qLower.includes(kwLower) || words.includes(kwLower)) {
+        score += 90;
+        break;
+      }
+    }
 
     // Exact match boost
     if (sTitle.includes(qLower)) score += 60;
@@ -299,13 +368,29 @@ export function searchSchemes(query: string, limit = 4): { scheme: SchemeRecord;
 
   scored.sort((a, b) => b.score - a.score);
 
-  // If no scheme scored positive, provide the flagship national scheme (PM-KISAN or Ayushman Bharat) so user always gets an accurate answer
+  // If no scheme scored positive, intelligently route based on broad topic keywords
   if (!scored[0] || scored[0].score <= 0) {
-    if (qLower.includes("health") || qLower.includes("hospital") || qLower.includes("medical")) {
-      const hlt = ALL_SCHEMES.find((s) => s.category.toLowerCase().includes("health"));
-      if (hlt) return [{ scheme: hlt, score: 25 }];
+    if (qLower.includes("health") || qLower.includes("hospital") || qLower.includes("medical") || qLower.includes("ఆరోగ్య") || qLower.includes("ఆసుపత్రి") || qLower.includes("వైద్య")) {
+      const hlt = ALL_SCHEMES.find((s) => s.id === "wel-001");
+      if (hlt) return [{ scheme: hlt, score: 35 }];
     }
-    // Default to flagship PM-KISAN or first scheme with default score
+    if (qLower.includes("pension") || qLower.includes("పెన్షన్") || qLower.includes("పింఛన్") || qLower.includes("వృద్ధాప్య")) {
+      const pen = ALL_SCHEMES.find((s) => s.id === "wel-002");
+      if (pen) return [{ scheme: pen, score: 35 }];
+    }
+    if (qLower.includes("scholarship") || qLower.includes("స్కాలర్‌షిప్") || qLower.includes("విద్యా") || qLower.includes("student")) {
+      const sch = ALL_SCHEMES.find((s) => s.id === "sch-003" || s.id === "sch-001");
+      if (sch) return [{ scheme: sch, score: 35 }];
+    }
+    if (qLower.includes("loan") || qLower.includes("business") || qLower.includes("వ్యాపార") || qLower.includes("రుణం") || qLower.includes("లోన్")) {
+      const emp = ALL_SCHEMES.find((s) => s.id === "emp-002");
+      if (emp) return [{ scheme: emp, score: 35 }];
+    }
+    if (qLower.includes("skill") || qLower.includes("training") || qLower.includes("శిక్షణ")) {
+      const trn = ALL_SCHEMES.find((s) => s.id === "emp-001");
+      if (trn) return [{ scheme: trn, score: 35 }];
+    }
+    // Default to flagship PM-KISAN
     return [{ scheme: ALL_SCHEMES[0], score: 20 }];
   }
 

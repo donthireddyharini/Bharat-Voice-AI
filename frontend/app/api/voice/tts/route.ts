@@ -23,7 +23,7 @@ const GOOGLE_TTS_LANG_MAP: Record<Language, string | null> = {
   or: null, // Odia handled by browser SpeechSynthesis
 };
 
-function cleanTextForSpeech(text: string): string {
+function cleanTextForSpeech(text: string, language: Language = "en"): string {
   let cleaned = text
     .replace(/https?:\/\/\S+/g, "")
     .replace(/[*_#`~>\[\]\(\)\{\}]/g, " ")
@@ -31,6 +31,18 @@ function cleanTextForSpeech(text: string): string {
     .replace(/[•\-\–]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+  if (language === "te") {
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "రూపాయలు ").replace(/రూ\.\s*/g, "రూపాయలు ");
+  } else if (language === "hi" || language === "mr") {
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "रुपये ").replace(/रु\.\s*/g, "रुपये ");
+  } else if (language === "kn") {
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ರೂಪಾಯಿ ");
+  } else if (language === "ta") {
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ரூபாய் ");
+  } else {
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "Rupees ").replace(/Rs\.\s*/gi, "Rupees ");
+  }
 
   // Pick first 1-2 sentences for instant natural vocal delivery
   const sentences = cleaned.split(/(?<=[.!?।])\s+/);
@@ -55,7 +67,7 @@ export async function GET(req: NextRequest) {
     const text = searchParams.get("text") || "";
     const language = (searchParams.get("language") as Language) || "en";
 
-    const cleaned = cleanTextForSpeech(text);
+    const cleaned = cleanTextForSpeech(text, language);
     if (!cleaned) {
       return NextResponse.json({ detail: "Empty text" }, { status: 400, headers: CORS_HEADERS });
     }

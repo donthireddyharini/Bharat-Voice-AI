@@ -96,25 +96,25 @@ function cleanTextForSpeech(text: string, language: Language): string {
     .trim();
 
   if (language === "te") {
-    cleaned = cleaned.replace(/రూ\.\s*/g, "రూపాయలు ").replace(/రూ\s+/g, "రూపాయలు ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "రూపాయలు ").replace(/రూ\.\s*/g, "రూపాయలు ").replace(/రూ\s+/g, "రూపాయలు ");
   } else if (language === "hi" || language === "mr") {
-    cleaned = cleaned.replace(/रु\.\s*/g, "रुपये ").replace(/रु\s+/g, "रुपये ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "रुपये ").replace(/रु\.\s*/g, "रुपये ").replace(/रु\s+/g, "रुपये ");
   } else if (language === "kn") {
-    cleaned = cleaned.replace(/ರೂ\.\s*/g, "ರೂಪಾಯಿ ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ರೂಪಾಯಿ ").replace(/ರೂ\.\s*/g, "ರೂಪಾಯಿ ");
   } else if (language === "ta") {
-    cleaned = cleaned.replace(/ரூ\.\s*/g, "ரூபாய் ").replace(/ரூ\s+/g, "ரூபாய் ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ரூபாய் ").replace(/ரூ\.\s*/g, "ரூபாய் ").replace(/ரூ\s+/g, "ரூபாய் ");
   } else if (language === "bn") {
-    cleaned = cleaned.replace(/টাকা\s*/g, "টাকা ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "টাকা ").replace(/টাকা\s*/g, "টাকা ");
   } else if (language === "gu") {
-    cleaned = cleaned.replace(/રૂ\.\s*/g, "રૂપિયા ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "રૂપિયા ").replace(/રૂ\.\s*/g, "રૂપિયા ");
   } else if (language === "ml") {
-    cleaned = cleaned.replace(/രൂ\.\s*/g, "രൂപ ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "രൂപ ").replace(/രൂ\.\s*/g, "രൂപ ");
   } else if (language === "pa") {
-    cleaned = cleaned.replace(/ਰੁ\.\s*/g, "ਰੁਪਏ ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ਰੁਪਏ ").replace(/ਰੁ\.\s*/g, "ਰੁਪਏ ");
   } else if (language === "or") {
-    cleaned = cleaned.replace(/ଟ\.\s*/g, "ଟଙ୍କା ");
-  } else if (language === "en") {
-    cleaned = cleaned.replace(/Rs\.\s*/gi, "Rupees ").replace(/Rs\s+/gi, "Rupees ");
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ଟଙ୍କା ").replace(/ଟ\.\s*/g, "ଟଙ୍କା ");
+  } else {
+    cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "Rupees ").replace(/Rs\.\s*/gi, "Rupees ").replace(/Rs\s+/gi, "Rupees ");
     cleaned = cleaned.replace(/Govt\.\s*/gi, "Government ");
   }
 
