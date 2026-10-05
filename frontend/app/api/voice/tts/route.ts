@@ -128,7 +128,7 @@ async function generateNeuralTTS(text: string, voiceName: string): Promise<Buffe
         .setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3)
         .then(() => {
           try {
-            const stream = tts.toStream(text, { rate: 0, pitch: "+0Hz" });
+            const stream = tts.toStream(text, { rate: "+16%", pitch: "+0Hz" });
             const chunks: Buffer[] = [];
 
             stream.audioStream.on("data", (chunk: Buffer) => {

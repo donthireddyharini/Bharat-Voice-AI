@@ -372,35 +372,35 @@ function fallbackBrowserSpeak(cleanedText: string, language: Language, onEnd?: (
     utterance.volume = 1.0;
 
     if (language === "te") {
-      utterance.rate = 0.94;
-      utterance.pitch = 1.02;
+      utterance.rate = 1.08;
+      utterance.pitch = 1.0;
     } else if (language === "hi" || language === "mr") {
-      utterance.rate = 0.95;
-      utterance.pitch = 1.03;
+      utterance.rate = 1.06;
+      utterance.pitch = 1.0;
     } else if (language === "kn") {
-      utterance.rate = 0.94;
-      utterance.pitch = 1.02;
+      utterance.rate = 1.08;
+      utterance.pitch = 1.0;
     } else if (language === "ta") {
-      utterance.rate = 0.94;
-      utterance.pitch = 1.02;
+      utterance.rate = 1.08;
+      utterance.pitch = 1.0;
     } else if (language === "bn") {
-      utterance.rate = 0.95;
-      utterance.pitch = 1.03;
+      utterance.rate = 1.06;
+      utterance.pitch = 1.0;
     } else if (language === "gu") {
-      utterance.rate = 0.95;
-      utterance.pitch = 1.02;
+      utterance.rate = 1.06;
+      utterance.pitch = 1.0;
     } else if (language === "ml") {
-      utterance.rate = 0.93;
-      utterance.pitch = 1.02;
+      utterance.rate = 1.06;
+      utterance.pitch = 1.0;
     } else if (language === "pa") {
-      utterance.rate = 0.96;
-      utterance.pitch = 1.03;
+      utterance.rate = 1.06;
+      utterance.pitch = 1.0;
     } else if (language === "or") {
-      utterance.rate = 0.94;
-      utterance.pitch = 1.02;
+      utterance.rate = 1.06;
+      utterance.pitch = 1.0;
     } else {
-      utterance.rate = 0.98;
-      utterance.pitch = 1.04;
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
     }
 
     const voice = getMatchingVoice(language);
