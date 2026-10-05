@@ -12,15 +12,15 @@ const CORS_HEADERS = {
 
 // Studio-grade Human Neural Voice models for Indian languages
 const NEURAL_VOICE_MAP: Partial<Record<Language, string>> = {
-  te: "te-IN-ShrutiNeural",           // Authentic, 100% human-natural fluent Telugu
-  hi: "hi-IN-SwaraNeural",            // Authentic, 100% human-natural fluent Hindi
-  kn: "kn-IN-SapnaNeural",            // Authentic, 100% human-natural fluent Kannada
-  ta: "ta-IN-PallaviNeural",          // Authentic, 100% human-natural fluent Tamil
-  ml: "ml-IN-SobhanaNeural",          // Authentic, 100% human-natural fluent Malayalam
-  mr: "mr-IN-AarohiNeural",           // Authentic, 100% human-natural fluent Marathi
-  bn: "bn-IN-TanishaaNeural",         // Authentic, 100% human-natural fluent Bengali
-  gu: "gu-IN-DhwaniNeural",           // Authentic, 100% human-natural fluent Gujarati
-  en: "en-IN-NeerjaExpressiveNeural", // Authentic, 100% human-natural Indian English
+  te: "te-IN-ShrutiNeural",           // Fluent natural Telugu
+  hi: "hi-IN-SwaraNeural",            // Fluent natural Hindi
+  kn: "kn-IN-SapnaNeural",            // Fluent natural Kannada
+  ta: "ta-IN-PallaviNeural",          // Fluent natural Tamil
+  ml: "ml-IN-SobhanaNeural",          // Fluent natural Malayalam
+  mr: "mr-IN-AarohiNeural",           // Fluent natural Marathi
+  bn: "bn-IN-TanishaaNeural",         // Fluent natural Bengali
+  gu: "gu-IN-DhwaniNeural",           // Fluent natural Gujarati
+  en: "en-IN-NeerjaExpressiveNeural", // Fluent natural Indian English
 };
 
 // Fallback Google TTS locale codes
@@ -38,9 +38,9 @@ const GOOGLE_TTS_LANG_MAP: Record<Language, string | null> = {
   or: null,
 };
 
-// In-memory cache for ultra-fast instant audio delivery of common voice phrases
+// In-memory cache for fast instant audio delivery
 const AUDIO_CACHE = new Map<string, Buffer>();
-const MAX_CACHE_SIZE = 100;
+const MAX_CACHE_SIZE = 200;
 
 function cleanTextForSpeech(text: string, language: Language = "en"): string {
   let cleaned = text
@@ -95,15 +95,11 @@ function cleanTextForSpeech(text: string, language: Language = "en"): string {
       .replace(/Govt\.\s*/gi, "Government ");
   }
 
-  // Pick first 2-3 sentences for natural, concise vocal delivery (max 380 chars)
-  const sentences = cleaned.split(/(?<=[.!?।])\s+/).filter(Boolean);
-  if (sentences.length > 2 && cleaned.length > 320) {
-    cleaned = sentences.slice(0, 2).join(" ");
-  }
-  if (cleaned.length > 380) {
-    const sub = cleaned.slice(0, 380);
+  // Speak the ENTIRE answer completely without cutting off sentences (up to 1600 characters)
+  if (cleaned.length > 1600) {
+    const sub = cleaned.slice(0, 1600);
     const lastPunct = Math.max(sub.lastIndexOf("."), sub.lastIndexOf("!"), sub.lastIndexOf("?"), sub.lastIndexOf("।"));
-    if (lastPunct > 150) {
+    if (lastPunct > 600) {
       cleaned = sub.slice(0, lastPunct + 1);
     } else {
       cleaned = sub.trim();
@@ -115,6 +111,7 @@ function cleanTextForSpeech(text: string, language: Language = "en"): string {
 
 /**
  * Generate human-like studio speech via Microsoft Azure/Edge Neural TTS
+ * With brisk conversational rate (+14%) for smooth English-like flow
  */
 async function generateNeuralTTS(text: string, voiceName: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -122,13 +119,14 @@ async function generateNeuralTTS(text: string, voiceName: string): Promise<Buffe
       const tts = new MsEdgeTTS();
       const timeout = setTimeout(() => {
         reject(new Error("Neural TTS timeout"));
-      }, 4500);
+      }, 10000);
 
       tts
         .setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3)
         .then(() => {
           try {
-            const stream = tts.toStream(text, { rate: "+16%", pitch: "+0Hz" });
+            // Rate +14%: brisk, active, natural conversational flow like English
+            const stream = tts.toStream(text, { rate: "+14%", pitch: "+0Hz" });
             const chunks: Buffer[] = [];
 
             stream.audioStream.on("data", (chunk: Buffer) => {
@@ -165,7 +163,7 @@ async function generateNeuralTTS(text: string, voiceName: string): Promise<Buffe
 async function generateGoogleTTS(text: string, ttsLang: string): Promise<Buffer | null> {
   try {
     const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
-      text
+      text.slice(0, 300)
     )}&tl=${encodeURIComponent(ttsLang)}&client=tw-ob`;
 
     const controller = new AbortController();

@@ -126,18 +126,13 @@ function cleanTextForSpeech(text: string, language: Language): string {
     cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "ଟଙ୍କା ").replace(/ଟ\.\s*/g, "ଟଙ୍କା ");
   } else {
     cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "Rupees ").replace(/Rs\.\s*/gi, "Rupees ").replace(/Rs\s+/gi, "Rupees ");
-    cleaned = cleaned.replace(/Govt\.\s*/gi, "Government ");
   }
 
-  // Pick first 2-3 sentences for natural, concise vocal delivery (max 380 chars)
-  const sentences = cleaned.split(/(?<=[.!?।])\s+/).filter(Boolean);
-  if (sentences.length > 2 && cleaned.length > 320) {
-    cleaned = sentences.slice(0, 2).join(" ");
-  }
-  if (cleaned.length > 380) {
-    const sub = cleaned.slice(0, 380);
+  // Speak the ENTIRE answer completely without cutting off sentences (up to 1600 characters)
+  if (cleaned.length > 1600) {
+    const sub = cleaned.slice(0, 1600);
     const lastPunct = Math.max(sub.lastIndexOf("."), sub.lastIndexOf("!"), sub.lastIndexOf("?"), sub.lastIndexOf("।"));
-    if (lastPunct > 150) {
+    if (lastPunct > 600) {
       cleaned = sub.slice(0, lastPunct + 1);
     } else {
       cleaned = sub.trim();
@@ -375,7 +370,7 @@ function fallbackBrowserSpeak(cleanedText: string, language: Language, onEnd?: (
       utterance.rate = 1.08;
       utterance.pitch = 1.0;
     } else if (language === "hi" || language === "mr") {
-      utterance.rate = 1.06;
+      utterance.rate = 1.08;
       utterance.pitch = 1.0;
     } else if (language === "kn") {
       utterance.rate = 1.08;
@@ -384,23 +379,23 @@ function fallbackBrowserSpeak(cleanedText: string, language: Language, onEnd?: (
       utterance.rate = 1.08;
       utterance.pitch = 1.0;
     } else if (language === "bn") {
-      utterance.rate = 1.06;
+      utterance.rate = 1.08;
       utterance.pitch = 1.0;
     } else if (language === "gu") {
-      utterance.rate = 1.06;
+      utterance.rate = 1.08;
       utterance.pitch = 1.0;
     } else if (language === "ml") {
       utterance.rate = 1.06;
       utterance.pitch = 1.0;
     } else if (language === "pa") {
-      utterance.rate = 1.06;
+      utterance.rate = 1.08;
       utterance.pitch = 1.0;
     } else if (language === "or") {
-      utterance.rate = 1.06;
+      utterance.rate = 1.08;
       utterance.pitch = 1.0;
     } else {
-      utterance.rate = 1.05;
-      utterance.pitch = 1.0;
+      utterance.rate = 1.08;
+      utterance.pitch = 1.02;
     }
 
     const voice = getMatchingVoice(language);
