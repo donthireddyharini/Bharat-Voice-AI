@@ -9,6 +9,7 @@ import { getLocalizedScheme } from "@/lib/schemeLocalization";
 import { startListening, speak, isSpeechRecognitionSupported } from "@/lib/speech";
 import { isSupabaseConfigured, storeConversationInSupabase, storeMessageInSupabase } from "@/lib/supabase";
 import { saveSearchToHistory } from "@/lib/history";
+import { getChatSessionById, saveOrUpdateChatSession } from "@/lib/chatSessions";
 import MessageBubble from "./MessageBubble";
 import ThinkingAnimation from "./ThinkingAnimation";
 import VoiceButton from "./VoiceButton";
@@ -133,11 +134,20 @@ const WELCOME_TITLES: Record<Language, { title: string; desc: string }> = {
 interface ChatWindowProps {
   language: Language;
   externalQuery?: { text: string; nonce: number } | null;
+  activeSessionId?: string | null;
   onSourcesChange?: (sources: SourceRef[]) => void;
   onFollowupsChange?: (followups: string[]) => void;
+  onNewChat?: () => void;
 }
 
-export default function ChatWindow({ language, externalQuery, onSourcesChange, onFollowupsChange }: ChatWindowProps) {
+export default function ChatWindow({
+  language,
+  externalQuery,
+  activeSessionId,
+  onSourcesChange,
+  onFollowupsChange,
+  onNewChat,
+}: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [assistantState, setAssistantState] = useState<AssistantState>("idle");
@@ -146,6 +156,30 @@ export default function ChatWindow({ language, externalQuery, onSourcesChange, o
   const [errorText, setErrorText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastFailedQuery = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (activeSessionId) {
+      const savedSession = getChatSessionById(activeSessionId);
+      if (savedSession) {
+        setConversationId(savedSession.id);
+        setMessages(savedSession.messages || []);
+        onSourcesChange?.(savedSession.sources || []);
+        onFollowupsChange?.(savedSession.followups || []);
+        return;
+      }
+    }
+  }, [activeSessionId]);
+
+  function handleNewChat() {
+    setMessages([]);
+    setConversationId(undefined);
+    onSourcesChange?.([]);
+    onFollowupsChange?.([]);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("bharathvoice_active_session_id");
+    }
+    onNewChat?.();
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -186,7 +220,9 @@ export default function ChatWindow({ language, externalQuery, onSourcesChange, o
       }
 
       setAssistantState("generating");
-      setConversationId(result.conversation_id);
+      const currentConvId = result.conversation_id || conversationId || `conv-${Date.now()}`;
+      setConversationId(currentConvId);
+
       const assistantMessage: ChatMessage = {
         id: result.message_id || uuidLike(),
         role: "assistant",
@@ -196,7 +232,24 @@ export default function ChatWindow({ language, externalQuery, onSourcesChange, o
         sources: result.sources || [],
         followups: result.suggested_followups || [],
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+
+      setMessages((prev) => {
+        const nextMessages = [...prev, assistantMessage];
+        // Save entire chat session with all messages and date
+        saveOrUpdateChatSession({
+          id: currentConvId,
+          messages: nextMessages,
+          language: result.language || language,
+          sources: result.sources || [],
+          followups: result.suggested_followups || [],
+          title: query.slice(0, 50),
+        });
+        if (typeof window !== "undefined") {
+          localStorage.setItem("bharathvoice_active_session_id", currentConvId);
+        }
+        return nextMessages;
+      });
+
       onSourcesChange?.(result.sources || []);
       onFollowupsChange?.(result.suggested_followups || []);
 
@@ -254,7 +307,21 @@ export default function ChatWindow({ language, externalQuery, onSourcesChange, o
           sources: fallback.sources,
           followups: fallback.suggested_followups,
         };
-        setMessages((prev) => [...prev, fallbackMessage]);
+        const fallbackConvId = fallback.conversation_id || conversationId || `conv-${Date.now()}`;
+        setConversationId(fallbackConvId);
+        setMessages((prev) => {
+          const nextMessages = [...prev, fallbackMessage];
+          saveOrUpdateChatSession({
+            id: fallbackConvId,
+            messages: nextMessages,
+            language: fallback.language || language,
+            sources: fallback.sources || [],
+            followups: fallback.suggested_followups || [],
+            title: query.slice(0, 50),
+          });
+          return nextMessages;
+        });
+
         onSourcesChange?.(fallback.sources);
         onFollowupsChange?.(fallback.suggested_followups);
 
@@ -307,6 +374,24 @@ export default function ChatWindow({ language, externalQuery, onSourcesChange, o
 
   return (
     <div className="flex flex-col h-full">
+      {messages.length > 0 && (
+        <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 glass rounded-xl mb-1 text-xs shrink-0">
+          <div className="flex items-center gap-2 truncate pr-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_#34d399]" />
+            <span className="text-mist font-medium truncate">
+              {messages.length} {language === "te" ? "సందేశాలు (సేవ్ చేయబడింది)" : "messages (Saved)"}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleNewChat}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg glass border border-saffron/40 hover:border-saffron text-saffron hover:text-white hover:bg-saffron/20 transition-all font-semibold active:scale-95 cursor-pointer shadow-sm text-xs whitespace-nowrap"
+          >
+            <span>✨</span>
+            <span>{language === "te" ? "+ కొత్త చాట్" : "+ New Chat"}</span>
+          </button>
+        </div>
+      )}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-1 py-4 space-y-5">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-5 py-6 sm:py-8 max-w-xl mx-auto">

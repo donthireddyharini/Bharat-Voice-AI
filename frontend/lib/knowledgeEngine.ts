@@ -179,9 +179,10 @@ export function detectUserIntent(query: string): UserIntent {
 
 const SYNONYMS: Record<string, string[]> = {
   scholarship: [
-    "scholarship", "merit", "pragati", "deevena", "vidya", "education", "student", "students", "fee", "college", "school",
-    "छात्रवृत्ति", "छात्र", "विद्या", "विद्यार्थी",
-    "స్కాలర్‌షిప్", "విద్యార్థి", "విద్యార్థులకు", "విద్య", "ఫీజు",
+    "scholarship", "scholarships", "merit", "pragati", "deevena", "vidya", "education", "student", "students", "fee", "college", "school",
+    "chaduvu", "vidyarthi", "vidyarthulu", "fees", "fee reimbursement", "nmmss", "post matric", "pre matric", "btech",
+    "छात्रवृत्ति", "छात्र", "विद्या", "विद्यार्थी", "पढ़ाई", "कॉलेज", "स्कूल", "फीस",
+    "స్కాలర్‌షిప్", "స్కాలర్షిప్", "విద్యార్థి", "విద్యార్థులకు", "విద్య", "ఫీజు", "చదువు", "కాలేజ్",
     "ವಿದ್ಯಾರ್ಥಿವೇತನ", "ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ", "ವಿದ್ಯಾರ್ಥಿ",
     "கல்வி உதவித்தொகை", "மாணவர்", "மாணவர்கள்", "படிப்பு",
     "शिष्यवृत्ती", "विद्यार्थी", "शिक्षण", "फी",
@@ -192,9 +193,9 @@ const SYNONYMS: Record<string, string[]> = {
     "ସ୍କଲାରସିପ୍", "ଛାତ୍ର", "ଶିକ୍ଷା",
   ],
   agriculture: [
-    "agriculture", "farmer", "farmers", "kisan", "crop", "fertilizer", "soil", "rythu", "bharosa", "pm-kisan", "pm kisan",
-    "कृषि", "किसान", "किसानों", "खेती", "फसल",
-    "రైతు", "రైతులకు", "రైతులు", "వ్యవసాయం", "రైతు భరోసా", "పంట",
+    "agriculture", "farmer", "farmers", "kisan", "crop", "fertilizer", "soil", "rythu", "raithu", "rythulu", "bharosa", "pm-kisan", "pm kisan", "pmkisan", "fasal", "bima", "panta", "pantalu", "vyavasayam", "pasupu", "seeds",
+    "कृषि", "किसान", "किसानों", "खेती", "फसल", "बीज", "खाद", "पीएम किसान",
+    "రైతు", "రైతులకు", "రైతులు", "రైతు భరోసా", "వ్యవసాయం", "పంట", "పంటలు", "విత్తనాలు", "ఎరువులు", "పీఎం కిసాన్", "ఫసల్ బీమా",
     "ಕೃಷಿ", "ರೈತ", "ರೈತರಿಗೆ", "ರೈತರು", "ಬೆಳೆ",
     "விவசாயம்", "விவசாயி", "பயிர்", "உழவர்",
     "शेती", "शेतकरी", "पीक", "खत",
@@ -205,9 +206,9 @@ const SYNONYMS: Record<string, string[]> = {
     "କୃଷି", "କୃଷକ", "ଫସଲ",
   ],
   health: [
-    "health", "ayushman", "bharat", "hospital", "treatment", "medicine", "insurance", "card", "aarogya", "pm-jay",
-    "स्वास्थ्य", "इलाज", "अस्पताल", "दवा", "आयुष्मान",
-    "ఆరోగ్యం", "ఆస్పత్రి", "చికిత్స", "ఆయుష్మాన్", "ఆరోగ్యశ్రీ",
+    "health", "ayushman", "bharat", "hospital", "treatment", "medicine", "insurance", "card", "aarogya", "arogya", "aarogyasri", "arogyasri", "pm-jay", "pmjay", "golden card", "asupatri", "chikitsha", "mandulu", "surgery",
+    "स्वास्थ्य", "इलाज", "अस्पताल", "दवा", "आयुष्मान", "गोल्डन कार्ड", "बीमा",
+    "ఆరోగ్యం", "ఆస్పత్రి", "ఆసుపత్రి", "చికిత్స", "ఆయుష్మాన్", "ఆరోగ్యశ్రీ", "మందులు", "హెల్త్ కార్డు",
     "ಆರೋಗ್ಯ", "ಆಸ್ಪತ್ರೆ", "ಚಿಕಿತ್ಸೆ", "ಆಯುಷ್ಮಾನ್",
     "சுகாதாரம்", "மருத்துவம்", "மருத்துவமனை", "காப்பீடு",
     "आरोग्य", "दवाखाना", "उपचार", "विमा",
@@ -218,9 +219,9 @@ const SYNONYMS: Record<string, string[]> = {
     "ସ୍ୱାସ୍ଥ୍ୟ", "ଡାକ୍ତରଖାନା", "ଚିକିତ୍ସା",
   ],
   employment: [
-    "employment", "job", "jobs", "mudra", "skill", "training", "startup", "business", "loan", "credit", "rozgar", "svanidhi",
-    "रोजगार", "नौकरी", "ऋण", "लोन", "मुद्रा", "व्यापार",
-    "ఉపాధి", "ఉద్యోగం", "ఉద్యోగాలు", "రుణం", "ముద్రా", "వ్యాపారం",
+    "employment", "job", "jobs", "mudra", "skill", "training", "startup", "business", "loan", "loans", "credit", "rozgar", "svanidhi", "vyaparam", "udyoga", "udyogam", "appu", "runam", "self employed", "naukri",
+    "रोजगार", "नौकरी", "ऋण", "लोन", "मुद्रा", "व्यापार", "दुकान", "व्यवसाय",
+    "ఉపాధి", "ఉద్యోగం", "ఉద్యోగాలు", "రుణం", "ముద్రా", "ముద్ర", "వ్యాపారం", "అప్పు", "స్వయం ఉపాధి",
     "ಉದ್ಯೋಗ", "ಕೆಲಸ", "ಸಾಲ", "ಮುದ್ರಾ", "ವ್ಯವಹಾರ",
     "வேலைவாய்ப்பு", "தொழில்", "கடன்", "முத்ரா",
     "रोजगार", "नोकरी", "कर्ज", "मुद्रा", "व्यवसाय",
@@ -231,9 +232,9 @@ const SYNONYMS: Record<string, string[]> = {
     "ନିଯୁକ୍ତି", "ଚାକିରି", "ଋଣ", "ମୁଦ୍ରା",
   ],
   welfare: [
-    "welfare", "pension", "ration", "food", "poor", "senior", "poverty", "awas", "housing", "sukanya",
-    "कल्याण", "पेंशन", "राशन", "गरीब", "आवास", "सुकन्या",
-    "సంక్షేమం", "పెన్షన్", "రేషన్", "ఇల్లు", "ఆవాస్",
+    "welfare", "pension", "ration", "ration card", "food", "poor", "senior", "poverty", "awas", "housing", "sukanya", "samriddhi", "girl", "biyyam", "illu", "indlu", "houses", "pedalu", "ammavodi", "aadabidda",
+    "कल्याण", "पेंशन", "राशन", "गरीब", "आवास", "सुकन्या", "मकान", "घर",
+    "సంక్షేమం", "పెన్షన్", "పింఛన్", "రేషన్", "రేషన్ కార్డు", "బియ్యం", "ఇల్లు", "ఇండ్లు", "ఆవాస్", "పేదలు", "ఆడపిల్ల", "సుకున్య",
     "ಸಹಾಯಧನ", "ಪಿಂಚಣಿ", "ಪಡಿತರ", "ವಸತಿ", "ಆವಾಸ್",
     "நலத்திட்டம்", "ஓய்வூதியம்", "ரேஷன்", "வீடு",
     "कल्याण", "पेन्शन", "रेशन", "घरकुल", "आवास",
@@ -246,8 +247,9 @@ const SYNONYMS: Record<string, string[]> = {
 };
 
 const GENERAL_SCHEME_WORDS = [
-  "scheme", "schemes", "yojana", "yojanagalu", "yojanaye", "pathakam", "pathakalu",
-  "ಯೋಜನೆ", "ಯೋಜನೆಗಳು", "యొజన", "పథకం", "పథకాలు", "योजना", "योजनाएं",
+  "scheme", "schemes", "yojana", "yojanagalu", "yojanaye", "pathakam", "pathakalu", "details", "info", "information",
+  "cheppandi", "cheppu", "kavali", "unnai", "undi", "batao", "bataiye", "list", "all",
+  "ಯೋಜನೆ", "ಯೋಜನೆಗಳು", "ಯೊಜನೆ", "పథకం", "పథకాలు", "వివరాలు", "చెప్పండి", "ఉన్నాయి", "योजना", "योजनाएं", "बताओ",
   "திட்டம்", "திட்டங்கள்", "योजना", "প্রকল্প", "યોજના", "പദ്ധതി", "ਸਕੀਮਾਂ", "ଯୋଜନା",
 ];
 
@@ -257,11 +259,21 @@ export function searchSchemes(query: string, limit = 4): { scheme: SchemeRecord;
   const isGeneralQuery = GENERAL_SCHEME_WORDS.some((gw) => qLower.includes(gw.toLowerCase()));
 
   const scored = ALL_SCHEMES.map((scheme) => {
-    let score = isGeneralQuery ? 4 : 0;
+    let score = isGeneralQuery ? 15 : 0;
+    const sId = scheme.id.toLowerCase();
     const sTitle = scheme.title.toLowerCase();
     const sCat = scheme.category.toLowerCase();
     const sDesc = scheme.description.toLowerCase();
     const sAll = `${sTitle} ${sCat} ${sDesc} ${(scheme.eligibility || []).join(" ")} ${(scheme.benefits || []).join(" ")}`.toLowerCase();
+
+    // Direct scheme ID / alias boosts
+    if ((qLower.includes("kisan") || qLower.includes("rythu") || qLower.includes("raithu")) && sId === "agr-001") score += 80;
+    if ((qLower.includes("fasal") || qLower.includes("crop")) && sId === "agr-002") score += 80;
+    if ((qLower.includes("ayushman") || qLower.includes("pmjay") || qLower.includes("hospital") || qLower.includes("arogya") || qLower.includes("aarogya")) && sId === "hlt-001") score += 80;
+    if ((qLower.includes("mudra") || (qLower.includes("loan") && qLower.includes("business"))) && sId === "emp-001") score += 80;
+    if ((qLower.includes("awas") || qLower.includes("housing") || qLower.includes("illu") || qLower.includes("indlu")) && sId === "wel-001") score += 80;
+    if ((qLower.includes("sukanya") || qLower.includes("girl")) && sId === "wel-002") score += 80;
+    if ((qLower.includes("scholarship") || qLower.includes("vidya") || qLower.includes("student")) && sId.includes("edu")) score += 80;
 
     // Exact match boost
     if (sTitle.includes(qLower)) score += 60;
@@ -276,8 +288,8 @@ export function searchSchemes(query: string, limit = 4): { scheme: SchemeRecord;
 
       for (const [catKey, synList] of Object.entries(SYNONYMS)) {
         if (synList.some((syn) => word.includes(syn) || syn.includes(word))) {
-          if (sCat.toLowerCase().includes(catKey) || sTitle.toLowerCase().includes(catKey)) score += 20;
-          if (sAll.includes(catKey)) score += 10;
+          if (sCat.toLowerCase().includes(catKey) || sTitle.toLowerCase().includes(catKey)) score += 25;
+          if (sAll.includes(catKey)) score += 12;
         }
       }
     }
@@ -286,6 +298,17 @@ export function searchSchemes(query: string, limit = 4): { scheme: SchemeRecord;
   });
 
   scored.sort((a, b) => b.score - a.score);
+
+  // If no scheme scored positive, provide the flagship national scheme (PM-KISAN or Ayushman Bharat) so user always gets an accurate answer
+  if (!scored[0] || scored[0].score <= 0) {
+    if (qLower.includes("health") || qLower.includes("hospital") || qLower.includes("medical")) {
+      const hlt = ALL_SCHEMES.find((s) => s.category.toLowerCase().includes("health"));
+      if (hlt) return [{ scheme: hlt, score: 25 }];
+    }
+    // Default to flagship PM-KISAN or first scheme with default score
+    return [{ scheme: ALL_SCHEMES[0], score: 20 }];
+  }
+
   return scored.slice(0, limit);
 }
 

@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/useLanguage";
 import { speak } from "@/lib/speech";
 import { getSearchHistory, deleteSearchHistoryItem, clearSearchHistory, SearchHistoryEntry, HISTORY_UPDATED_EVENT } from "@/lib/history";
+import { getChatSessions, deleteChatSession, clearAllChatSessions, ChatSession, CHAT_SESSIONS_UPDATED_EVENT } from "@/lib/chatSessions";
 
 type DashboardTab = "overview" | "voice" | "schemes" | "history";
 
@@ -17,18 +18,26 @@ export default function DashboardPage() {
   const { language, t } = useLanguage();
   const [conversations, setConversations] = useState<any[]>([]);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryEntry[]>([]);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [speakingQuery, setSpeakingQuery] = useState<string | null>(null);
 
   useEffect(() => {
     fetchConversations().then(setConversations).catch(() => {});
     setSearchHistory(getSearchHistory());
+    setChatSessions(getChatSessions());
 
-    const onHistoryUpdate = () => setSearchHistory(getSearchHistory());
+    const onHistoryUpdate = () => {
+      setSearchHistory(getSearchHistory());
+      setChatSessions(getChatSessions());
+    };
+
     window.addEventListener(HISTORY_UPDATED_EVENT, onHistoryUpdate);
+    window.addEventListener(CHAT_SESSIONS_UPDATED_EVENT, onHistoryUpdate);
     window.addEventListener("storage", onHistoryUpdate);
     return () => {
       window.removeEventListener(HISTORY_UPDATED_EVENT, onHistoryUpdate);
+      window.removeEventListener(CHAT_SESSIONS_UPDATED_EVENT, onHistoryUpdate);
       window.removeEventListener("storage", onHistoryUpdate);
     };
   }, []);
@@ -186,9 +195,9 @@ export default function DashboardPage() {
           >
             <span>💬</span>
             <span>{t.dashTabHistory}</span>
-            {(searchHistory.length > 0 || conversations.length > 0) && (
+            {(chatSessions.length > 0 || searchHistory.length > 0 || conversations.length > 0) && (
               <span className="text-[10px] bg-white/20 px-1.5 py-0.2 rounded-full font-bold">
-                {searchHistory.length || conversations.length}
+                {chatSessions.length + searchHistory.length || conversations.length}
               </span>
             )}
           </button>
@@ -442,28 +451,29 @@ export default function DashboardPage() {
 
         {/* TAB 4: RECENT SEARCH & VOICE HISTORY */}
         {activeTab === "history" && (
-          <div className="glass-strong rounded-2xl p-6 border border-white/10 animate-fadeIn space-y-4">
+          <div className="glass-strong rounded-2xl p-6 border border-white/10 animate-fadeIn space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-white/10">
               <div>
                 <h3 className="font-display font-bold text-base text-bone flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-saffron shadow-glow" />
-                  <span>Search &amp; Voice History</span>
+                  <span>Conversations &amp; Search History</span>
                 </h3>
                 <p className="text-xs text-mist mt-0.5">
-                  Chronological record of citizen queries with verified timestamps and source references.
+                  Complete conversations and queries saved chronologically with dates, timestamps, and full scheme responses.
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
-                {searchHistory.length > 0 && (
+                {(chatSessions.length > 0 || searchHistory.length > 0) && (
                   <>
                     <span className="text-xs font-semibold text-cyber glass px-2.5 py-1 rounded-lg border border-cyber/20">
-                      {searchHistory.length} searches
+                      {chatSessions.length} chats · {searchHistory.length} searches
                     </span>
                     <button
                       type="button"
                       onClick={() => {
-                        if (confirm("Are you sure you want to clear your search history?")) {
+                        if (confirm("Are you sure you want to clear all saved conversations and search history?")) {
+                          clearAllChatSessions();
                           clearSearchHistory();
                         }
                       }}
@@ -476,91 +486,151 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {searchHistory.length === 0 && conversations.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 glass rounded-2xl border border-white/5 border-dashed">
-                <span className="text-4xl mb-3 opacity-50">🕒</span>
-                <p className="text-sm text-mist/80 mb-1">No search history recorded yet.</p>
-                <p className="text-xs text-mist/60 mb-4 text-center max-w-sm">
-                  Every question you search or speak will be securely saved here along with the date and time.
-                </p>
-                <Link
-                  href={`/assistant?lang=${language}`}
-                  className="px-6 py-2.5 rounded-full bg-gradient-to-r from-saffron to-gulal text-white text-xs font-bold shadow-glow hover:scale-105 active:scale-95 transition-all"
-                >
-                  Start Your First Search →
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {searchHistory.map((item) => (
-                  <div
-                    key={item.id}
-                    className="glass-strong rounded-xl p-4 border border-white/10 hover:border-saffron/30 transition-all group flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between text-xs text-mist/70 mb-2 flex-wrap gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="flex items-center gap-1.5 font-mono text-cyber font-semibold text-[11px] bg-cyber/10 border border-cyber/25 px-2.5 py-0.5 rounded-full">
-                          <span>📅</span>
-                          <span>{item.formattedDate}</span>
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase font-bold text-bone">
-                          {item.viaVoice ? "🎙️ Voice Query" : "🔍 Search Query"}
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full bg-saffron/10 border border-saffron/20 text-[10px] uppercase font-bold text-saffron">
-                          {item.language.toUpperCase()}
-                        </span>
+            {/* SECTION 1: FULL SAVED CHAT SESSIONS */}
+            <div className="space-y-3">
+              <h4 className="font-display font-bold text-sm text-bone flex items-center gap-2">
+                <span>💬</span>
+                <span>Saved Full Conversations ({chatSessions.length})</span>
+              </h4>
+
+              {chatSessions.length === 0 ? (
+                <div className="p-4 rounded-xl glass border border-white/5 text-center text-xs text-mist/70">
+                  No full chat sessions saved yet. Start talking with the Voice Assistant to save conversations automatically.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {chatSessions.map((session) => (
+                    <div
+                      key={session.id}
+                      className="glass-strong rounded-xl p-4 border border-white/10 hover:border-saffron/40 transition-all group flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-mist/70 mb-2">
+                          <span className="flex items-center gap-1 font-mono text-cyber font-semibold text-[11px] bg-cyber/10 border border-cyber/25 px-2.5 py-0.5 rounded-full">
+                            <span>📅</span>
+                            <span>{session.formattedDate}</span>
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase font-bold text-bone">
+                              {session.messages.length} messages
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteChatSession(session.id)}
+                              className="text-mist/40 hover:text-red-400 text-xs px-1"
+                              title="Delete conversation"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+
+                        <h5 className="font-semibold text-sm text-bone group-hover:text-saffron transition-colors line-clamp-2 mb-2">
+                          {session.title || "Voice Assistant Conversation"}
+                        </h5>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => deleteSearchHistoryItem(item.id)}
-                        className="text-mist/40 hover:text-red-400 text-sm px-2 py-0.5 rounded hover:bg-white/5 transition-all"
-                        title="Delete from history"
-                      >
-                        ✕
-                      </button>
+                      <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] text-mist/70 uppercase tracking-wider font-semibold">
+                          🌐 {session.language.toUpperCase()}
+                        </span>
+                        <Link
+                          href={`/assistant?session=${session.id}&lang=${session.language}`}
+                          className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-saffron to-gulal text-white text-xs font-bold shadow-glow hover:scale-105 active:scale-95 transition-all flex items-center gap-1"
+                        >
+                          <span>Open Full Chat 💬</span>
+                          <span>→</span>
+                        </Link>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-                    <div className="mb-2">
-                      <Link
-                        href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
-                        className="font-semibold text-sm sm:text-base text-bone group-hover:text-saffron transition-colors block cursor-pointer"
-                      >
-                        "{item.query}"
-                      </Link>
-                      {item.answerSummary && (
-                        <p className="text-xs text-mist/80 mt-1 line-clamp-2 leading-relaxed">
-                          {item.answerSummary}
-                        </p>
-                      )}
-                    </div>
+            {/* SECTION 2: SEARCH QUERIES */}
+            <div className="space-y-3 pt-4 border-t border-white/10">
+              <h4 className="font-display font-bold text-sm text-bone flex items-center gap-2">
+                <span>🔍</span>
+                <span>Recent Queries ({searchHistory.length})</span>
+              </h4>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-white/5 flex-wrap gap-2">
-                      <div className="flex items-center gap-2">
-                        {item.category && (
-                          <span className="text-[10px] text-amethyst font-semibold uppercase tracking-wider bg-amethyst/10 px-2 py-0.5 rounded border border-amethyst/20">
-                            🏷️ {item.category}
+              {searchHistory.length === 0 ? (
+                <div className="p-4 rounded-xl glass border border-white/5 text-center text-xs text-mist/70">
+                  No individual search queries recorded yet.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {searchHistory.map((item) => (
+                    <div
+                      key={item.id}
+                      className="glass-strong rounded-xl p-4 border border-white/10 hover:border-saffron/30 transition-all group flex flex-col justify-between"
+                    >
+                      <div className="flex items-center justify-between text-xs text-mist/70 mb-2 flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="flex items-center gap-1.5 font-mono text-cyber font-semibold text-[11px] bg-cyber/10 border border-cyber/25 px-2.5 py-0.5 rounded-full">
+                            <span>📅</span>
+                            <span>{item.formattedDate}</span>
                           </span>
+                          <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase font-bold text-bone">
+                            {item.viaVoice ? "🎙️ Voice Query" : "🔍 Search Query"}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-saffron/10 border border-saffron/20 text-[10px] uppercase font-bold text-saffron">
+                            {item.language.toUpperCase()}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => deleteSearchHistoryItem(item.id)}
+                          className="text-mist/40 hover:text-red-400 text-sm px-2 py-0.5 rounded hover:bg-white/5 transition-all"
+                          title="Delete from history"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <div className="mb-2">
+                        <Link
+                          href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
+                          className="font-semibold text-sm sm:text-base text-bone group-hover:text-saffron transition-colors block cursor-pointer"
+                        >
+                          "{item.query}"
+                        </Link>
+                        {item.answerSummary && (
+                          <p className="text-xs text-mist/80 mt-1 line-clamp-2 leading-relaxed">
+                            {item.answerSummary}
+                          </p>
                         )}
-                        {item.sourcesCount && item.sourcesCount > 0 ? (
-                          <span className="text-[10px] text-mist/70">
-                            📚 {item.sourcesCount} verified sources
-                          </span>
-                        ) : null}
                       </div>
 
-                      <Link
-                        href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
-                        className="text-xs font-bold text-saffron hover:text-gulal flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
-                      >
-                        <span>Ask Assistant Again</span>
-                        <span>→</span>
-                      </Link>
+                      <div className="flex items-center justify-between pt-2 border-t border-white/5 flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          {item.category && (
+                            <span className="text-[10px] text-amethyst font-semibold uppercase tracking-wider bg-amethyst/10 px-2 py-0.5 rounded border border-amethyst/20">
+                              🏷️ {item.category}
+                            </span>
+                          )}
+                          {item.sourcesCount && item.sourcesCount > 0 ? (
+                            <span className="text-[10px] text-mist/70">
+                              📚 {item.sourcesCount} verified sources
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <Link
+                          href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${item.language}`}
+                          className="text-xs font-bold text-saffron hover:text-gulal flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
+                        >
+                          <span>Ask Assistant Again</span>
+                          <span>→</span>
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
