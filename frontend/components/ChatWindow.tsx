@@ -228,7 +228,7 @@ export default function ChatWindow({
 
   useEffect(() => {
     if (externalQuery && externalQuery.text) {
-      sendMessage(externalQuery.text);
+      sendMessage(externalQuery.text, true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [externalQuery?.nonce]);
@@ -332,7 +332,11 @@ export default function ChatWindow({
       }
 
       setAssistantState("speaking");
-      speak(result.answer?.summary || "", result.language || language, () => setAssistantState("idle"));
+      const speechText =
+        (result.answer?.scheme_id ? getLocalizedScheme(result.answer.scheme_id, language)?.summary : null) ||
+        result.answer?.summary ||
+        "";
+      speak(speechText, result.language || language, () => setAssistantState("idle"));
       lastFailedQuery.current = null;
     } catch (e: any) {
       console.warn("[ChatWindow] Fallback recovery:", e);
@@ -374,8 +378,16 @@ export default function ChatWindow({
           viaVoice,
           sourcesCount: fallback.sources?.length || 0,
         });
-      } catch {}
-      setAssistantState("idle");
+
+        setAssistantState("speaking");
+        const fallbackSpeechText =
+          (fallback.answer?.scheme_id ? getLocalizedScheme(fallback.answer.scheme_id, language)?.summary : null) ||
+          fallback.answer.summary ||
+          "";
+        speak(fallbackSpeechText, fallback.language || language, () => setAssistantState("idle"));
+      } catch {
+        setAssistantState("idle");
+      }
       lastFailedQuery.current = null;
     }
   }
@@ -467,13 +479,23 @@ export default function ChatWindow({
             {m.role === "assistant" && (
               <div className="flex gap-1.5 sm:gap-2 mt-2 flex-wrap pl-1 sm:pl-11 max-w-full">
                 <button
+                  type="button"
                   onClick={() => {
                     const speechText = (m.structured?.scheme_id ? getLocalizedScheme(m.structured.scheme_id, language)?.summary : null) || m.content;
                     handleReadAloud(speechText, language);
                   }}
-                  className="text-xs text-mist hover:text-bone hover:bg-white/5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-white/10 hover:border-saffron/30 transition-all duration-200"
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+                    assistantState === "speaking"
+                      ? "bg-saffron/20 border-saffron text-saffron font-bold shadow-glow"
+                      : "text-mist hover:text-bone hover:bg-white/5 border-white/10 hover:border-saffron/30"
+                  }`}
                 >
-                  🔊 Read Aloud
+                  <span>{assistantState === "speaking" ? "🔊" : "🔉"}</span>
+                  <span>
+                    {assistantState === "speaking"
+                      ? language === "te" ? "మాట్లాడుతోంది..." : language === "hi" ? "बोल रहा है..." : "Speaking..."
+                      : language === "te" ? "వాయిస్ వినండి" : language === "hi" ? "आवाज सुनें" : "Listen Voice"}
+                  </span>
                 </button>
                 {(m.followups || []).map((f) => (
                   <button

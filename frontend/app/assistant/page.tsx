@@ -82,6 +82,8 @@ function AssistantContent() {
         const url = new URL(window.location.href);
         url.searchParams.delete("q");
         url.searchParams.delete("query");
+        url.searchParams.delete("voice");
+        url.searchParams.delete("speak");
         window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
       }
     } else {

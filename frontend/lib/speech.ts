@@ -325,11 +325,32 @@ export async function speak(text: string, language: Language, onEnd?: () => void
       audio.preload = "auto";
       audio.src = audioUrl;
 
+      let fallbackTriggered = false;
+      const triggerFallback = () => {
+        if (!fallbackTriggered && !ended) {
+          fallbackTriggered = true;
+          if (currentAudio === audio) currentAudio = null;
+          try {
+            audio.pause();
+          } catch {}
+          fallbackBrowserSpeak(cleanedText, language, finish);
+        }
+      };
+
       audio.onended = finish;
-      audio.onerror = (e) => {
-        console.warn("[TTS] Neural stream notice, using browser fallback:", e);
-        currentAudio = null;
-        fallbackBrowserSpeak(cleanedText, language, finish);
+      audio.onerror = () => {
+        triggerFallback();
+      };
+
+      // If audio fails to load within 3.5 seconds, fall back immediately so user never waits
+      const loadTimeout = setTimeout(() => {
+        if (!ended && audio.readyState < 2) {
+          triggerFallback();
+        }
+      }, 3500);
+
+      audio.onplaying = () => {
+        clearTimeout(loadTimeout);
       };
 
       const playPromise = audio.play();
@@ -339,6 +360,10 @@ export async function speak(text: string, language: Language, onEnd?: () => void
       return;
     } catch (err) {
       console.warn("[TTS] Neural stream notice, using browser fallback:", err);
+      if (!ended) {
+        fallbackBrowserSpeak(cleanedText, language, finish);
+      }
+      return;
     }
   }
 
