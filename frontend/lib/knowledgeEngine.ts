@@ -293,6 +293,21 @@ const STOP_WORDS = new Set([
   "details", "information", "info", "please"
 ]);
 
+const GEOGRAPHIC_WORDS = new Set([
+  "andhra", "pradesh", "telangana", "karnataka", "tamil", "nadu", "kerala", "odisha", "maharashtra",
+  "gujarat", "punjab", "bengal", "bihar", "rajasthan", "haryana", "uttar", "madhya", "delhi", "india", "bharat",
+  "state", "central", "district", "village", "city", "mandal", "taluka", "panchayat", "ap", "ts", "tn", "up", "mp",
+  "ఆంధ్రప్రదేశ్", "ఆంధ్ర", "ప్రదేశ్", "తెలంగాణ", "భారత్",
+  "आंध्र", "प्रदेश", "तेलंगाना", "भारत"
+]);
+
+const NON_SCHEME_INTENTS = [
+  "cyclone", "hurricane", "storm", "weather", "rain", "raining", "rainfall", "temperature",
+  "forecast", "climate", "monsoon", "thunderstorm", "heatwave", "coldwave", "wind", "flood",
+  "తుఫాను", "తుపాను", "సైక్లోన్", "వర్షం", "వాన", "వాతావరణం", "ఉష్ణోగ్రత", "వరద",
+  "चक्रवात", "तूफान", "मौसम", "बारिश", "वर्षा", "तापमान", "बाढ़"
+];
+
 const GENERAL_SCHEME_WORDS = [
   "scheme", "schemes", "yojana", "yojanagalu", "yojanaye", "pathakam", "pathakalu",
   "యोजना", "యोजनाలు", "పథకం", "పథకాలు", "సర్కారు పథకాలు", "ప్రభుత్వ పథకాలు",
@@ -302,8 +317,15 @@ const GENERAL_SCHEME_WORDS = [
 
 export function searchSchemes(query: string, limit = 4): { scheme: SchemeRecord; score: number }[] {
   const qLower = query.toLowerCase();
+
+  // If the query is asking about weather, cyclones, or storms, never hijack it as a welfare scheme
+  if (NON_SCHEME_INTENTS.some((kw) => qLower.includes(kw))) {
+    return [];
+  }
+
   const rawWords = qLower.split(/[\s,?.!;:()\[\]{}]+/).filter((w) => w.length > 1);
   const words = rawWords.filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+  const contentWords = words.filter((w) => !GEOGRAPHIC_WORDS.has(w));
   const isGeneralQuery = GENERAL_SCHEME_WORDS.some((gw) => qLower.includes(gw.toLowerCase()));
 
   const SCHEME_KEYWORD_RULES: Record<string, string[]> = {
@@ -401,7 +423,7 @@ export function searchSchemes(query: string, limit = 4): { scheme: SchemeRecord;
     const sCatTokens = sCat.split(/[\s,?.!;:()\[\]{}\/-]+/);
     const sDescTokens = sDesc.split(/[\s,?.!;:()\[\]{}\/-]+/);
 
-    for (const word of words) {
+    for (const word of contentWords) {
       if (sTitleTokens.includes(word)) score += 20;
       else if (sCatTokens.includes(word)) score += 15;
       else if (sDescTokens.includes(word)) score += 8;
