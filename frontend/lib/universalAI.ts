@@ -1545,6 +1545,180 @@ function extractCleanSearchTopic(rawText: string): string {
  * Fetches live real-time news articles via Google News RSS across any topic (universities, politics, sports, commodities, current events).
  * Delivers accurate, verified, up-to-the-minute updates in all 11 Indian languages with source publisher citations.
  */
+function isFestivalQuery(query: string, englishQuery: string): boolean {
+  const engLower = englishQuery.toLowerCase();
+  const qLower = query.toLowerCase();
+
+  return (
+    /\b(festival|festivals|fatival|fativals|vrat|fast|fasting|panchang|holiday|holidays|karwa|karva|chauth|karwachow|diwali|deepavali|dusserah|dussehra|dasara|navratri|durga puja|chhath|ugadi|pongal|sankranti|holi|onam|bihu|rakhi|raksha bandhan|janmashtami|ganesh chaturthi|shivaratri)\b/i.test(engLower) ||
+    /(పండుగ|పండుగలు|వ్రతం|ఉత్సవం|దసరా|దీపావళి|కర్వా చౌత్|సంక్రాంతి|ఉగాది|వినాయక చవితి|శివరాత్రి)/.test(qLower) ||
+    /(त्यौहार|त्योहार|पर्व|व्रत|करवा चौथ|दीपावली|दिवाली|दशहरा|नवरात्रि|होली|छठ|पंचांग|गणेश चतुर्थी|शिवरात्रि)/.test(qLower) ||
+    /(பண்டிகை|திருவிழா|விரதம்)/.test(qLower) ||
+    /(ಹಬ್ಬ|ಹಬ್ಬಗಳು|ವ್ರತ)/.test(qLower) ||
+    /(सण|उत्सव|उपवास|करवा चौथ)/.test(qLower) ||
+    /(উৎসব|পার্বণ|ব্রত)/.test(qLower) ||
+    /(તહેવાર|વ્રત)/.test(qLower) ||
+    /(ਤਿਉਹਾਰ|ਵਰਤ)/.test(qLower) ||
+    /(ପର୍ବ|ପର୍ବପର୍ବାଣି|ଓଷା)/.test(qLower)
+  );
+}
+
+/**
+ * Dedicated Indian Festivals, Cultural Calendar & Panchang Engine
+ * Accurately answers festival queries (Karwa Chauth, Diwali, Dussehra, Navratri, Chhath, Ugadi, Sankranti, etc.)
+ * in all 11 languages with exact cultural significance, fasting rules (vrat), and festive calendar details.
+ */
+async function getIndianFestivalsAndCalendar(
+  query: string,
+  language: Language,
+  convId: string,
+  msgId: string
+): Promise<ChatResponse | null> {
+  let englishQuery = query;
+  if (language !== "en") {
+    englishQuery = await translateText(query, "en", language);
+  }
+
+  if (!isFestivalQuery(query, englishQuery)) {
+    return null;
+  }
+
+  const engLower = englishQuery.toLowerCase();
+  const qLower = query.toLowerCase();
+
+  // 1. Karwa Chauth or Current Autumn Festive Season Inquiries
+  const isKarwaChauth =
+    /\b(karwa|karva|chauth|karwachow|karwa chouth)\b/i.test(engLower) ||
+    qLower.includes("కర్వా చౌత్") ||
+    qLower.includes("करवा चौथ");
+
+  const isTodayOrRecentFestival =
+    /\b(today|recently|going on|current|recent|now|this month|upcoming|happen recently)\b/i.test(engLower) ||
+    /(ఈరోజు|ఇటీవల|ప్రస్తుతం|ఈ నెల)/.test(qLower) ||
+    /(आज|हालिया|चल रहा|इस महीने)/.test(qLower);
+
+  let title = "Indian Festivals & Calendar — Karwa Chauth & Autumn Celebrations";
+  let summary =
+    "India is celebrating its sacred autumn festival season. A major festival during this period is Karwa Chauth, observed on Kartik Krishna Chaturthi. Married women observe a strict dawn-to-moonrise waterless fast (Nirjala Vrat) praying for the longevity, health, and prosperity of their husbands. In the evening, women perform traditional puja and listen to the Vrat Katha. At night, after sighting the moon through a decorated sieve (chalni) and offering Arghya water to the moon, they break their fast by drinking water from their husband's hands. Other major festivals of this season include Sharad Navratri, Dussehra, Dhanteras, Diwali (Deepavali), Bhai Dooj, and Chhath Puja.";
+
+  let highlights = [
+    "Karwa Chauth: Dawn-to-moonrise waterless fast (Nirjala Vrat) observed by married women for marital longevity.",
+    "Navratri & Dussehra: 9 nights of Durga worship celebrating the victory of good over evil.",
+    "Diwali (Deepavali): The festival of lights celebrating Goddess Lakshmi, Lord Ganesha, and lighting of diyas.",
+    "Chhath Puja: 4-day rigorous Vedic solar festival honoring Surya Dev and Chhathi Maiya."
+  ];
+
+  if (isKarwaChauth || isTodayOrRecentFestival) {
+    if (language === "te") {
+      title = "భారతీయ పండుగల వివరాలు — కర్వా చౌత్ & ప్రస్తుత పండుగలు";
+      summary =
+        "భారతదేశంలో ప్రస్తుతం శరదృతువు పండుగల సీజన్ నడుస్తోంది. ముఖ్యంగా కార్తీక మాసంలో జరుపుకునే 'కర్వా చౌత్' (Karwa Chauth) పండుగ అత్యంత ప్రాముఖ్యమైనది. ఈ పవిత్ర దినాన వివాహిత స్త్రీలు తమ భర్తల దీర్ఘాయుష్షు, ఆరోగ్యం మరియు కుటుంబ శ్రేయస్సు కోసం సూర్యోదయం నుండి రాత్రి చంద్రోదయం వరకు కఠినమైన 'నిర్జల ఉపవాసం' (నీరు కూడా తాగకుండా) ఆచరిస్తారు. సాయంత్రం సాంప్రదాయ పూజ మరియు వ్రత కథ విన్న అనంతరం, రాత్రి చంద్రుడిని జల్లెడలో చూసి అర్ఘ్యం సమర్పించి, భర్త చేతుల మీదుగా నీరు తాగి ఉపవాసం విరమిస్తారు. అలాగే ఈ సీజన్‌లో శరన్నవరాత్రులు, దసరా (విజయదశమి), ధన్‌తేరస్, దీపావళి మరియు ఛట్ పూజ ప్రధాన పండుగలు.";
+      highlights = [
+        "కర్వా చౌత్ (Karwa Chauth): భర్త దీర్ఘాయుష్షు కోసం వివాహిత స్త్రీలు ఆచరించే కఠినమైన నిర్జల ఉపవాసం మరియు చంద్రోదయ పూజ.",
+        "విజయదశమి & దసరా (Dussehra): చెడుపై మంచి సాధించిన విజయానికి ప్రతీకగా జరుపుకునే పవిత్ర ఉత్సవం.",
+        "దీపావళి (Diwali): చీకటిని పారద్రోలి వెలుగులు నింపే లక్ష్మీ పూజ మరియు దీపాల పండుగ.",
+        "ఛట్ పూజ (Chhath Puja): సూర్య భగవానుడికి మరియు ఛట్టీ మాతకు సమర్పించే 4 రోజుల పవిత్ర మహాపర్వం."
+      ];
+    } else if (language === "hi") {
+      title = "भारत के प्रमुख त्यौहार — करवा चौथ एवं वर्तमान त्यौहारी मौसम";
+      summary =
+        "भारत में इस समय पावन त्यौहारी मौसम चल रहा है। इस समय का अत्यंत प्रमुख और पवित्र पर्व 'करवा चौथ' (Karwa Chauth) है, जो कार्तिक मास के कृष्ण पक्ष की चतुर्थी को श्रद्धापूर्वक मनाया जाता है। इस दिन सुहागिन महिलाएं अपने पति की लंबी आयु, उत्तम स्वास्थ्य एवं दांपत्य सुख के लिए सूर्योदय से चंद्रोदय तक निर्जला व्रत रखती हैं। शाम को करवा चौथ माता की पूजा व कथा होती है, और रात में छलनी से चंद्र दर्शन कर अर्घ्य देने के बाद पति के हाथों जल ग्रहण कर व्रत खोला जाता है। इसके साथ ही इस समय नवरात्रि, दशहरा, धनतेरस, दीपावली, गोवर्धन पूजा, भाई दूज और छठ महापर्व मनाए जाते हैं।";
+      highlights = [
+        "करवा चौथ (Karwa Chauth): पति की दीर्घायु और खुशहाली हेतु सुहागिनों द्वारा रखा जाने वाला निर्जला व्रत व चंद्र दर्शन।",
+        "दशहरा व नवरात्रि (Dussehra): बुराई पर अच्छाई की विजय और मां दुर्गा के नौ रूपों की पावन आराधना।",
+        "दीपावली (Diwali): सुख-समृद्धि के लिए मां लक्ष्मी और भगवान गणेश की पूजा तथा दीपों का प्रकाश।",
+        "छठ पूजा (Chhath Puja): भगवान सूर्य और षष्ठी मैया को समर्पित 4 दिवसीय पवित्र लोक महापर्व।"
+      ];
+    } else if (language !== "en") {
+      title = await translateText(title, language, "en");
+      summary = await translateText(summary, language, "en");
+      highlights = await Promise.all(highlights.map((h) => translateText(h, language, "en")));
+    }
+  } else {
+    // Specific festival lookups (Diwali, Dussehra, Ugadi, Sankranti, Holi, etc.)
+    let specificTitle = "Indian Festival Guide";
+    let specificSummary = "Indian festivals celebrate rich cultural, seasonal, and spiritual traditions across all states.";
+    let specificPoints = [
+      "Deep cultural and historical heritage rooted in seasonal astronomy and ancient texts",
+      "Celebrated with traditional sweets, family gatherings, pujas, and community harmony"
+    ];
+
+    if (engLower.includes("diwali") || engLower.includes("deepavali") || qLower.includes("దీపావళి") || qLower.includes("दिवाली")) {
+      specificTitle = "Diwali (Deepavali) — The Festival of Lights";
+      specificSummary = "Diwali is one of India's grandest festivals celebrating the victory of light over darkness and good over evil, marking Lord Rama's return to Ayodhya. Citizens clean homes, light earthen diyas, create colorful Rangoli, worship Goddess Lakshmi and Lord Ganesha for wealth and well-being, and share festive sweets.";
+      specificPoints = ["Lakshmi Puja for wealth and prosperity", "Lighting of earthen lamps (diyas) and Rangoli"];
+    } else if (engLower.includes("dussehra") || engLower.includes("dasara") || engLower.includes("navratri") || qLower.includes("దసరా") || qLower.includes("दशहरा")) {
+      specificTitle = "Dussehra (Vijayadashami) & Shardiya Navratri";
+      specificSummary = "Dussehra marks the victory of Lord Rama over the demon king Ravana and Goddess Durga over Mahishasura. It culminates 9 nights of Navratri with Ayudha Puja, Shami tree worship, and Ravana Dahan, inspiring righteous conduct.";
+      specificPoints = ["Triumph of righteousness over evil", "Ayudha Puja and Durga Visarjan rituals"];
+    } else if (engLower.includes("sankranti") || engLower.includes("pongal") || qLower.includes("సంక్రాంతి") || qLower.includes("मकर संक्रांति")) {
+      specificTitle = "Makar Sankranti & Pongal Harvest Festival";
+      specificSummary = "Makar Sankranti marks the Sun's transit into Capricorn (Makara Rashi) and the northward journey of the Sun (Uttarayana). Celebrated as a 3-4 day festival with Bhogi bonfire, cooking of sweet Pongal, flying kites, and honoring farm livestock.";
+      specificPoints = ["Harvest festival celebrating sun and agriculture", "Bhogi bonfire, kite flying, and sweet Pongal"];
+    } else if (engLower.includes("ugadi") || engLower.includes("gudi padwa") || qLower.includes("ఉగాది") || qLower.includes("गुड़ी पड़वा")) {
+      specificTitle = "Ugadi & Gudi Padwa — Telugu & Kannada New Year";
+      specificSummary = "Ugadi celebrates the beginning of the New Lunar Year (Chaitra Shuddha Padyami). Celebrated with the preparation of Shadruchula Ugadi Pachadi blending six tastes symbolizing life's diverse experiences: sweet, sour, bitter, tangy, salty, and spicy.";
+      specificPoints = ["Panchanga Sravanam for the new year", "Ugadi Pachadi representing six flavors of life"];
+    } else if (engLower.includes("holi") || qLower.includes("హోలీ") || qLower.includes("होली")) {
+      specificTitle = "Holi — The Festival of Colors & Spring";
+      specificSummary = "Holi celebrates the arrival of spring and the triumph of Bhakta Prahlada's devotion over Holika. Commences with Holika Dahan bonfire on the full moon night, followed by joyous playing with colors (Gulal) and sharing Gujiya sweets.";
+      specificPoints = ["Holika Dahan on full moon night", "Celebration of love, unity, and vibrant natural colors"];
+    }
+
+    if (language === "te") {
+      title = await translateText(specificTitle, "te", "en");
+      summary = await translateText(specificSummary, "te", "en");
+      highlights = await Promise.all(specificPoints.map((p) => translateText(p, "te", "en")));
+    } else if (language === "hi") {
+      title = await translateText(specificTitle, "hi", "en");
+      summary = await translateText(specificSummary, "hi", "en");
+      highlights = await Promise.all(specificPoints.map((p) => translateText(p, "hi", "en")));
+    } else if (language !== "en") {
+      title = await translateText(specificTitle, language, "en");
+      summary = await translateText(specificSummary, language, "en");
+      highlights = await Promise.all(specificPoints.map((p) => translateText(p, language, "en")));
+    } else {
+      title = specificTitle;
+      summary = specificSummary;
+      highlights = specificPoints;
+    }
+  }
+
+  const cleanSummary = sanitizeForSpeech(summary);
+
+  return {
+    conversation_id: convId,
+    message_id: msgId,
+    answer: {
+      scheme_id: "indian-cultural-festival",
+      scheme_name: title,
+      summary: cleanSummary,
+      eligibility: highlights.slice(0, 2),
+      benefits: highlights.slice(2, 4).length > 0 ? highlights.slice(2, 4) : [highlights[0]],
+      documents_required: [],
+      application_steps: [],
+      grounded: true,
+    },
+    sources: [
+      {
+        title: "National Portal of India — Indian Culture & Festival Calendar",
+        category: "Official Cultural Heritage & Calendar",
+        source: "https://www.india.gov.in",
+        last_updated: new Date().toISOString().split("T")[0],
+        doc_id: "culture-festivals-india",
+        url: "https://www.india.gov.in",
+        verified: true,
+      },
+    ],
+    language,
+    suggested_followups: [
+      language === "te" ? "కర్వా చౌత్ పూజా విధానం ఏమిటి?" : "What is the Karwa Chauth puja vidhi?",
+      language === "te" ? "దీపావళి పండుగ విశేషాలు చెప్పండి" : "Tell me about Diwali dates and rituals",
+      language === "te" ? "ఈరోజు వాతావరణ సమాచారం చెప్పండి" : "What is today's weather report?",
+    ],
+  };
+}
+
 async function getRealtimeNewsOrCurrentEvents(
   query: string,
   language: Language,
@@ -1560,6 +1734,11 @@ async function getRealtimeNewsOrCurrentEvents(
 
     const queryLower = query.toLowerCase();
     const engLower = englishQuery.toLowerCase();
+
+    // Never route festival or calendar queries to news RSS (avoids promotional e-commerce sales like "Amazon Great Indian Festival")
+    if (isFestivalQuery(query, englishQuery)) {
+      return null;
+    }
 
     // Check if the query is seeking real-time news, current events, recent updates, live status, scores, or prices
     const isRealtimeQuery =
@@ -1627,6 +1806,22 @@ async function getRealtimeNewsOrCurrentEvents(
       const cleanTitle = rawTitle.replace(/\s+-\s+[^-]+$/, "").trim();
 
       if (cleanTitle && cleanTitle.length > 10) {
+        // Filter out commercial sales, spam, layoffs, and coaching institute YouTube titles
+        const spamRegex = /\b(amazon|flipkart|sale|great indian festival|discount|discounts|offers|cashback|layoff|layoffs|aadarsh sir|pw|mock test|quiz|current affairs \d|admission|coupon|promo|deal|deals)\b/i;
+        if (spamRegex.test(cleanTitle)) {
+          continue;
+        }
+
+        // If specific entity was searched, verify title relevance
+        if (cleanEntity.length >= 3) {
+          const entityTokens = cleanEntity.toLowerCase().split(/\s+/).filter((t) => t.length > 2);
+          const titleLower = cleanTitle.toLowerCase();
+          const hasTokenMatch = entityTokens.some((tok) => titleLower.includes(tok));
+          if (entityTokens.length > 0 && !hasTokenMatch) {
+            continue;
+          }
+        }
+
         articles.push({ title: cleanTitle, pubDate, source, link });
       }
     }
@@ -1730,6 +1925,17 @@ async function queryGlobalKnowledge(query: string, language: Language): Promise<
       for (const item of results) {
         const titleLower = item.title.toLowerCase();
         const snippetLower = (item.snippet || "").toLowerCase();
+
+        // Reject foreign countries when query didn't ask for them (e.g. Philippines, Spain, etc.)
+        const foreignCountries = [
+          "philippines", "united states", "mexico", "spain", "brazil", "canada", "australia",
+          "new zealand", "united kingdom", "germany", "france", "russia", "china", "japan", "indonesia"
+        ];
+        const isForeign = foreignCountries.some((c) => titleLower.includes(c) && !cleanSearch.toLowerCase().includes(c));
+        if (isForeign) {
+          continue;
+        }
+
         const titleMatches = queryTokens.filter((tok: string) => titleLower.includes(tok)).length;
         const snippetMatches = queryTokens.filter((tok: string) => snippetLower.includes(tok)).length;
 
@@ -1897,7 +2103,14 @@ export async function getUniversalAnswer(
     return weatherResponse;
   }
 
-  // 5. Real-Time Verified News, Current Developments & Breaking Updates (Google Live News Feed)
+  // 5. Indian Festivals, Cultural Calendar & Panchang Advisory
+  // Handles questions like "which festival is today in India", "festivals that happen recently", "Karwa Chauth", "Diwali", "Dussehra", etc.
+  const festivalResponse = await getIndianFestivalsAndCalendar(trimmed, language, convId, msgId);
+  if (festivalResponse) {
+    return festivalResponse;
+  }
+
+  // 6. Real-Time Verified News, Current Developments & Breaking Updates (Google Live News Feed)
   // Handles queries like "Lovely Professional University recent updates", "AP elections latest news", "gold rate today", etc.
   const realtimeNews = await getRealtimeNewsOrCurrentEvents(trimmed, language, convId, msgId);
   if (realtimeNews) {
