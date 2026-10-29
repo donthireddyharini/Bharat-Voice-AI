@@ -21,8 +21,9 @@ export default function SchemeCard({ answer, sources, language = "en" }: SchemeC
 
   const isWeather = answer.scheme_id === "weather-realtime";
   const isRural = answer.scheme_id === "rural-advisory";
+  const isCivic = answer.scheme_id === "civic-advisory";
   const isGeneralAI = answer.scheme_id?.startsWith("ai-") || answer.scheme_id?.startsWith("global-");
-  const isGovScheme = !isWeather && !isRural && !isGeneralAI;
+  const isGovScheme = !isWeather && !isRural && !isCivic && !isGeneralAI;
 
   const getBadgeTitle = () => {
     if (isWeather) {
@@ -38,6 +39,11 @@ export default function SchemeCard({ answer, sources, language = "en" }: SchemeC
       if (language === "ta") return "சரிபார்க்கப்பட்ட வேளாண்மை & கிராமப்புற ஆலோசனை";
       if (language === "kn") return "ಪರಿಶೀಲಿಸಿದ ಕೃಷಿ ಮತ್ತು ಗ್ರಾಮೀಣ ಸಲಹೆ";
       return "Verified Agricultural & Rural Advisory";
+    }
+    if (isCivic) {
+      if (language === "te") return "ప్రజాస్వామ్య & పౌర సమాచారం";
+      if (language === "hi") return "लोकतांत्रिक एवं नागरिक सेवा विवरण";
+      return "Civic & Governance Services";
     }
     if (isGeneralAI) {
       if (language === "te") return "ధృవీకరించిన సమాచారం";

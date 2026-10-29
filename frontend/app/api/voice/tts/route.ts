@@ -58,16 +58,32 @@ function cleanTextForSpeech(text: string, language: Language = "en"): string {
       .replace(/రూ\.\s*/g, "రూపాయలు ")
       .replace(/రూ\s+/g, "రూపాయలు ")
       .replace(/%/g, " శాతం ")
-      .replace(/km\s*/gi, " కిలోమీటర్లు ")
-      .replace(/AI\b/g, "ఏఐ");
+      .replace(/\bkm\/h\b|\bkmph\b/gi, " కిలోమీటర్ల వేగంతో ")
+      .replace(/\bkm\b/gi, " కిలోమీటర్లు ")
+      .replace(/\bmm\b/gi, " మిల్లీమీటర్లు ")
+      .replace(/\bAI\b/g, "ఏఐ")
+      .replace(/\bIMD\b/g, "ఐఎండీ")
+      .replace(/\bAP\b/g, "ఆంధ్రప్రదేశ్")
+      .replace(/\bSEC\b/g, "రాష్ట్ర ఎన్నికల సంఘం")
+      .replace(/\bECI\b/g, "ఎన్నికల సంఘం")
+      .replace(/\bDBT\b/g, "డీబీటీ")
+      .replace(/\bMSP\b/g, "కనీస మద్దతు ధర")
+      .replace(/\bPM\b/g, "పీఎం")
+      .replace(/\bVSCS\b/gi, "అత్యంత తీవ్ర తుఫాను")
+      .replace(/\bCyclone\b/gi, "సైక్లోన్")
+      .replace(/\bArnab\b/gi, "ఆర్నబ్");
   } else if (language === "hi") {
     cleaned = cleaned
       .replace(/[₹\u20B9]\s*/g, "रुपये ")
       .replace(/रु\.\s*/g, "रुपये ")
       .replace(/रु\s+/g, "रुपये ")
       .replace(/%/g, " प्रतिशत ")
-      .replace(/km\s*/gi, " किलोमीटर ")
-      .replace(/AI\b/g, "एआई");
+      .replace(/\bkm\/h\b|\bkmph\b/gi, " किलोमीटर प्रति घंटा ")
+      .replace(/\bkm\b/gi, " किलोमीटर ")
+      .replace(/\bmm\b/gi, " मिलीमीटर ")
+      .replace(/\bAI\b/g, "एआई")
+      .replace(/\bIMD\b/g, "आईएमडी")
+      .replace(/\bAP\b/g, "आंध्र प्रदेश");
   } else if (language === "kn") {
     cleaned = cleaned
       .replace(/[₹\u20B9]\s*/g, "ರೂಪಾಯಿ ")
@@ -125,8 +141,8 @@ async function generateNeuralTTS(text: string, voiceName: string): Promise<Buffe
         .setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3)
         .then(() => {
           try {
-            // Rate +14%: brisk, active, natural conversational flow like English
-            const stream = tts.toStream(text, { rate: "+14%", pitch: "+0Hz" });
+            // Rate +2%: natural, comfortable human conversational flow
+            const stream = tts.toStream(text, { rate: "+2%", pitch: "+0Hz" });
             const chunks: Buffer[] = [];
 
             stream.audioStream.on("data", (chunk: Buffer) => {

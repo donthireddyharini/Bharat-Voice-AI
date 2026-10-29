@@ -342,12 +342,12 @@ export async function speak(text: string, language: Language, onEnd?: () => void
         triggerFallback();
       };
 
-      // If audio fails to load within 3.5 seconds, fall back immediately so user never waits
+      // Give neural TTS stream up to 7 seconds to load high-definition studio audio
       const loadTimeout = setTimeout(() => {
         if (!ended && audio.readyState < 2) {
           triggerFallback();
         }
-      }, 3500);
+      }, 7000);
 
       audio.onplaying = () => {
         clearTimeout(loadTimeout);

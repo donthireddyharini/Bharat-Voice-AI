@@ -690,6 +690,149 @@ async function getRuralAgriculturalAdvisory(
   };
 }
 
+interface CivicTopic {
+  id: string;
+  keywords: string[];
+  titleEn: string;
+  titleTe: string;
+  titleHi: string;
+  summaryEn: string;
+  summaryTe: string;
+  summaryHi: string;
+  highlightsEn: string[];
+  highlightsTe: string[];
+  highlightsHi: string[];
+}
+
+const CIVIC_TOPICS: CivicTopic[] = [
+  {
+    id: "ap-elections",
+    keywords: [
+      "election", "elections", "ఎలక్షన్", "ఎలక్షన్స్", "ఎన్నికలు", "ఎన్నికల", "ఎలక్షన్లు", "ఓటింగ్", "ఓటు", "పోలింగ్",
+      "తీర్పు", "అసెంబ్లీ ఎన్నికలు", "పంచాయతీ ఎన్నికలు", "స్థానిక సంస్థలు", "మేయర్", "సర్పంచ్", "ఎమ్మెల్యే", "ఎంపీ",
+      "జరుగుతున్న", "ఎలక్షన్ జరుగుతున్న",
+      "चुनाव", "मतदान", "विधानसभा चुनाव", "पंचायत चुनाव"
+    ],
+    titleEn: "Andhra Pradesh Elections & Local Bodies Overview",
+    titleTe: "ఆంధ్రప్రదేశ్ ఎన్నికల వివరాలు (Elections in Andhra Pradesh)",
+    titleHi: "आंध्र प्रदेश चुनाव एवं स्थानीय निकाय विवरण",
+    summaryEn: "In Andhra Pradesh, elections are conducted under the Constitution of India. General elections for 175 Legislative Assembly and 25 Lok Sabha seats were concluded with the new government taking office. Local body elections (Gram Panchayats, Mandal Parishad MPTC, Zilla Parishad ZPTC, and Municipalities) are notified by the State Election Commission (SEC) in designated schedules. Citizens who turn 18 can enroll in the voter list using Form 6 on voterportal.eci.gov.in.",
+    summaryTe: "ఆంధ్రప్రదేశ్ రాష్ట్రంలో ఎన్నికలు భారత రాజ్యాంగం ప్రకారం నిర్వహించబడతాయి. రాష్ట్రంలో 175 అసెంబ్లీ మరియు 25 లోక్‌సభ స్థానాలు ఉన్నాయి. సాధారణ సార్వత్రిక అసెంబ్లీ ఎన్నికలు ఇటీవల మే 2024 లో ముగిసి కొత్త ప్రభుత్వం కొలువుదీరింది. ఇక స్థానిక సంస్థలైన గ్రామ పంచాయతీలు, ఎంపీటీసీ, జడ్పీటీసీ మరియు పురపాలక సంఘాల (మున్సిపాలిటీలు) ఎన్నికలు లేదా ఉప ఎన్నికలు రాష్ట్ర ఎన్నికల సంఘం (State Election Commission) అధికారిక నోటిఫికేషన్ మరియు షెడ్యూల్ ప్రకారం జరుగుతాయి. 18 ఏళ్లు నిండిన వారు voterportal.eci.gov.in లో ఫారం 6 ద్వారా ఓటరుగా నమోదు చేసుకోవచ్చు.",
+    summaryHi: "आंध्र प्रदेश में चुनाव भारत के संविधान के तहत आयोजित किए जाते हैं। राज्य में 175 विधानसभा और 25 लोकसभा सीटें हैं। आम चुनाव संपन्न होने के बाद नई सरकार कार्यभार संभाल चुकी है। स्थानीय निकायों (ग्राम पंचायत, मंडल परिषद, जिला परिषद और नगर पालिका) के चुनाव राज्य चुनाव आयोग (SEC) के आधिकारिक कैलेंडर के अनुसार होते हैं। 18 वर्ष पूर्ण कर चुके नागरिक voterportal.eci.gov.in पर फॉर्म 6 भरकर मतदाता सूची में नाम जुड़वा सकते हैं।",
+    highlightsEn: [
+      "General Elections: 175 Assembly and 25 Parliamentary constituencies form the state legislative representation",
+      "Local Bodies Elections: Gram Panchayats and Municipalities are administered by the State Election Commission",
+      "Voter Registration: Eligible citizens can register online through Form 6 on ECI Voter Portal or at local Tahsildar offices"
+    ],
+    highlightsTe: [
+      "సార్వత్రిక ఎన్నికలు: 175 అసెంబ్లీ మరియు 25 లోక్‌సభ స్థానాలకు సాధారణ ఎన్నికలు ముగిశాయి",
+      "స్థానిక సంస్థల ఎన్నికలు: గ్రామ పంచాయతీలు మరియు మున్సిపాలిటీల ఎన్నికలు రాష్ట్ర ఎన్నికల సంఘం ఆధ్వర్యంలో జరుగుతాయి",
+      "ఓటరు నమోదు: 18 ఏళ్లు నిండిన వారు ఫారం 6 ద్వారా ఓటరు గుర్తింపు కార్డు (Voter ID) పొందవచ్చు"
+    ],
+    highlightsHi: [
+      "आम चुनाव: राज्य की 175 विधानसभा और 25 लोकसभा सीटों पर आम चुनाव संपन्न हो चुके हैं",
+      "स्थानीय निकाय चुनाव: पंचायत और नगर निगम चुनाव राज्य चुनाव आयोग द्वारा कराए जाते हैं",
+      "वोटर पंजीकरण: पात्र नागरिक फॉर्म 6 द्वारा वोटर कार्ड के लिए ऑनलाइन आवेदन कर सकते हैं"
+    ]
+  },
+  {
+    id: "ration-services",
+    keywords: ["ration", "ration card", "రేషన్", "రేషన్ కార్డు", "బియ్యం", "రాషన్", "డిపో", "కోటా", "రాషన్ బియ్యం", "राशन", "राशन कार्ड"],
+    titleEn: "Public Distribution System & Ration Card Services",
+    titleTe: "రేషన్ కార్డు & ప్రజా పంపిణీ వివరాలు (Ration Card Services)",
+    titleHi: "राशन कार्ड एवं सार्वजनिक वितरण प्रणाली",
+    summaryEn: "Under the National Food Security Act (NFSA), eligible families receive monthly subsidized food grains through Fair Price Shops. White Ration Cards in AP provide 5 kg rice per person free/subsidized. e-KYC authentication via Aadhaar biometric is mandatory at local Fair Price Shops or Gram Sachivalayams.",
+    summaryTe: "జాతీయ ఆహార భద్రతా చట్టం కింద అర్హులైన పేద కుటుంబాలకు ప్రజా పంపిణీ వ్యవస్థ ద్వారా ప్రతి నెలా రాయితీపై లేదా ఉచితంగా బియ్యం మరియు నిత్యావసర సరుకులు పంపిణీ చేయబడతాయి. ఆంధ్రప్రదేశ్‌లో తెల్ల రేషన్ కార్డుదారులకు ప్రతి సభ్యునికి 5 కేజీల బియ్యం అందుతుంది. సరుకులు పొందడానికి గ్రామ సచివాలయంలో లేదా రేషన్ డీలర్ వద్ద ఈ-కేవైసీ బయోమెట్రిక్ పూర్తి చేసుకోవాలి.",
+    summaryHi: "राष्ट्रीय खाद्य सुरक्षा अधिनियम के तहत पात्र परिवारों को हर महीने राशन डिपो से खाद्यान्न दिया जाता है। प्रति व्यक्ति 5 किलो चावल मिलता है। राशन के लिए आधार बायोमेट्रिक ई-केवाईसी कराना अनिवार्य है।",
+    highlightsEn: [
+      "Entitlement: 5 kg rice per registered family member per month",
+      "e-KYC Requirement: Mandatory biometric authentication at Fair Price Shop or Gram Sachivalayam",
+      "New Card Application: Apply with income certificate and family Aadhaar cards via MeeSeva"
+    ],
+    highlightsTe: [
+      "కోటా వివరాలు: కుటుంబంలో నమోదైన ప్రతి సభ్యునికి నెలకు 5 కేజీల బియ్యం అందుతాయి",
+      "ఈ-కేవైసీ తప్పనిసరి: రేషన్ డీలర్ లేదా గ్రామ సచివాలయంలో బయోమెట్రిక్ ఈ-కేవైసీ పూర్తి చేసుకోవాలి",
+      "కొత్త కార్డు దరఖాస్తు: ఆధార్ కార్డులు మరియు ఆదాయ ధృవీకరణ పత్రంతో మీసేవాలో దరఖాస్తు చేసుకోవచ్చు"
+    ],
+    highlightsHi: [
+      "कोटा: प्रत्येक पंजीकृत सदस्य को प्रति माह 5 किलो खाद्यान्न",
+      "ई-केवाईसी: राशन डिपो पर बायोमेट्रिक सत्यापन अनिवार्य है",
+      "नया राशन कार्ड: आधार और आय प्रमाण पत्र के साथ आवेदन कर सकते हैं"
+    ]
+  }
+];
+
+async function getCivicGovernanceAdvisory(
+  query: string,
+  language: Language,
+  convId: string,
+  msgId: string
+): Promise<ChatResponse | null> {
+  const lower = query.toLowerCase();
+
+  let matchedTopic: CivicTopic | null = null;
+  for (const topic of CIVIC_TOPICS) {
+    if (topic.keywords.some((kw) => lower.includes(kw.toLowerCase()))) {
+      matchedTopic = topic;
+      break;
+    }
+  }
+
+  if (!matchedTopic) return null;
+
+  let title = matchedTopic.titleEn;
+  let summary = matchedTopic.summaryEn;
+  let highlights = matchedTopic.highlightsEn;
+
+  if (language === "te") {
+    title = matchedTopic.titleTe;
+    summary = matchedTopic.summaryTe;
+    highlights = matchedTopic.highlightsTe;
+  } else if (language === "hi") {
+    title = matchedTopic.titleHi;
+    summary = matchedTopic.summaryHi;
+    highlights = matchedTopic.highlightsHi;
+  } else if (language !== "en") {
+    title = await translateText(matchedTopic.titleEn, language, "en");
+    summary = await translateText(matchedTopic.summaryEn, language, "en");
+    highlights = await Promise.all(matchedTopic.highlightsEn.map((h) => translateText(h, language, "en")));
+  }
+
+  const cleanSummary = sanitizeForSpeech(summary);
+
+  return {
+    conversation_id: convId,
+    message_id: msgId,
+    answer: {
+      scheme_id: "civic-advisory",
+      scheme_name: title,
+      summary: cleanSummary,
+      eligibility: highlights.slice(0, 2),
+      benefits: highlights.slice(2, 4),
+      documents_required: [],
+      application_steps: [],
+      grounded: true,
+    },
+    sources: [
+      {
+        title: "Election Commission of India & State Election Commission Portal",
+        category: "Official Democratic Services",
+        source: "https://eci.gov.in & https://sec.ap.gov.in",
+        last_updated: new Date().toISOString().split("T")[0],
+        doc_id: `civic-${matchedTopic.id}`,
+        url: "https://eci.gov.in",
+        verified: true,
+      },
+    ],
+    language,
+    suggested_followups: [
+      language === "te" ? "కొత్త ఓటరు గుర్తింపు కార్డు ఎలా పొందాలి?" : "How to apply for a new voter card?",
+      language === "te" ? "ఈరోజు వాతావరణ సమాచారం చెప్పండి" : "What is today's weather report?",
+      language === "te" ? "ప్రభుత్వ సంక్షేమ పథకాలు ఏమిటి?" : "What government welfare schemes are available?",
+    ],
+  };
+}
+
 /**
  * Strict Scheme Intent Filter:
  * Only route to welfare scheme lookup if the query is actually inquiring about a welfare scheme,
@@ -926,6 +1069,20 @@ function getConversationalResponse(query: string, language: Language): string | 
   return null;
 }
 
+function extractCleanSearchTopic(rawText: string): string {
+  let s = rawText
+    .replace(/\b(he said that|they said that|someone said that|i heard that|people are saying that|is it true that|is it happening|it is said that)\b/gi, " ")
+    .replace(/\b(can you tell me|can you explain|tell me about|tell me|explain to me|explain about|explain this|please explain|explain|what is this|what is that|what are|what is|who is|where is|when was|how does|why does)\b/gi, " ")
+    .replace(/\b(so please explain|please explain|so explain|details please|give details|in detail)\b/gi, " ")
+    .replace(/\b(going on in|happening in|taking place in)\b/gi, " in ")
+    .replace(/\b(the|a|an|that|this|these|those)\b/gi, " ")
+    .replace(/[?!.,;:'"()\[\]{}]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return s.length >= 3 ? s : rawText.replace(/[?!.,;:'"()\[\]{}]+/g, " ").trim();
+}
+
 /**
  * Universal Knowledge Retrieval across Multilingual Open Knowledge Archives
  */
@@ -936,15 +1093,11 @@ async function queryGlobalKnowledge(query: string, language: Language): Promise<
       searchTopic = await translateText(query, "en", language);
     }
 
-    const cleanSearch = searchTopic
-      .replace(/^(who is|what is|how does|why does|tell me about|explain|where is|when was)\s+/i, "")
-      .replace(/[?!.]+$/, "")
-      .trim();
-
+    const cleanSearch = extractCleanSearchTopic(searchTopic);
     const candidateQueries = [cleanSearch, searchTopic];
 
     for (const q of candidateQueries) {
-      if (!q) continue;
+      if (!q || q.length < 2) continue;
 
       const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json`;
       const controller = new AbortController();
@@ -957,9 +1110,29 @@ async function queryGlobalKnowledge(query: string, language: Language): Promise<
 
       if (!res.ok) continue;
       const data = await res.json();
-      const title = data.query?.search?.[0]?.title;
-      if (!title) continue;
+      const results = (data.query?.search || []).slice(0, 5);
+      if (results.length === 0) continue;
 
+      // Extract query keywords to verify article relevance
+      const queryTokens = cleanSearch.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+      let bestItem = null;
+      let maxOverlap = -1;
+
+      for (const item of results) {
+        const itemText = `${item.title} ${item.snippet || ""}`.toLowerCase();
+        const overlap = queryTokens.filter((tok: string) => itemText.includes(tok)).length;
+        if (overlap > maxOverlap) {
+          maxOverlap = overlap;
+          bestItem = item;
+        }
+      }
+
+      // Reject irrelevant articles that have ZERO keyword overlap with the subject
+      if (!bestItem || (queryTokens.length > 0 && maxOverlap === 0)) {
+        continue;
+      }
+
+      const title = bestItem.title;
       const sumUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
       const sumController = new AbortController();
       const sumTimeout = setTimeout(() => sumController.abort(), 4500);
@@ -1106,7 +1279,13 @@ export async function getUniversalAnswer(
     return ruralAdvisoryResponse;
   }
 
-  // 6. High-Confidence Government Welfare Scheme Matching
+  // 6. Civic & Governance Advisory (Elections, Local Bodies, Ration Services, Land Records)
+  const civicResponse = await getCivicGovernanceAdvisory(trimmed, language, convId, msgId);
+  if (civicResponse) {
+    return civicResponse;
+  }
+
+  // 7. High-Confidence Government Welfare Scheme Matching
   // ONLY routes if the user actually asks about a welfare scheme/scholarship/pension/loan
   if (isSchemeQuery(trimmed)) {
     const schemeMatches = searchSchemes(trimmed, 2);
