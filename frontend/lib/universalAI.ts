@@ -708,6 +708,8 @@ async function getRuralAgriculturalAdvisory(
 
 interface CivicTopic {
   id: string;
+  portalName: string;
+  portalUrl: string;
   keywords: string[];
   titleEn: string;
   titleTe: string;
@@ -722,7 +724,443 @@ interface CivicTopic {
 
 const CIVIC_TOPICS: CivicTopic[] = [
   {
+    id: "aadhaar-services",
+    portalName: "Unique Identification Authority of India (UIDAI)",
+    portalUrl: "https://myaadhaar.uidai.gov.in",
+    keywords: [
+      "aadhaar", "uidai", "aadhaar card", "update aadhaar", "download aadhaar", "link aadhaar", "eaadhaar",
+      "ఆధార్", "ఆధార్ కార్డు", "ఆధార్ అప్డేట్", "ఆధార్ లింక్", "ఆధార్ డౌన్‌లోడ్", "ఈ-ఆధార్", "బయోమెట్రిక్",
+      "आधार", "आधार कार्ड", "आधार अपडेट", "आधार डाउनलोड", "आधार लिंक", "यूआईडीएआई"
+    ],
+    titleEn: "Aadhaar Card Services & UIDAI Citizen Portal",
+    titleTe: "ఆధార్ కార్డు సేవలు & UIDAI పోర్టల్ వివరాలు",
+    titleHi: "आधार कार्ड सेवाएं एवं यूआईडीएआई नागरिक पोर्टल",
+    summaryEn: "Aadhaar is a 12-digit unique identity issued by UIDAI for all Indian residents. Citizens can download digital e-Aadhaar, order PVC cards, update addresses, and check verification status at myaadhaar.uidai.gov.in. Updating mobile numbers or biometrics can be done at any registered Aadhaar Seva Kendra or post office without requiring documents. Biometric updates are mandatory for children at ages 5 and 15. The official UIDAI toll-free helpline is 1947.",
+    summaryTe: "ఆధార్ అనేది భారత ప్రభుత్వం తరపున UIDAI జారీ చేసే 12 అంకెల గుర్తింపు సంఖ్య. myaadhaar.uidai.gov.in వెబ్‌సైట్ ద్వారా e-Aadhaar డౌన్‌లోడ్ చేసుకోవచ్చు, పీవీసీ (PVC) కార్డు ఆర్డర్ చేయవచ్చు మరియు చిరునామాను ఆన్‌లైన్‌లో మార్చుకోవచ్చు. మొబైల్ నంబర్ లేదా బయోమెట్రిక్స్ అప్‌డేట్ చేయడానికి సమీపంలోని ఆధార్ సేవా కేంద్రం లేదా పోస్టాఫీసును సందర్శించాలి. పిల్లలకు 5 మరియు 15 సంవత్సరాల వయస్సులో బయోమెట్రిక్ అప్‌డేట్ చేయడం ఉచితం మరియు తప్పనిసరి. అధికారిక టోల్‌ఫ్రీ నంబర్ 1947.",
+    summaryHi: "आधार यूआईडीएआई द्वारा जारी 12 अंकों की विशिष्ट पहचान संख्या है। myaadhaar.uidai.gov.in पर नागरिक डिजिटल ई-आधार डाउनलोड, पीवीसी कार्ड ऑर्डर और पता अपडेट कर सकते हैं। मोबाइल नंबर या बायोमेट्रिक अपडेट किसी भी आधार सेवा केंद्र या डाकघर में कराया जा सकता है। 5 और 15 वर्ष की आयु में बच्चों का बायोमेट्रिक अपडेट अनिवार्य है। आधिकारिक हेल्पलाइन 1947 है।",
+    highlightsEn: [
+      "Digital e-Aadhaar: Download instantly from myaadhaar.uidai.gov.in using Aadhaar/VID and mobile OTP",
+      "Biometric Update: Mandatory and free for children at age 5 and age 15 at Aadhaar centers",
+      "Official Support: Dial 1947 toll-free or visit registered post office Aadhaar Seva Kendras"
+    ],
+    highlightsTe: [
+      "ఈ-ఆధార్ డౌన్‌లోడ్: myaadhaar.uidai.gov.in లో మొబైల్ ఓటీపీ ద్వారా వెంటనే డిజిటల్ కార్డు పొందవచ్చు",
+      "పిల్లల బయోమెట్రిక్: 5 మరియు 15 ఏళ్ల వయస్సులో ఉచిత బయోమెట్రిక్ అప్‌డేట్ తప్పనిసరి",
+      "సహాయవాణి: ఏవైనా సందేహాలుంటే టోల్‌ఫ్రీ నంబర్ 1947 కి కాల్ చేయవచ్చు"
+    ],
+    highlightsHi: [
+      "ई-आधार डाउनलोड: myaadhaar.uidai.gov.in से मोबाइल ओटीपी द्वारा तुरंत डाउनलोड करें",
+      "बच्चों का बायोमेट्रिक: 5 व 15 वर्ष की उम्र में अनिवार्य एवं पूर्णतः निःशुल्क",
+      "हेल्पलाइन: किसी भी सहायता हेतु टोल-फ्री 1947 पर कॉल करें"
+    ]
+  },
+  {
+    id: "pan-tax-services",
+    portalName: "Income Tax Department e-Filing Portal",
+    portalUrl: "https://www.incometax.gov.in",
+    keywords: [
+      "pan", "pan card", "income tax", "tax slab", "tax regime", "instant pan", "link pan",
+      "పాన్", "పాన్ కార్డు", "ఇన్‌కమ్ టాక్స్", "పన్ను", "పాన్ ఆధార్ లింక్", "కొత్త పన్ను విధానం",
+      "पैन", "पैन कार्ड", "आयकर", "टैक्स स्लैब", "पैन आधार लिंक", "नया टैक्स रिजीम"
+    ],
+    titleEn: "PAN Card Services & Income Tax Guidelines",
+    titleTe: "పాన్ కార్డు సేవలు & ఆదాయ పన్ను మార్గదర్శకాలు",
+    titleHi: "पैन कार्ड सेवाएं एवं आयकर दिशानिर्देश",
+    summaryEn: "A Permanent Account Number (PAN) is a 10-digit alphanumeric identifier issued by the Income Tax Department. Eligible Indian citizens with an Aadhaar-linked mobile number can generate an Instant e-PAN for free in 10 minutes on incometax.gov.in. Under the New Tax Regime (Section 115BAC), individual income up to ₹3 Lakh has 0% tax, and with the standard deduction of ₹75,000 and Section 87A rebate, salaried citizens earning up to ₹7.75 Lakh per year pay zero tax.",
+    summaryTe: "పాన్ (PAN) కార్డు అనేది ఆదాయ పన్ను శాఖ జారీ చేసే 10 అంకెల విశిష్ట గుర్తింపు. ఆధార్‌తో లింక్ అయిన మొబైల్ నంబర్ ఉన్న పౌరులు incometax.gov.in లో కేవలం 10 నిమిషాల్లో ఉచితంగా 'Instant e-PAN' పొందవచ్చు. కొత్త పన్ను విధానం (New Tax Regime) ప్రకారం ₹3 లక్షల వరకు సున్నా పన్ను ఉంటుంది. ₹75,000 ప్రామాణిక తగ్గింపు (Standard Deduction) మరియు సెక్షన్ 87A రిబేటుతో కలిపి సంవత్సరానికి ₹7.75 లక్షల వరకు వేతనం పొందే ఉద్యోగులు రూపాయి కూడా పన్ను చెల్లించాల్సిన అవసరం లేదు.",
+    summaryHi: "पैन आयकर विभाग द्वारा जारी 10 अंकों का अल्फ़ान्यूमेरिक पहचान पत्र है। आधार से जुड़े मोबाइल नंबर वाले नागरिक incometax.gov.in पर 10 मिनट में निःशुल्क इंस्टेंट ई-पैन बना सकते हैं। नए टैक्स रिजीम के तहत ₹3 लाख तक शून्य टैक्स है, तथा ₹75,000 मानक कटौती और धारा 87A छूट के साथ ₹7.75 लाख तक वेतनभोगी नागरिकों को कोई आयकर नहीं देना पड़ता।",
+    highlightsEn: [
+      "Instant e-PAN: Free 10-minute digital PAN generation using Aadhaar OTP on incometax.gov.in",
+      "New Tax Regime: Salaried employees earning up to ₹7.75 Lakh per year pay zero income tax",
+      "PAN-Aadhaar Linking: Mandatory for financial transactions and filing tax returns"
+    ],
+    highlightsTe: [
+      "ఉచిత ఇన్‌స్టంట్ పాన్: incometax.gov.in లో ఆధార్ ఓటీపీతో 10 నిమిషాల్లో ఈ-పాన్ పొందవచ్చు",
+      "కొత్త పన్ను మినహాయింపు: వార్షిక ఆదాయం ₹7.75 లక్షల వరకు ఉన్న ఉద్యోగులకు సున్నా ఆదాయ పన్ను",
+      "పాన్-ఆధార్ లింకింగ్: ఆర్థిక లావాదేవీలు మరియు ఐటీ రిటర్నులకు పాన్-ఆధార్ లింక్ తప్పనిసరి"
+    ],
+    highlightsHi: [
+      "इंस्टेंट ई-पैन: incometax.gov.in पर आधार ओटीपी से मात्र 10 मिनट में निःशुल्क पैन प्राप्त करें",
+      "नया टैक्स स्लैब: ₹7.75 लाख तक वार्षिक आय वाले कर्मचारियों पर शून्य आयकर देय",
+      "पैन-आधार लिंक: वित्तीय लेन-देन एवं रिटर्न दाखिल करने हेतु अनिवार्य"
+    ]
+  },
+  {
+    id: "surya-ghar-solar",
+    portalName: "National PM Surya Ghar Portal",
+    portalUrl: "https://pmsuryaghar.gov.in",
+    keywords: [
+      "surya ghar", "solar", "solar subsidy", "rooftop solar", "solar panels", "free electricity",
+      "సూర్య ఘర్", "సోలార్", "సౌర విద్యుత్", "రూఫ్‌టాప్ సోలార్", "సోలార్ సబ్సిడీ", "ఉచిత కరెంటు",
+      "सूर्य घर", "सोलर सब्सिडी", "रूफटॉप सोलर", "मुफ्त बिजली योजना", "सोलर पैनल"
+    ],
+    titleEn: "PM Surya Ghar: Muft Bijli Yojana (Rooftop Solar Subsidy)",
+    titleTe: "పీఎం సూర్య ఘర్: ఉచిత విద్యుత్ పథకం (సౌర విద్యుత్ సబ్సిడీ)",
+    titleHi: "पीएम सूर्य घर: मुफ्त बिजली योजना (रूफटॉप सोलर सब्सिडी)",
+    summaryEn: "PM Surya Ghar: Muft Bijli Yojana is a flagship national scheme providing direct central subsidies to install rooftop solar panels and get up to 300 units of free electricity every month. The government provides ₹30,000 subsidy for 1 kW systems, ₹60,000 for 2 kW systems, and a maximum of ₹78,000 for 3 kW and above systems. Applications are submitted online at pmsuryaghar.gov.in. Collateral-free bank loans at concessional interest rates around 7% are also available.",
+    summaryTe: "పీఎం సూర్య ఘర్: ముఫ్త్ బిజ్లీ యోజన ద్వారా ఇళ్లపై సోలార్ ప్యానెల్స్ అమర్చుకోవడానికి కేంద్ర ప్రభుత్వం నేరుగా భారీ సబ్సిడీ అందిస్తోంది. నెలకు 300 యూనిట్ల వరకు ఉచిత సౌర విద్యుత్ లభిస్తుంది. 1 కిలోవాట్ సిస్టమ్‌కు ₹30,000, 2 కిలోవాట్లకు ₹60,000, 3 కిలోవాట్లు లేదా అంతకంటే ఎక్కువ సామర్థ్యానికి గరిష్టంగా ₹78,000 నేరుగా బ్యాంక్ ఖాతాలో సబ్సిడీ జమవుతుంది. pmsuryaghar.gov.in పోర్టల్‌లో విద్యుత్ కనెక్షన్ వివరాలతో దరఖాస్తు చేసుకోవచ్చు.",
+    summaryHi: "पीएम सूर्य घर: मुफ्त बिजली योजना के तहत घरों की छतों पर सोलर पैनल लगाने हेतु सरकार भारी सब्सिडी दे रही है, जिससे हर महीने 300 यूनिट तक मुफ्त बिजली मिलती है। 1 किलोवाट पर ₹30,000, 2 किलोवाट पर ₹60,000 एवं 3 किलोवाट या अधिक पर अधिकतम ₹78,000 की सीधी सब्सिडी बैंक खाते में मिलती है। pmsuryaghar.gov.in पर ऑनलाइन आवेदन कर सकते हैं।",
+    highlightsEn: [
+      "Direct Subsidy: Up to ₹78,000 credited directly into the citizen's bank account for rooftop solar",
+      "Monthly Savings: Up to 300 units of zero-cost solar electricity every month",
+      "Easy Application: Apply with electricity consumer number on pmsuryaghar.gov.in"
+    ],
+    highlightsTe: [
+      "ప్రత్యక్ష సబ్సిడీ: 3 కిలోవాట్ వరకు గరిష్టంగా ₹78,000 నేరుగా బ్యాంక్ ఖాతాలో జమ",
+      "ఉచిత విద్యుత్: నెలకు 300 యూనిట్ల వరకు విద్యుత్ ఖర్చు పూర్తిగా ఆదా",
+      "సులభ దరఖాస్తు: కరెంట్ బిల్లు నంబర్‌తో pmsuryaghar.gov.in లో నమోదు చేసుకోవచ్చు"
+    ],
+    highlightsHi: [
+      "प्रत्यक्ष सब्सिडी: रूफटॉप सोलर पर अधिकतम ₹78,000 तक की सीधी सब्सिडी",
+      "मुफ्त बिजली: हर महीने 300 यूनिट तक निःशुल्क बिजली का लाभ",
+      "आवेदन प्रक्रिया: बिजली उपभोक्ता संख्या के साथ pmsuryaghar.gov.in पर आवेदन करें"
+    ]
+  },
+  {
+    id: "vishwakarma-artisan",
+    portalName: "PM Vishwakarma Central Portal",
+    portalUrl: "https://pmvishwakarma.gov.in",
+    keywords: [
+      "vishwakarma", "pm vishwakarma", "artisan", "craftsman", "carpenter", "blacksmith", "toolkit",
+      "విశ్వకర్మ", "చేతివృత్తులు", "వృత్తిదారులు", "టూల్ కిట్", "కుమ్మరి", "కమ్మరి", "వడ్రంగి", "దర్జీ", "మంగళ",
+      "विश्वकर्मा", "कारीगर", "दस्तकार", "टूलकिट", "बढ़ई", "लोहार", "दर्जी", "कुम्हार"
+    ],
+    titleEn: "PM Vishwakarma Scheme for Traditional Artisans",
+    titleTe: "పీఎం విశ్వకర్మ పథకం — చేతివృత్తుల సంక్షేమం",
+    titleHi: "पीएम विश्वकर्मा योजना — पारंपरिक कारीगर एवं दस्तकार कल्याण",
+    summaryEn: "PM Vishwakarma is a dedicated central scheme supporting traditional artisans and craftsmen across 18 designated trades (including carpenters, blacksmiths, goldsmiths, potters, cobblers, tailors, barbers, and washermen). Beneficiaries receive a recognized PM Vishwakarma Certificate, 5-7 days of free basic skill training with a ₹500 daily stipend, a ₹15,000 e-voucher for modern toolkits, and collateral-free enterprise loans up to ₹3 Lakh (₹1 Lakh in first tranche, ₹2 Lakh in second) at a concessional 5% interest rate.",
+    summaryTe: "పీఎం విశ్వకర్మ పథకం 18 రకాల చేతివృత్తుల వారికి (వడ్రంగి, కమ్మరి, కుమ్మరి, కంసాలి, దర్జీ, మంగలి, చాకలి, చెప్పులు కుట్టేవారు మొదలైన వారు) అండగా నిలుస్తోంది. నమోదు చేసుకున్న వారికి అధికారిక గుర్తింపు కార్డు, రోజుకు ₹500 ఉపకార వేతనంతో 5-7 రోజుల ఉచిత శిక్షణ, ఆధునిక పనిముట్ల కొనుగోలుకు ₹15,000 టూల్‌కిట్ ఈ-వోచర్ మరియు వ్యాపార విస్తరణకు ఎలాంటి హామీ లేకుండా 5% తక్కువ వడ్డీతో ₹3 లక్షల వరకు (మొదటి విడత ₹1 లక్ష, రెండో విడత ₹2 లక్షలు) రుణం లభిస్తుంది. గ్రామ సచివాలయం లేదా CSC కేంద్రాలలో దరఖాస్తు చేసుకోవచ్చు.",
+    summaryHi: "पीएम विश्वकर्मा योजना 18 पारंपरिक व्यवसायों (बढ़ई, लोहार, कुम्हार, दर्जी, मोची, नाई, धोबी आदि) के कारीगरों को सशक्त बनाती है। लाभार्थियों को प्रमाण पत्र, ₹500 दैनिक भत्ते के साथ कौशल प्रशिक्षण, ₹15,000 का आधुनिक टूलकिट वाउचर और बिना गारंटी मात्र 5% ब्याज दर पर ₹3 लाख तक का व्यवसाय ऋण दिया जाता है। pmvishwakarma.gov.in या सीएससी पर आवेदन करें।",
+    highlightsEn: [
+      "Toolkit Incentive: ₹15,000 digital e-voucher to purchase modern specialized trade tools",
+      "Collateral-Free Loan: Up to ₹3 Lakh enterprise development credit at a concessional 5% interest rate",
+      "Training & Stipend: Free skill enhancement training with ₹500 daily allowance and recognized certificate"
+    ],
+    highlightsTe: [
+      "టూల్‌కిట్ గ్రాంట్: ఆధునిక పనిముట్ల కొనుగోలు కోసం ₹15,000 ఉచిత ఈ-వోచర్",
+      "హామీ లేని రుణం: 5% తక్కువ వడ్డీకే ₹3 లక్షల వరకు వ్యాపార అభివృద్ధి రుణం",
+      "ఉచిత శిక్షణ: రోజుకు ₹500 స్టైపెండ్‌తో నైపుణ్య శిక్షణ మరియు అధికారిక సర్టిఫికెట్"
+    ],
+    highlightsHi: [
+      "टूलकिट वाउचर: आधुनिक औजारों की खरीद हेतु ₹15,000 का निःशुल्क ई-वाउचर",
+      "कम ब्याज ऋण: बिना गारंटी 5% रियायती ब्याज पर ₹3 लाख तक का ऋण",
+      "प्रशिक्षण एवं भत्ता: ₹500 प्रतिदिन भत्ते के साथ निःशुल्क कौशल प्रशिक्षण"
+    ]
+  },
+  {
+    id: "ayushman-abha-health",
+    portalName: "National Health Authority (NHA)",
+    portalUrl: "https://beneficiary.nha.gov.in",
+    keywords: [
+      "ayushman", "ayushman card", "pmjay", "abha", "health card", "aarogyasri", "free treatment", "senior citizen health",
+      "ఆయుష్మాన్", "ఆయుష్మాన్ భారత్", "ఆభా కార్డు", "హెల్త్ కార్డు", "ఆరోగ్యశ్రీ", "ఉచిత వైద్యం", "పెద్దల వైద్యం",
+      "आयुष्मान", "आयुष्मान कार्ड", "आभा कार्ड", "पीएमजेएवाई", "मुफ्त इलाज", "वरिष्ठ नागरिक स्वास्थ्य"
+    ],
+    titleEn: "Ayushman Bharat PM-JAY & ABHA Digital Health Card",
+    titleTe: "ఆయుష్మాన్ భారత్ PM-JAY & ఆభా (ABHA) డిజిటల్ హెల్త్ కార్డు",
+    titleHi: "आयुष्मान भारत पीएम-जेएवाई एवं आभा डिजिटल स्वास्थ्य कार्ड",
+    summaryEn: "Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) provides annual cashless health coverage of ₹5,00,000 per family for secondary and tertiary hospitalization across 27,000+ empaneled hospitals in India. Universal coverage is now extended to all senior citizens aged 70 years and above, regardless of income, under the Ayushman Vay Vandana scheme. Citizens can create their 14-digit ABHA digital health account at abha.abdm.gov.in and download their Ayushman card from beneficiary.nha.gov.in using Aadhaar OTP.",
+    summaryTe: "ఆయుష్మాన్ భారత్ (PM-JAY) పథకం కింద అర్హులైన కుటుంబానికి సంవత్సరానికి ₹5 లక్షల వరకు నగదు రహిత ఉచిత ఆసుపత్రి చికిత్స లభిస్తుంది. దేశవ్యాప్తంగా 27,000 పైగా నెట్‌వర్క్ ఆసుపత్రులలో ఇది వర్తిస్తుంది. కుటుంబ ఆదాయంతో సంబంధం లేకుండా 70 ఏళ్లు పైబడిన వృద్ధులందరికీ ఉచితంగా ₹5 లక్షల హెల్త్ కవరేజ్ (ఆయుష్మాన్ వయ వందన) విస్తరించబడింది. beneficiary.nha.gov.in లో ఆధార్ ఓటీపీ ద్వారా కార్డు డౌన్‌లోడ్ చేసుకోవచ్చు, అలాగే abha.abdm.gov.in లో 14 అంకెల ఆభా (ABHA) డిజిటల్ హెల్త్ రికార్డు ఐడీని ఉచితంగా సృష్టించుకోవచ్చు.",
+    summaryHi: "आयुष्मान भारत (AB-PMJAY) के तहत प्रत्येक पात्र परिवार को देश के 27,000+ अस्पतालों में प्रति वर्ष ₹5 लाख तक का कैशलेस इलाज मिलता है। 70 वर्ष या उससे अधिक आयु के सभी वरिष्ठ नागरिकों को आय सीमा के बिना आयुष्मान वय वंदना योजना के तहत जोड़ा गया है। beneficiary.nha.gov.in से आधार ओटीपी द्वारा कार्ड डाउनलोड करें एवं abha.abdm.gov.in पर 14 अंकों का आभा आईडी बनाएं।",
+    highlightsEn: [
+      "₹5 Lakh Annual Cover: Cashless inpatient treatment per family across 27,000+ empaneled hospitals",
+      "Senior Citizens 70+: Universal health insurance coverage irrespective of socioeconomic status",
+      "ABHA Health ID: 14-digit digital health account on abha.abdm.gov.in for paperless medical records"
+    ],
+    highlightsTe: [
+      "₹5 లక్షల ఉచిత వైద్యం: ప్రతి కుటుంబానికి ఏడాదికి ₹5 లక్షల వరకు నగదు రహిత ఆసుపత్రి చికిత్స",
+      "70 ఏళ్లు పైబడిన పెద్దలకు: ఎలాంటి ఆదాయ పరిమితి లేకుండా వృద్ధులందరికీ ఉచిత ఆరోగ్య బీమా",
+      "ఆభా (ABHA) ఐడీ: డిజిటల్ మెడికల్ రికార్డుల కోసం 14 అంకెల ప్రత్యేక హెల్త్ ఐడీ"
+    ],
+    highlightsHi: [
+      "₹5 लाख कैशलेस इलाज: प्रति परिवार प्रति वर्ष सूचीबद्ध अस्पतालों में निःशुल्क उपचार",
+      "70+ वरिष्ठ नागरिक: बिना किसी आय सीमा के सभी वरिष्ठ नागरिकों को ₹5 लाख का स्वास्थ्य कवर",
+      "आभा हेल्थ आईडी: पेपरलेस डिजिटल मेडिकल रिकॉर्ड हेतु 14 अंकों का विशिष्ट खाता"
+    ]
+  },
+  {
+    id: "emergency-helplines",
+    portalName: "National Emergency Response & Cyber Crime Portal",
+    portalUrl: "https://cybercrime.gov.in",
+    keywords: [
+      "helpline", "emergency", "police", "ambulance", "cyber crime", "112", "1930", "108", "1070", "fire",
+      "హెల్ప్‌లైన్", "ఎమర్జెన్సీ", "పోలీస్", "ఆంబులెన్స్", "సైబర్ క్రైమ్", "ఆపద", "సహాయం", "సైబర్ మోసం",
+      "हेल्पलाइन", "इमरजेंसी", "पुलिस", "एम्बुलेंस", "साइबर अपराध", "आपदा हेल्पलाइन", "1930 फ्रॉड"
+    ],
+    titleEn: "National Citizen Emergency & Cyber Crime Helplines",
+    titleTe: "జాతీయ అత్యవసర సహాయ నంబర్లు & సైబర్ క్రైమ్ రక్షణ",
+    titleHi: "राष्ट्रीय आपातकालीन हेल्पलाइन एवं साइबर अपराध सहायता",
+    summaryEn: "India operates 24/7 dedicated national helplines for citizens in distress. Dial 112 for the unified all-in-one emergency response (Police, Fire, and Ambulance). Dial 1930 immediately within the golden hour to report online financial cyber frauds and freeze stolen money. Dial 108 for free medical ambulance emergencies. Dial 1070 or 1077 for State and District Disaster Management control rooms during cyclones and floods. Dial 181 for Women in distress and 14416 for Tele-MANAS free mental health support.",
+    summaryTe: "భారతదేశంలో పౌరుల రక్షణ మరియు సహాయం కోసం 24 గంటలూ పనిచేసే అధికారిక జాతీయ హెల్ప్‌లైన్ నంబర్లు అందుబాటులో ఉన్నాయి:\n1. 112: ఏ అత్యవసర పరిస్థితికైనా (పోలీస్, అగ్నిమాపక, ఆంబులెన్స్) ఏకీకృత ఎమర్జెన్సీ నంబర్\n2. 1930: సైబర్ ఆర్థిక మోసాలు (ఆన్‌లైన్ ఫ్రాడ్) జరిగిన వెంటనే ఖాతాలోని డబ్బులు ఫ్రీజ్ చేయడానికి కాల్ చేయాల్సిన గోల్డెన్ అవర్ నంబర్\n3. 108: ఉచిత అత్యవసర వైద్య ఆంబులెన్స్ సేవ\n4. 1070 / 1077: తుఫానులు, వరదల సమయంలో రాష్ట్ర మరియు జిల్లా విపత్తు నిర్వహణ కంట్రోల్ రూమ్\n5. 181: ఆపదలో ఉన్న మహిళల రక్షణ కోసం\n6. 1098: పిల్లల రక్షణ (చైల్డ్‌లైన్)\n7. 14416: టెలి-మానస్ ఉచిత మానసిక ఆరోగ్య కౌన్సిలింగ్.",
+    summaryHi: "भारत में नागरिकों की सुरक्षा हेतु 24x7 निःशुल्क राष्ट्रीय हेल्पलाइन सेवाएं सक्रिय हैं: 112 (एकीकृत पुलिस, फायर व एम्बुलेंस), 1930 (साइबर वित्तीय धोखाधड़ी में तुरंत खाता फ्रीज कराने हेतु गोल्डन आवर हेल्पलाइन), 108 (मुफ्त एम्बुलेंस), 1070/1077 (बाढ़ एवं चक्रवात आपदा नियंत्रण कक्ष), 181 (महिला हेल्पलाइन), 1098 (चाइल्डलाइन) एवं 14416 (टेली-मानस मानसिक स्वास्थ्य सहायता)।",
+    highlightsEn: [
+      "Dial 112: All-India Unified Emergency Response Support System (Police, Fire, Ambulance)",
+      "Dial 1930: National Cyber Financial Fraud helpline — report within 1 hour to freeze stolen money",
+      "Dial 1070: State Disaster Management Control Room during cyclones, floods, and heavy rain"
+    ],
+    highlightsTe: [
+      "డయల్ 112: దేశవ్యాప్త ఏకీకృత అత్యవసర సహాయం (పోలీస్, ఫైర్, ఆంబులెన్స్)",
+      "డయల్ 1930: ఆన్‌లైన్ బ్యాంక్ మోసాలపై వెంటనే ఫిర్యాదు చేసి డబ్బు రికవరీ చేసుకునే సైబర్ నంబర్",
+      "డయల్ 1070: తుఫానులు మరియు వరద సహాయక చర్యల కోసం విపత్తు నిర్వహణ కంట్రోల్ రూమ్"
+    ],
+    highlightsHi: [
+      "डायल 112: अखिल भारतीय एकीकृत आपातकालीन सेवा (पुलिस, अग्निशमन, एम्बुलेंस)",
+      "डायल 1930: साइबर वित्तीय धोखाधड़ी के 1 घंटे के भीतर कॉल करके राशि फ्रीज करवाएं",
+      "डायल 1070: प्राकृतिक आपदा, चक्रवात व बाढ़ के समय राज्य आपदा नियंत्रण कक्ष"
+    ]
+  },
+  {
+    id: "land-records-revenue",
+    portalName: "State Land Records & Revenue Portal (Meebhoomi / Dharani / Bhulekh)",
+    portalUrl: "https://meebhoomi.ap.gov.in",
+    keywords: [
+      "land records", "meebhoomi", "dharani", "bhulekh", "pattadar", "adangal", "1b", "pahani", "passbook", "patta",
+      "మీభూమి", "ధరణి", "భూలేఖ్", "పట్టాదారు", "పాస్ పుస్తకం", "అడంగల్", "పహణీ", "1-బి", "భూమి రికార్డులు", "పట్టా",
+      "भूलेख", "जमीन के कागजात", "खतौनी", "पट्टा", "जमाबंदी", "खसरा खतौनी", "दाखिल खारिज"
+    ],
+    titleEn: "Digital Land Records, 1-B ROR & Pattadar Passbook Services",
+    titleTe: "డిజిటల్ భూ రికార్డులు, 1-బి (ROR), అడంగల్ & పట్టాదారు పాస్ పుస్తకం",
+    titleHi: "डिजिटल भू-अभिलेख, 1-B खतौनी एवं पट्टा पासबुक सेवाएं",
+    summaryEn: "Citizens can check, verify, and download digitized land records without visiting revenue offices. In Andhra Pradesh, meebhoomi.ap.gov.in provides digital 1-B (Record of Rights), Individual Adangal, Village Adangal, and Electronic Pattadar Passbooks. In Telangana, dharani.telangana.gov.in manages agricultural land mutations and passbooks. Other Indian states provide records via Bhulekh portals. Discrepancies can be resolved through local Village Revenue Officers (VROs) and Grama Sachivalayams.",
+    summaryTe: "రైతులు మరియు భూ యజమానులు తహసీల్దార్ కార్యాలయాల చుట్టూ తిరగాల్సిన పనిలేకుండా ఆన్‌లైన్‌లో తమ భూమి రికార్డులను పరిశీలించుకోవచ్చు. ఆంధ్రప్రదేశ్‌లో meebhoomi.ap.gov.in పోర్టల్ ద్వారా సర్వే నంబర్ లేదా ఖాతా నంబర్‌తో డిజిటల్ 1-బి (ROR), వ్యక్తిగత అడంగల్, గ్రామ అడంగల్ మరియు ఎలక్ట్రానిక్ పట్టాదారు పాస్ పుస్తకాన్ని డౌన్‌లోడ్ చేసుకోవచ్చు. తెలంగాణలో dharani.telangana.gov.in ద్వారా రిజిస్ట్రేషన్ మరియు మ్యుటేషన్ సేవలు అందుతాయి. రికార్డులలో మార్పుల కోసం గ్రామ సచివాలయంలో దరఖాస్తు చేసుకోవచ్చు.",
+    summaryHi: "नागरिक घर बैठे डिजिटल भू-अभिलेख की जांच व डाउनलोड कर सकते हैं। आंध्र प्रदेश में meebhoomi.ap.gov.in से खाता संख्या द्वारा 1-B, अडंगल और ई-पट्टा पासबुक प्राप्त होती है। तेलंगाना में dharani.telangana.gov.in पर भूमि सेवाएं उपलब्ध हैं। अन्य राज्यों में भूलेख पोर्टल द्वारा खसरा-खतौनी नकल निकाली जा सकती है। संशोधन हेतु स्थानीय ग्राम राजस्व अधिकारी (VRO) से संपर्क करें।",
+    highlightsEn: [
+      "Instant 1-B & Adangal: Download digitally signed land ownership documents using survey or khata number",
+      "Electronic Passbook: Verified Pattadar passbook accessible online for bank crop loans and PM-KISAN",
+      "Grama Sachivalayam: Mutation and grievance correction services available at village level"
+    ],
+    highlightsTe: [
+      "1-బి & అడంగల్ డౌన్‌లోడ్: సర్వే నంబర్ లేదా ఖాతా నంబర్‌తో డిజిటల్ ధృవీకరణ పత్రాలు వెంటనే పొందవచ్చు",
+      "ఈ-పాస్ పుస్తకం: బ్యాంకు పంట రుణాలు మరియు పీఎం-కిసాన్ కోసం అధికారిక డిజిటల్ పట్టాదారు పాస్ బుక్",
+      "గ్రామ సచివాలయ సేవలు: పేర్ల సవరణ మరియు మ్యుటేషన్ కోసం గ్రామ స్థాయిలోనే దరఖాస్తు సౌకర్యం"
+    ],
+    highlightsHi: [
+      "डिजिटल खतौनी: खाता अथवा खसरा संख्या द्वारा प्रमाणित भू-अभिलेख तुरंत प्राप्त करें",
+      "ई-पासबुक: बैंक फसली ऋण एवं पीएम-किसान सत्यापन हेतु डिजिटल पट्टा पासबुक मान्य",
+      "ग्राम स्तर पर समाधान: नामांतरण और शुद्धि हेतु ग्राम सचिवालय या सीएससी में आवेदन करें"
+    ]
+  },
+  {
+    id: "railway-irctc-services",
+    portalName: "Indian Railways & IRCTC Passenger Services",
+    portalUrl: "https://www.irctc.co.in",
+    keywords: [
+      "railway", "irctc", "tatkal", "train ticket", "pnr", "vande bharat", "train status", "uts", "railmadad",
+      "రైల్వే", "తత్కాల్", "ట్రైన్ టికెట్", "పీఎన్ఆర్", "వందే భారత్", "రైలు సమయాలు", "యుటిఎస్", "రైల్ సహాయ్",
+      "रेलवे", "तत्काल टिकट", "आईआरसीटीसी", "पीएनआर स्टेटस", "वंदे भारत", "ट्रेन टिकट", "यूटीएस"
+    ],
+    titleEn: "Indian Railways, Tatkal Booking Timings & PNR Status",
+    titleTe: "భారతీయ రైల్వేలు, తత్కాల్ టికెట్ బుకింగ్ సమయాలు & PNR స్థితి",
+    titleHi: "भारतीय रेलवे, तत्काल बुकिंग समय एवं पीएनआर स्थिति",
+    summaryEn: "Indian Railways operates the national train network with tickets booked via irctc.co.in. Tatkal booking opens at 10:00 AM for AC classes (1A, 2A, 3A, CC) and at 11:00 AM for Non-AC/Sleeper classes one day prior to the train journey from originating station. Unreserved general tickets can be booked digitally without queues using the official UTS mobile app. Check real-time PNR confirmation, train running status, and coach position via the RailMadad app or by dialing 139.",
+    summaryTe: "భారతీయ రైల్వే ప్రయాణికుల కోసం irctc.co.in ద్వారా ఆన్‌లైన్ టికెట్ బుకింగ్ సౌకర్యం కల్పిస్తోంది. అత్యవసర ప్రయాణాలకు 'తత్కాల్' బుకింగ్ రైలు బయలుదేరే ఒక రోజు ముందుగా ప్రారంభమవుతుంది: ఏసీ (AC) క్లాసులకు ఉదయం 10:00 గంటలకు, నాన్-ఏసీ/స్లీపర్ (Sleeper) క్లాసులకు ఉదయం 11:00 గంటలకు మొదలవుతుంది. జనరల్ అన్‌రిజర్వ్‌డ్ టికెట్ల కోసం క్యూలో నిలబడకుండా 'UTS on mobile' యాప్ ద్వారా బుక్ చేసుకోవచ్చు. లైవ్ ట్రైన్ రన్నింగ్ స్టేటస్ మరియు పీఎన్ఆర్ కోసం 139 కి కాల్ చేయవచ్చు.",
+    summaryHi: "आईआरसीटीसी पर तत्काल टिकट यात्रा तिथि से एक दिन पूर्व बुक होते हैं: एसी क्लास के लिए सुबह 10:00 बजे और स्लीपर/नॉन-एसी के लिए सुबह 11:00 बजे खिड़की खुलती है। सामान्य अनारक्षित टिकट बिना लाइन में लगे UTS ऐप द्वारा बुक किए जा सकते हैं। ट्रेन रनिंग स्टेटस, पीएनआर एवं कोच स्थिति के लिए RailMadad ऐप देखें या 139 पर कॉल करें।",
+    highlightsEn: [
+      "Tatkal Timings: 10:00 AM for AC classes, 11:00 AM for Sleeper classes (1 day in advance)",
+      "UTS Mobile App: Book unreserved general platform and train tickets without station queues",
+      "Helpline 139: Integrated national railway helpline for PNR inquiry, train running status, and assistance"
+    ],
+    highlightsTe: [
+      "తత్కాల్ సమయాలు: ఏసీ క్లాసులకు ఉదయం 10:00 గంటలకు, స్లీపర్ క్లాసులకు ఉదయం 11:00 గంటలకు",
+      "యూటీఎస్ యాప్: స్టేషన్ క్యూలలో నిలబడకుండా మొబైల్ లోనే సాధారణ జనరల్ టికెట్లు బుక్ చేసుకోవచ్చు",
+      "హెల్ప్‌లైన్ 139: పీఎన్ఆర్ మరియు రైలు లైవ్ సమాచారం కోసం జాతీయ రైల్వే నంబర్"
+    ],
+    highlightsHi: [
+      "तत्काल समय: एसी हेतु प्रातः 10:00 बजे, स्लीपर हेतु प्रातः 11:00 बजे (एक दिन पूर्व)",
+      "यूटीएस ऐप: बिना कतार में लगे जनरल अनारक्षित व प्लेटफॉर्म टिकट बुक करें",
+      "हेल्पलाइन 139: पीएनआर, ट्रेन लाइव स्थिति एवं सहायता हेतु एकीकृत नंबर"
+    ]
+  },
+  {
+    id: "digital-payments-upi",
+    portalName: "National Payments Corporation of India (NPCI)",
+    portalUrl: "https://www.npci.org.in",
+    keywords: [
+      "upi", "google pay", "phonepe", "paytm", "bhim", "wrong transfer", "upi fraud", "npci",
+      "యూపీఐ", "ఫోన్‌పే", "గూగుల్‌పే", "పేటీఎం", "తప్పుగా డబ్బులు పంపితే", "యూపీఐ మోసం", "డిజిటల్ పేమెంట్స్",
+      "यूपीआई", "गूगल पे", "फोनपे", "गलत ट्रांसफर", "यूपीआई फ्रॉड", "एनपीसीआई", "डिजिटल भुगतान"
+    ],
+    titleEn: "UPI Payments, Wrong Transfer Recovery & Cyber Safety",
+    titleTe: "యూపీఐ (UPI) లావాదేవీలు, తప్పుగా వెళ్లిన డబ్బుల రికవరీ & సైబర్ భద్రత",
+    titleHi: "यूपीआई भुगतान, गलत खाते में गए पैसों की वापसी एवं सुरक्षा",
+    summaryEn: "Unified Payments Interface (UPI) managed by NPCI allows instant 24/7 bank transfers using mobile apps like PhonePe, Google Pay, and BHIM. Standard daily limit is ₹1 Lakh (up to ₹5 Lakh for hospitals and educational fees). Important security rule: UPI PIN is ONLY required to send money or check balance, NEVER to receive money. If money is sent to a wrong UPI ID/account by mistake, immediately note the 12-digit UTR/UPI Transaction ID, contact your bank branch within 24 hours, file a complaint on npci.org.in, and call 1930 for online fraud.",
+    summaryTe: "ఎన్‌పీసీఐ (NPCI) నిర్వహిస్తున్న యూపీఐ (UPI) ద్వారా ఫోన్‌పే, గూగుల్‌పే, భీమ్ యాప్‌లతో నేరుగా ఉచిత బ్యాంక్ బదిలీలు చేసుకోవచ్చు. రోజువారీ పరిమితి సాధారణంగా ₹1 లక్ష వరకు ఉంటుంది. ముఖ్యమైన భద్రతా నియమం: యూపీఐ పిన్ (PIN) ను డబ్బులు ఇతరులకు పంపేటప్పుడు లేదా బ్యాలెన్స్ చెక్ చేసేటప్పుడు మాత్రమే ఎంటర్ చేయాలి, ఎవరైనా డబ్బులు పంపుతున్నారని పిన్ అడిగితే ఎట్టిపరిస్థితుల్లోనూ కొట్టకూడదు. పొరపాటున వేరే ఖాతాకు డబ్బులు వెళ్తే వెంటనే 12 అంకెల UTR నంబర్‌తో మీ బ్యాంక్‌ను సంప్రదించాలి మరియు npci.org.in లో ఫిర్యాదు చేయాలి.",
+    summaryHi: "यूपीआई द्वारा 24 घंटे त्वरित बैंक ट्रांसफर संभव है। सामान्य दैनिक सीमा ₹1 लाख तक है। अनिवार्य नियम: यूपीआई पिन केवल पैसे भेजने या बैलेंस जांचने हेतु डाला जाता है, पैसे प्राप्त करने हेतु कभी पिन नहीं लगता। यदि गलती से किसी अन्य खाते में पैसे चले जाएं, तो 12 अंकों का यूटीआर नंबर लेकर 24 घंटे के भीतर बैंक से संपर्क करें और npci.org.in व 1930 पर शिकायत दर्ज करें।",
+    highlightsEn: [
+      "Golden Security Rule: UPI PIN is entered ONLY to deduct money; NEVER enter PIN to receive money",
+      "Wrong Transfer Action: Report 12-digit UTR number to bank within 24 hours and raise dispute on npci.org.in",
+      "Cyber Helpline: Dial 1930 immediately in case of financial cyber fraud or phishing links"
+    ],
+    highlightsTe: [
+      "బంగారు భద్రతా సూత్రం: డబ్బులు పంపడానికి మాత్రమే పిన్ అవసరం; డబ్బులు తీసుకోవడానికి పిన్ అవసరం లేదు",
+      "తప్పుగా బదిలీ అయితే: 12 అంకెల యూటీఆర్ (UTR) నంబర్‌తో 24 గంటల్లో బ్యాంక్‌ను ఆశ్రయించండి",
+      "సైబర్ ఫిర్యాదు: ఏదైనా మోసం జరిగితే వెంటనే జాతీయ నంబర్ 1930 కి కాల్ చేయండి"
+    ],
+    highlightsHi: [
+      "सुरक्षा नियम: पैसे भेजने हेतु ही पिन लगता है, पैसे प्राप्त करने हेतु कभी पिन न डालें",
+      "गलत ट्रांसफर: 12 अंकों की यूटीआर संख्या लेकर 24 घंटे में बैंक व npci.org.in पर शिकायत करें",
+      "साइबर फ्रॉड: वित्तीय धोखाधड़ी होने पर तत्काल 1930 पर कॉल करें"
+    ]
+  },
+  {
+    id: "sukanya-girl-child",
+    portalName: "Department of Posts & Ministry of Finance",
+    portalUrl: "https://www.indiapost.gov.in",
+    keywords: [
+      "sukanya", "sukanya samriddhi", "girl child", "ssy", "post office saving",
+      "సుకన్య సమృద్ధి", "సుకన్య పథకం", "ఆడపిల్లల పథకం", "పోస్టాఫీస్ పొదుపు", "బాలిక సంక్షేమం",
+      "सुकन्या समृद्धि", "सुकन्या योजना", "बेटी बचाओ", "पोस्ट ऑफिस बचत", "बालिका योजना"
+    ],
+    titleEn: "Sukanya Samriddhi Yojana (SSY) for Girl Child",
+    titleTe: "సుకన్య సమృద్ధి యోజన — ఆడపిల్లల బంగారు భవిష్యత్తు పొదుపు",
+    titleHi: "सुकन्या समृद्धि योजना — बालिकाओं के सुरक्षित भविष्य हेतु बचत",
+    summaryEn: "Sukanya Samriddhi Yojana is a government-backed savings scheme under the Beti Bachao Beti Padhao campaign for girls up to 10 years of age. It offers one of the highest interest rates among small savings schemes (currently 8.2% per annum, compounded annually). Deposits range from a minimum of ₹250 to a maximum of ₹1,50,000 per financial year. It carries Triple Tax Exemption (EEE) under Section 80C. The account matures after 21 years from opening, with up to 50% partial withdrawal permitted after age 18 for higher education.",
+    summaryTe: "సుకన్య సమృద్ధి యోజన ఆడపిల్లల ఉన్నత చదువులు మరియు భవిష్యత్తు కోసం ప్రభుత్వం ప్రవేశపెట్టిన అత్యంత లాభదాయక పొదుపు పథకం. 10 సంవత్సరాలలోపు వయస్సు ఉన్న ఆడపిల్లల పేరుతో పోస్టాఫీసు లేదా బ్యాంకులలో ఖాతా తెరవవచ్చు. ప్రస్తుతం వార్షిక వడ్డీ రేటు 8.2% గా ఉంది. సంవత్సరానికి కనీసం ₹250 నుండి గరిష్టంగా ₹1,50,000 వరకు డిపాజిట్ చేసుకోవచ్చు. సెక్షన్ 80C కింద పూర్తి పన్ను మినహాయింపు (EEE) వర్తిస్తుంది. ఖాతా తెరిచిన 21 సంవత్సరాలకు పథకం ముగుస్తుంది, అయితే అమ్మాయికి 18 ఏళ్లు నిండిన తర్వాత ఉన్నత విద్య కోసం 50% నిధులు తీసుకోవచ్చు.",
+    summaryHi: "सुकन्या समृद्धि योजना 10 वर्ष तक की बालिकाओं के लिए सर्वाधिक ब्याज देने वाली सरकारी योजना है (वर्तमान ब्याज दर 8.2% वार्षिक)। प्रति वर्ष न्यूनतम ₹250 एवं अधिकतम ₹1,50,000 तक जमा किए जा सकते हैं। आयकर की धारा 80C के तहत पूर्ण कर छूट मिलती है। 21 वर्ष में खाता परिपक्व होता है तथा बालिका की 18 वर्ष की आयु के बाद उच्च शिक्षा हेतु 50% राशि निकाली जा सकती है। डाकघर या बैंक में खाता खुलवाएं।",
+    highlightsEn: [
+      "High Interest Rate: 8.2% per annum compounded annually with sovereign government guarantee",
+      "Triple Tax Benefit (EEE): Investment, interest earned, and maturity proceeds are 100% tax-free",
+      "Higher Education Support: 50% partial withdrawal allowed after the girl turns 18 years of age"
+    ],
+    highlightsTe: [
+      "గరిష్ట వడ్డీ రేటు: ప్రభుత్వ గ్యారెంటీతో వార్షికంగా 8.2% చక్రవడ్డీ లభిస్తుంది",
+      "పూర్తి పన్ను మినహాయింపు: జమ చేసిన మొత్తం, వడ్డీ మరియు మెచ్యూరిటీపై ఎలాంటి పన్ను ఉండదు",
+      "చదువుల కోసం వెసులుబాటు: అమ్మాయికి 18 ఏళ్లు నిండిన తర్వాత చదువు కోసం 50% డబ్బులు విత్ డ్రా చేసుకోవచ్చు"
+    ],
+    highlightsHi: [
+      "आकर्षक ब्याज: 8.2% वार्षिक चक्रवृद्धि ब्याज एवं सरकारी संप्रभु गारंटी",
+      "ट्रिपल टैक्स छूट: जमा राशि, ब्याज और परिपक्वता राशि पूर्णतः कर-मुक्त (EEE)",
+      "उच्च शिक्षा में सहयोग: बालिका के 18 वर्ष पूरे होने पर 50% निकासी की सुविधा"
+    ]
+  },
+  {
+    id: "driving-license-parivahan",
+    portalName: "Ministry of Road Transport and Highways (Parivahan Sarathi)",
+    portalUrl: "https://sarathi.parivahan.gov.in",
+    keywords: [
+      "driving license", "license", "llr", "rc", "parivahan", "sarathi", "driving test", "rto",
+      "డ్రైవింగ్ లైసెన్స్", "లైసెన్స్", "ఎల్ఎల్ఆర్", "ఆర్సీ", "పరివాహన్", "సారథి", "డ్రైవింగ్ టెస్ట్", "ఆర్టీవో",
+      "ड्राइविंग लाइसेंस", "डीएल", "लर्नर लाइसेंस", "सारथी", "परिवहन", "आरसी", "ड्राइविंग टेस्ट"
+    ],
+    titleEn: "Driving License (LLR & Permanent DL) & Parivahan Services",
+    titleTe: "డ్రైవింగ్ లైసెన్స్ (LLR & పర్మనెంట్ DL) & పరివాహన్ సేవలు",
+    titleHi: "ड्राइविंग लाइसेंस (लर्नर व परमानेंट) एवं परिवहन सारथी सेवाएं",
+    summaryEn: "The Ministry of Road Transport and Highways (MoRTH) provides contactless citizen transport services on sarathi.parivahan.gov.in. Citizens can apply for a Learner's License (LLR) and take the online computer test from home using Aadhaar authentication without visiting the RTO. After 30 days of LLR issuance, candidates can book an appointment slot for the permanent driving license test. Digital Driving Licenses and Vehicle Registration Certificates (RC) saved on DigiLocker or mParivahan are legally valid across all Indian states under Rule 139 of the Central Motor Vehicles Rules.",
+    summaryTe: "రవాణా శాఖ సేవలు ఇప్పుడు sarathi.parivahan.gov.in పోర్టల్ ద్వారా ఆన్‌లైన్‌లో అందుబాటులో ఉన్నాయి. లెర్నర్స్ లైసెన్స్ (LLR) కోసం ఆధార్ నంబర్‌తో ఇంట్లో కూర్చునే ఆన్‌లైన్ టెస్ట్ రాసి వెంటనే ఎల్ఎల్ఆర్ పొందవచ్చు, ఆర్టీవో ఆఫీస్‌కు వెళ్లాల్సిన అవసరం లేదు. ఎల్ఎల్ఆర్ వచ్చిన 30 రోజుల తర్వాత పర్మనెంట్ డ్రైవింగ్ లైసెన్స్ డ్రైవింగ్ టెస్ట్ కోసం స్లాట్ బుక్ చేసుకోవచ్చు. డిజిలాకర్ (DigiLocker) లేదా ఎం-పరివాహన్ (mParivahan) యాప్‌లలో భద్రపరిచిన డిజిటల్ డ్రైవింగ్ లైసెన్స్ మరియు ఆర్సీ (RC) దేశమంతటా చట్టబద్ధంగా చెల్లుబాటు అవుతాయి.",
+    summaryHi: "sarathi.parivahan.gov.in पर नागरिक घर बैठे आधार प्रमाणीकरण द्वारा लर्नर लाइसेंस (LLR) का ऑनलाइन टेस्ट देकर लाइसेंस प्राप्त कर सकते हैं। LLR जारी होने के 30 दिन बाद परमानेंट ड्राइविंग लाइसेंस टेस्ट हेतु स्लॉट बुक करें। DigiLocker अथवा mParivahan ऐप पर उपलब्ध डिजिटल डीएल एवं आरसी पूरे देश में कानूनन वैध हैं।",
+    highlightsEn: [
+      "Contactless LLR: Apply and complete the Learner's License test online from home using Aadhaar",
+      "DigiLocker Validity: Digital DL and RC on DigiLocker/mParivahan are legally valid across India",
+      "Slot Booking: Schedule driving test appointment slot at your designated RTO office"
+    ],
+    highlightsTe: [
+      "ఇంట్లోనే ఎల్ఎల్ఆర్: ఆధార్ ఓటీపీ ద్వారా ఆర్టీవో ఆఫీస్‌కు వెళ్లకుండానే ఆన్‌లైన్‌లో ఎల్ఎల్ఆర్ టెస్ట్ రాయవచ్చు",
+      "డిజిలాకర్ చెల్లుబాటు: డిజిలాకర్ మరియు ఎం-పరివాహన్ యాప్‌లలోని డిజిటల్ లైసెన్స్, ఆర్సీ దేశవ్యాప్తంగా చెల్లుతాయి",
+      "స్లాట్ బుకింగ్: సారథి పోర్టల్‌లో పర్మనెంట్ డ్రైవింగ్ టెస్ట్ కోసం తేదీని ఎంపిక చేసుకోవచ్చు"
+    ],
+    highlightsHi: [
+      "फेसलेस एलएलआर: आधार द्वारा घर बैठे ऑनलाइन टेस्ट देकर लर्नर लाइसेंस प्राप्त करें",
+      "डिजिलॉकर वैधता: डिजिलॉकर व mParivahan पर डिजिटल डीएल व आरसी पूरे भारत में मान्य",
+      "स्लॉट बुकिंग: सारथी पोर्टल पर परमानेंट ड्राइविंग टेस्ट हेतु समय व तारीख बुक करें"
+    ]
+  },
+  {
+    id: "passport-seva",
+    portalName: "Passport Seva Portal (Ministry of External Affairs)",
+    portalUrl: "https://www.passportindia.gov.in",
+    keywords: [
+      "passport", "passport seva", "psk", "tatkaal passport", "apply passport", "passport renewal",
+      "పాస్‌పోర్ట్", "పాస్‌పోర్ట్ సేవా కేంద్రం", "తత్కాల్ పాస్‌పోర్ట్", "పాస్‌పోర్ట్ దరఖాస్తు", "పాస్‌పోర్ట్ రెన్యూవల్",
+      "पासपोर्ट", "पासपोर्ट सेवा", "तत्काल पासपोर्ट", "पासपोर्ट आवेदन", "पासपोर्ट नवीनीकरण"
+    ],
+    titleEn: "Passport Seva Guidelines & Application Procedures",
+    titleTe: "పాస్‌పోర్ట్ సేవా మార్గదర్శకాలు & దరఖాస్తు విధానం",
+    titleHi: "पासपोर्ट सेवा दिशानिर्देश एवं ऑनलाइन आवेदन प्रक्रिया",
+    summaryEn: "The Ministry of External Affairs manages Indian passports through passportindia.gov.in. Applicants register online, fill Application Reference Number (ARN) details, pay the fee, and book an appointment at the nearest Passport Seva Kendra (PSK) or Post Office PSK (POPSK). Normal passport fee is ₹1,500 (36-page booklet valid for 10 years), while Tatkaal fee is ₹3,500 for expedited issuance. Key required documents include Proof of Date of Birth (Aadhaar or 10th marks memo), Proof of Identity (Aadhaar/Voter ID), and Proof of Address. Police verification is initiated automatically after the in-person biometric appointment.",
+    summaryTe: "విదేశాంగ మంత్రిత్వ శాఖ ఆధ్వర్యంలో passportindia.gov.in పోర్టల్ ద్వారా పాస్‌పోర్ట్ సేవలు నిర్వహించబడతాయి. దరఖాస్తుదారులు ఆన్‌లైన్‌లో ఫారమ్ పూరించి, ఫీజు చెల్లించి, సమీపంలోని పాస్‌పోర్ట్ సేవా కేంద్రం (PSK) లేదా పోస్టాఫీస్ పాస్‌పోర్ట్ సేవా కేంద్రం (POPSK) లో అపాయింట్‌మెంట్ బుక్ చేసుకోవాలి. సాధారణ పాస్‌పోర్ట్ ఫీజు ₹1,500 (10 సంవత్సరాల కాలపరిమితి), తత్కాల్ ఫీజు ₹3,500. అవసరమైన పత్రాలు: ఆధార్ కార్డు, పదో తరగతి మార్కుల మెమో (పుట్టిన తేదీ ధృవీకరణ కోసం) మరియు చిరునామా ధృవీకరణ పత్రం. బయోమెట్రిక్స్ పూర్తయిన తర్వాత పోలీసు విచారణ నిర్వహించబడుతుంది.",
+    summaryHi: "विदेश मंत्रालय की आधिकारिक वेबसाइट passportindia.gov.in पर पासपोर्ट हेतु ऑनलाइन आवेदन, शुल्क भुगतान एवं पासपोर्ट सेवा केंद्र (PSK/POPSK) का अपॉइंटमेंट बुक किया जाता है। सामान्य शुल्क ₹1,500 तथा तत्काल शुल्क ₹3,500 है। आवश्यक दस्तावेज: आधार कार्ड, 10वीं की अंकतालिका (जन्म तिथि हेतु) एवं पते का प्रमाण। बायोमेट्रिक सत्यापन के पश्चात पुलिस वेरिफिकेशन होता है।",
+    highlightsEn: [
+      "Official Portal: Apply and book verified appointments strictly via passportindia.gov.in",
+      "Fee Structure: Standard 36-page booklet ₹1,500; Fast-track Tatkaal application ₹3,500",
+      "Documents: Aadhaar Card, 10th Class certificate (DOB), and Address Proof"
+    ],
+    highlightsTe: [
+      "అధికారిక పోర్టల్: దరఖాస్తు మరియు అపాయింట్‌మెంట్ బుకింగ్ passportindia.gov.in లోనే చేసుకోవాలి",
+      "ఫీజు వివరాలు: సాధారణ పాస్‌పోర్ట్ ₹1,500; అత్యవసర తత్కాల్ పాస్‌పోర్ట్ ₹3,500",
+      "ముఖ్య పత్రాలు: ఆధార్ కార్డు, పదో తరగతి సర్టిఫికెట్ మరియు అడ్రస్ ప్రూఫ్"
+    ],
+    highlightsHi: [
+      "आधिकारिक पोर्टल: केवल passportindia.gov.in पर ही प्राधिकृत आवेदन एवं अपॉइंटमेंट बुक करें",
+      "शुल्क संरचना: सामान्य 36-पेज पासपोर्ट ₹1,500; तत्काल पासपोर्ट ₹3,500",
+      "मुख्य दस्तावेज: आधार कार्ड, 10वीं अंकतालिका (जन्म प्रमाण) एवं निवास प्रमाण"
+    ]
+  },
+  {
+    id: "national-scholarships-nsp",
+    portalName: "National Scholarship Portal (NSP)",
+    portalUrl: "https://scholarships.gov.in",
+    keywords: [
+      "scholarship", "nsp", "national scholarship", "pre matric", "post matric", "fee reimbursement",
+      "స్కాలర్‌షిప్", "జాతీయ స్కాలర్‌షిప్", "విద్యార్థి వేతనం", "పోస్ట్ మెట్రిక్", "ఫీజు రీయింబర్స్‌మెంట్",
+      "छात्रवृत्ति", "स्कॉलरशिप", "एनएसपी", "प्री मैट्रिक", "पोस्ट मैट्रिक", "फीस प्रतिपूर्ति"
+    ],
+    titleEn: "National Scholarship Portal (NSP) Central Schemes",
+    titleTe: "నేషనల్ స్కాలర్‌షిప్ పోర్టల్ (NSP) — విద్యార్థుల స్కాలర్‌షిప్‌లు",
+    titleHi: "राष्ट्रीय छात्रवृत्ति पोर्टल (NSP) — केंद्रीय छात्रवृत्तियां",
+    summaryEn: "The National Scholarship Portal (scholarships.gov.in) is the unified digital platform for Central and State government scholarships for SC, ST, OBC, EWS, and Minority students. Schemes cover Pre-Matric (Classes 1-10), Post-Matric (Classes 11-12, Diploma, Degree, PG, Ph.D.), and Merit-cum-Means technical and professional courses. Aadhaar-based biometric facial authentication at educational institutions is mandatory. Approved scholarship amounts are credited directly into students' Aadhaar-seeded bank accounts via Direct Benefit Transfer (DBT).",
+    summaryTe: "నేషనల్ స్కాలర్‌షిప్ పోర్టల్ (scholarships.gov.in) అనేది కేంద్ర మరియు రాష్ట్ర ప్రభుత్వాలు అందించే అన్ని రకాల స్కాలర్‌షిప్‌లకు ఒకే ఒక అధికారిక వేదిక. ఎస్సీ, ఎస్టీ, బీసీ, మైనారిటీ మరియు ఈడబ్ల్యూఎస్ (EWS) విద్యార్థులకు ప్రీ-మెట్రిక్ (1 నుండి 10 తరగతులు), పోస్ట్-మెట్రిక్ (ఇంటర్, డిగ్రీ, ఇంజనీరింగ్, పీజీ) మరియు మెరిట్ ఆధారిత స్కాలర్‌షిప్‌లు అందుతాయి. పాఠశాల లేదా కళాశాలలో ఆధార్ బయోమెట్రిక్ లేదా ముఖ గుర్తింపు (Facial e-KYC) తప్పనిసరి. మంజూరైన స్కాలర్‌షిప్ నిధులు నేరుగా విద్యార్థి బ్యాంక్ ఖాతాలో డీబీటీ (DBT) ద్వారా జమవుతాయి.",
+    summaryHi: "राष्ट्रीय छात्रवृत्ति पोर्टल (scholarships.gov.in) एससी, एसटी, ओबीसी, अल्पसंख्यक एवं ईडब्ल्यूएस विद्यार्थियों हेतु केंद्रीय छात्रवृत्तियों का एकीकृत मंच है। इसमें प्री-मैट्रिक, पोस्ट-मैट्रिक एवं मेरिट-कम-मीन्स तकनीकी छात्रवृत्तियां शामिल हैं। स्कूल/कॉलेज में आधार बायोमेट्रिक/फेस प्रमाणीकरण अनिवार्य है। छात्रवृत्ति राशि सीधे आधार से जुड़े बैंक खाते में डीबीटी द्वारा भेजी जाती है।",
+    highlightsEn: [
+      "One-Stop Portal: Centralized application for all Central and State government student scholarships",
+      "Biometric e-KYC: Aadhaar-based biometric verification conducted at educational institutions",
+      "Direct Benefit Transfer: Funds disbursed directly to student's bank account without middlemen"
+    ],
+    highlightsTe: [
+      "ఒకే వేదిక: కేంద్ర మరియు రాష్ట్ర ప్రభుత్వాల విద్యార్థి స్కాలర్‌షిప్‌లన్నింటికీ scholarships.gov.in ఒకటే పోర్టల్",
+      "బయోమెట్రిక్ ధృవీకరణ: విద్యాసంస్థలలో ఆధార్ బయోమెట్రిక్ ఈ-కేవైసీ పూర్తి చేసుకోవాలి",
+      "నేరుగా బ్యాంక్ ఖాతాలో: ఎలాంటి మధ్యవర్తులు లేకుండా డీబీటీ (DBT) ద్వారా నేరుగా నిధుల బదిలీ"
+    ],
+    highlightsHi: [
+      "एकल पोर्टल: सभी केंद्रीय एवं राज्य छात्रवृत्तियों हेतु scholarships.gov.in पर एकल खिड़की व्यवस्था",
+      "बायोमेट्रिक प्रमाणीकरण: शिक्षण संस्थानों में आधार आधारित ई-केवाईसी सत्यापन अनिवार्य",
+      "डीबीटी भुगतान: छात्रवृत्ति राशि बिना किसी बिचौलिये के सीधे बैंक खाते में जमा"
+    ]
+  },
+  {
+    id: "public-jobs-recruitment",
+    portalName: "Central & State Public Recruitment Commissions",
+    portalUrl: "https://www.upsc.gov.in",
+    keywords: [
+      "govt job", "sarkari naukri", "upsc", "ssc", "rrb", "railway recruitment", "appsc", "tspsc", "notification",
+      "ప్రభుత్వ ఉద్యోగాలు", "నోటిఫికేషన్", "యూపీఎస్సీ", "ఎస్ఎస్సీ", "రైల్వే రిక్రూట్‌మెంట్", "జాబ్స్", "పోటీ పరీక్షలు",
+      "सरकारी नौकरी", "यूपीएससी", "एसएससी", "रेलवे भर्ती", "आरआरबी", "भर्ती परीक्षा", "सरकारी जॉब"
+    ],
+    titleEn: "Public Employment Exams & Recruitment Information",
+    titleTe: "ప్రభుత్వ ఉద్యోగ నోటిఫికేషన్లు & రిక్రూట్‌మెంట్ వివరాలు",
+    titleHi: "सरकारी नौकरी भर्ती एवं प्रतियोगी परीक्षा दिशानिर्देश",
+    summaryEn: "Government job recruitments in India are conducted transparently through statutory constitutional commissions. Key recruiting bodies include UPSC (Civil Services, NDA, CDS at upsc.gov.in), Staff Selection Commission (SSC CGL, CHSL, GD at ssc.gov.in), Railway Recruitment Boards (RRB NTPC, ALP at rrbapply.gov.in), and State Public Service Commissions (APPSC, TSPSC, UPPSC, etc.). National Career Service (ncs.gov.in) provides free citizen job matching and Rozgar Melas. Citizens are advised to verify notices exclusively on .gov.in or .nic.in official domains to avoid fraudulent job syndicates.",
+    summaryTe: "భారతదేశంలో ప్రభుత్వ ఉద్యోగ నియామకాలు రాజ్యాంగబద్ధమైన అధికారిక కమిషన్ల ద్వారా మాత్రమే నిర్వహించబడతాయి. ప్రధాన సంస్థలు:\n1. UPSC (upsc.gov.in): ఐఏఎస్, ఐపీఎస్ సివిల్ సర్వీసెస్ మరియు రక్షణ విభాగాలు\n2. SSC (ssc.gov.in): కేంద్ర ప్రభుత్వ శాఖలలో సీజీఎల్ (CGL), సీహెచ్ఎస్ఎల్ (CHSL), జీడీ కానిస్టేబుల్ పోస్టులు\n3. Railway RRB (rrbapply.gov.in): రైల్వేలలో ఎన్‌టీపీసీ, లోకోపైలట్, గ్రూప్-డి పోస్టులు\n4. రాష్ట్ర కమిషన్లు: ఏపీపీఎస్సీ (APPSC), టీఎస్పీఎస్సీ (TSPSC) రాష్ట్ర స్థాయి గ్రూప్స్ నియామకాలు.\nనకిలీ ఉద్యోగ ప్రకటనలను నమ్మవద్దు; కేవలం .gov.in లేదా .nic.in తో ముగిసే అధికారిక వెబ్‌సైట్లలోని నోటిఫికేషన్లను మాత్రమే పరిశీలించండి.",
+    summaryHi: "सरकारी भर्तियां निष्पक्ष रूप से अधिकृत आयोगों द्वारा की जाती हैं: यूपीएससी (upsc.gov.in) सिविल सेवा, एसएससी (ssc.gov.in) केंद्र सरकार के विभिन्न मंत्रालयों में भर्ती, रेलवे आरआरबी (rrbapply.gov.in) रेलवे पद, तथा राज्य लोक सेवा आयोग। नेशनल करियर सर्विस (ncs.gov.in) पर निःशुल्क रोजगार मेले आयोजित होते हैं। फर्जी वेबसाइटों से सावधान रहें और केवल .gov.in डोमेन पर ही आवेदन करें।",
+    highlightsEn: [
+      "Official Commissions: Apply exclusively via official commission portals (UPSC, SSC, RRB, State PSCs)",
+      "National Career Service: Free citizen job matching and government Rozgar Melas at ncs.gov.in",
+      "Scam Warning: Never pay fees to private recruitment agents or non-.gov.in fake websites"
+    ],
+    highlightsTe: [
+      "అధికారిక కమిషన్లు: కేవలం UPSC, SSC, RRB, APPSC/TSPSC అధికారిక వెబ్‌సైట్లలోనే దరఖాస్తు చేసుకోవాలి",
+      "నేషనల్ కెరీర్ సర్వీస్: ncs.gov.in పోర్టల్‌లో ఉచిత ఉద్యోగ సమాచారం మరియు రోజ్‌గార్ మేళాలు",
+      "మోసాలపై హెచ్చరిక: ప్రైవేట్ వ్యక్తులకు ఉద్యోగాల పేరుతో డబ్బులు ఇచ్చి మోసపోవద్దు"
+    ],
+    highlightsHi: [
+      "अधिकृत आयोग: केवल आधिकारिक पोर्टलों (UPSC, SSC, RRB) पर ही विज्ञापन देखें एवं आवेदन करें",
+      "रोजगार मेले: ncs.gov.in पर निःशुल्क जॉब मैचिंग और करियर काउंसलिंग उपलब्ध",
+      "धोखाधड़ी से बचाव: किसी भी गैर-सरकारी व्यक्ति या फर्जी साइट को पैसे न दें"
+    ]
+  },
+  {
     id: "ap-elections",
+    portalName: "Election Commission of India & State Election Commission",
+    portalUrl: "https://voters.eci.gov.in",
     keywords: [
       "election", "elections", "ఎలక్షన్", "ఎలక్షన్స్", "ఎన్నికలు", "ఎన్నికల", "ఎలక్షన్లు", "ఓటింగ్", "ఓటు", "పోలింగ్",
       "తీర్పు", "అసెంబ్లీ ఎన్నికలు", "పంచాయతీ ఎన్నికలు", "స్థానిక సంస్థలు", "మేయర్", "సర్పంచ్", "ఎమ్మెల్యే", "ఎంపీ",
@@ -732,9 +1170,9 @@ const CIVIC_TOPICS: CivicTopic[] = [
     titleEn: "Andhra Pradesh Elections & Local Bodies Overview",
     titleTe: "ఆంధ్రప్రదేశ్ ఎన్నికల వివరాలు (Elections in Andhra Pradesh)",
     titleHi: "आंध्र प्रदेश चुनाव एवं स्थानीय निकाय विवरण",
-    summaryEn: "In Andhra Pradesh, elections are conducted under the Constitution of India. General elections for 175 Legislative Assembly and 25 Lok Sabha seats were concluded with the new government taking office. Local body elections (Gram Panchayats, Mandal Parishad MPTC, Zilla Parishad ZPTC, and Municipalities) are notified by the State Election Commission (SEC) in designated schedules. Citizens who turn 18 can enroll in the voter list using Form 6 on voterportal.eci.gov.in.",
-    summaryTe: "ఆంధ్రప్రదేశ్ రాష్ట్రంలో ఎన్నికలు భారత రాజ్యాంగం ప్రకారం నిర్వహించబడతాయి. రాష్ట్రంలో 175 అసెంబ్లీ మరియు 25 లోక్‌సభ స్థానాలు ఉన్నాయి. సాధారణ సార్వత్రిక అసెంబ్లీ ఎన్నికలు ఇటీవల మే 2024 లో ముగిసి కొత్త ప్రభుత్వం కొలువుదీరింది. ఇక స్థానిక సంస్థలైన గ్రామ పంచాయతీలు, ఎంపీటీసీ, జడ్పీటీసీ మరియు పురపాలక సంఘాల (మున్సిపాలిటీలు) ఎన్నికలు లేదా ఉప ఎన్నికలు రాష్ట్ర ఎన్నికల సంఘం (State Election Commission) అధికారిక నోటిఫికేషన్ మరియు షెడ్యూల్ ప్రకారం జరుగుతాయి. 18 ఏళ్లు నిండిన వారు voterportal.eci.gov.in లో ఫారం 6 ద్వారా ఓటరుగా నమోదు చేసుకోవచ్చు.",
-    summaryHi: "आंध्र प्रदेश में चुनाव भारत के संविधान के तहत आयोजित किए जाते हैं। राज्य में 175 विधानसभा और 25 लोकसभा सीटें हैं। आम चुनाव संपन्न होने के बाद नई सरकार कार्यभार संभाल चुकी है। स्थानीय निकायों (ग्राम पंचायत, मंडल परिषद, जिला परिषद और नगर पालिका) के चुनाव राज्य चुनाव आयोग (SEC) के आधिकारिक कैलेंडर के अनुसार होते हैं। 18 वर्ष पूर्ण कर चुके नागरिक voterportal.eci.gov.in पर फॉर्म 6 भरकर मतदाता सूची में नाम जुड़वा सकते हैं।",
+    summaryEn: "In Andhra Pradesh, elections are conducted under the Constitution of India. General elections for 175 Legislative Assembly and 25 Lok Sabha seats were concluded with the new government taking office. Local body elections (Gram Panchayats, Mandal Parishad MPTC, Zilla Parishad ZPTC, and Municipalities) are notified by the State Election Commission (SEC) in designated schedules. Citizens who turn 18 can enroll in the voter list using Form 6 on voters.eci.gov.in.",
+    summaryTe: "ఆంధ్రప్రదేశ్ రాష్ట్రంలో ఎన్నికలు భారత రాజ్యాంగం ప్రకారం నిర్వహించబడతాయి. రాష్ట్రంలో 175 అసెంబ్లీ మరియు 25 లోక్‌సభ స్థానాలు ఉన్నాయి. సాధారణ సార్వత్రిక అసెంబ్లీ ఎన్నికలు ఇటీవల మే 2024 లో ముగిసి కొత్త ప్రభుత్వం కొలువుదీరింది. ఇక స్థానిక సంస్థలైన గ్రామ పంచాయతీలు, ఎంపీటీసీ, జడ్పీటీసీ మరియు పురపాలక సంఘాల (మున్సిపాలిటీలు) ఎన్నికలు లేదా ఉప ఎన్నికలు రాష్ట్ర ఎన్నికల సంఘం (State Election Commission) అధికారిక నోటిఫికేషన్ మరియు షెడ్యూల్ ప్రకారం జరుగుతాయి. 18 ఏళ్లు నిండిన వారు voters.eci.gov.in లో ఫారం 6 ద్వారా ఓటరుగా నమోదు చేసుకోవచ్చు.",
+    summaryHi: "आंध्र प्रदेश में चुनाव भारत के संविधान के तहत आयोजित किए जाते हैं। राज्य में 175 विधानसभा और 25 लोकसभा सीटें हैं। आम चुनाव संपन्न होने के बाद नई सरकार कार्यभार संभाल चुकी है। स्थानीय निकायों (ग्राम पंचायत, मंडल परिषद, जिला परिषद और नगर पालिका) के चुनाव राज्य चुनाव आयोग (SEC) के आधिकारिक कैलेंडर के अनुसार होते हैं। 18 वर्ष पूर्ण कर चुके नागरिक voters.eci.gov.in पर फॉर्म 6 भरकर मतदाता सूची में नाम जुड़वा सकते हैं।",
     highlightsEn: [
       "General Elections: 175 Assembly and 25 Parliamentary constituencies form the state legislative representation",
       "Local Bodies Elections: Gram Panchayats and Municipalities are administered by the State Election Commission",
@@ -753,7 +1191,9 @@ const CIVIC_TOPICS: CivicTopic[] = [
   },
   {
     id: "ration-services",
-    keywords: ["ration", "ration card", "రేషన్", "రేషన్ కార్డు", "బియ్యం", "రాషన్", "డిపో", "కోటా", "రాషన్ బియ్యం", "राशन", "राशन कार्ड"],
+    portalName: "National Food Security Portal & State Civil Supplies",
+    portalUrl: "https://epds.ap.gov.in",
+    keywords: ["ration", "ration card", "రేషన్", "రేషన్ కార్డు", "బియ్యం", "రాషన్", "డిపో", "కోటా", "రాషన్ బియ్యం", "రాషన్ కార్డు", "राशन", "राशन कार्ड", "खाद्यान्न"],
     titleEn: "Public Distribution System & Ration Card Services",
     titleTe: "రేషన్ కార్డు & ప్రజా పంపిణీ వివరాలు (Ration Card Services)",
     titleHi: "राशन कार्ड एवं सार्वजनिक वितरण प्रणाली",
@@ -820,31 +1260,31 @@ async function getCivicGovernanceAdvisory(
     conversation_id: convId,
     message_id: msgId,
     answer: {
-      scheme_id: "civic-advisory",
+      scheme_id: `civic-${matchedTopic.id}`,
       scheme_name: title,
       summary: cleanSummary,
       eligibility: highlights.slice(0, 2),
-      benefits: highlights.slice(2, 4),
+      benefits: highlights.slice(2, 4).length > 0 ? highlights.slice(2, 4) : [highlights[0]],
       documents_required: [],
       application_steps: [],
       grounded: true,
     },
     sources: [
       {
-        title: "Election Commission of India & State Election Commission Portal",
-        category: "Official Democratic Services",
-        source: "https://eci.gov.in & https://sec.ap.gov.in",
+        title: `${matchedTopic.portalName}`,
+        category: "Official Public Service Portal",
+        source: matchedTopic.portalUrl,
         last_updated: new Date().toISOString().split("T")[0],
         doc_id: `civic-${matchedTopic.id}`,
-        url: "https://eci.gov.in",
+        url: matchedTopic.portalUrl,
         verified: true,
       },
     ],
     language,
     suggested_followups: [
-      language === "te" ? "కొత్త ఓటరు గుర్తింపు కార్డు ఎలా పొందాలి?" : "How to apply for a new voter card?",
-      language === "te" ? "ఈరోజు వాతావరణ సమాచారం చెప్పండి" : "What is today's weather report?",
-      language === "te" ? "ప్రభుత్వ సంక్షేమ పథకాలు ఏమిటి?" : "What government welfare schemes are available?",
+      language === "te" ? "దీనికి ఏయే పత్రాలు అవసరం?" : "What documents are required for this?",
+      language === "te" ? "ఈరోజు తాజా వార్తలు ఏమిటి?" : "What are today's top news stories?",
+      language === "te" ? "ప్రభుత్వ సంక్షేమ పథకాలు చూపించండి" : "Show government welfare schemes",
     ],
   };
 }
@@ -1263,7 +1703,7 @@ async function queryGlobalKnowledge(query: string, language: Language): Promise<
     }
 
     const cleanSearch = extractCleanSearchTopic(searchTopic);
-    const candidateQueries = [cleanSearch, searchTopic];
+    const candidateQueries = [cleanSearch, `${cleanSearch} India`, searchTopic];
 
     for (const q of candidateQueries) {
       if (!q || q.length < 2) continue;
