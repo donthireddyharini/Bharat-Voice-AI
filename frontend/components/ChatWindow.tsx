@@ -177,6 +177,7 @@ export default function ChatWindow({
   const speechStatus = useSpeechStatus();
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastFailedQuery = useRef<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Sync assistantState with global speech status
   useEffect(() => {
@@ -523,6 +524,27 @@ export default function ChatWindow({
         {messages.map((m) => (
           <div key={m.id} className={`w-full flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
             <MessageBubble message={m} currentLanguage={language} />
+            {m.role === "user" && (
+              <div className="flex gap-1.5 mt-1 pr-1 items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInput(m.content);
+                    setTimeout(() => {
+                      inputRef.current?.focus();
+                      inputRef.current?.select();
+                    }, 50);
+                  }}
+                  className="text-xs text-mist/80 hover:text-bone hover:bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 hover:border-saffron/40 transition-all duration-200 flex items-center gap-1 cursor-pointer active:scale-95 group"
+                  title={language === "te" ? "ప్రశ్నను సవరించండి" : language === "hi" ? "प्रश्न संपादित करें" : "Edit question"}
+                >
+                  <span className="text-xs group-hover:scale-110 transition-transform">✏️</span>
+                  <span className="text-[11px] font-medium">
+                    {language === "te" ? "సవరించు" : language === "hi" ? "संपादित करें" : "Edit"}
+                  </span>
+                </button>
+              </div>
+            )}
             {m.role === "assistant" && (
               <div className="flex gap-1.5 sm:gap-2 mt-2 flex-wrap pl-1 sm:pl-11 max-w-full items-center">
                 {activeSpokenMessageId === m.id && (speechStatus === "playing" || assistantState === "speaking" || speechStatus === "paused" || assistantState === "paused") ? (
@@ -624,6 +646,7 @@ export default function ChatWindow({
         <div className="flex items-center gap-2 sm:gap-3">
           <VoiceButton isListening={isListening} onStart={handleVoiceStart} onStop={handleVoiceStop} />
           <input
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}

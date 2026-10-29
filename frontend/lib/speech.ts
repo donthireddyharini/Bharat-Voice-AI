@@ -185,8 +185,18 @@ function cleanTextForSpeech(text: string, language: Language): string {
       .replace(/రూ\.\s*/g, "రూపాయలు ")
       .replace(/రూ\s+/g, "రూపాయలు ")
       .replace(/%/g, " శాతం ")
-      .replace(/km\s*/gi, " కిలోమీటర్లు ")
-      .replace(/AI\b/g, "ఏఐ");
+      .replace(/\bkm\/h\b|\bkmph\b/gi, " కిలోమీటర్ల వేగంతో ")
+      .replace(/\bkm\s*/gi, " కిలోమీటర్లు ")
+      .replace(/\bAI\b/g, "ఏఐ")
+      .replace(/\bIMD\b/g, "భారత వాతావరణ శాఖ")
+      .replace(/\bAP\b/gi, "ఆంధ్రప్రదేశ్")
+      .replace(/\bCM\b/g, "ముఖ్యమంత్రి")
+      .replace(/\bPM\b/g, "పీఎం")
+      .replace(/\bCyclone\b/gi, "తుఫాను")
+      .replace(/\bTDP\b/gi, "తెలుగుదేశం")
+      .replace(/\bJSP\b/gi, "జనసేన")
+      .replace(/\bBJP\b/gi, "బీజేపీ")
+      .replace(/\bDBT\b/gi, "డీబీటీ");
   } else if (language === "hi") {
     cleaned = cleaned
       .replace(/[₹\u20B9]\s*/g, "रुपये ")
@@ -530,6 +540,13 @@ function fallbackBrowserSpeak(cleanedText: string, language: Language, onEnd?: (
     }
 
     const voice = getMatchingVoice(language);
+    // CRITICAL: If no native voice for this Indian language exists in the browser,
+    // NEVER read Indian language text with an English mechanical synthesizer.
+    if (!voice && language !== "en") {
+      console.warn(`[Speech] No browser-native voice installed for ${language}. Suppressed robotic English synthesis.`);
+      finish();
+      return;
+    }
     if (voice) {
       utterance.voice = voice;
     }
