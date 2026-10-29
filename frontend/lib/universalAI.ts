@@ -1121,11 +1121,19 @@ async function getRealtimeNewsOrCurrentEvents(
     const queryLower = query.toLowerCase();
     const engLower = englishQuery.toLowerCase();
 
-    // Check if the query is seeking real-time news, current events, recent updates, live status, or prices
+    // Check if the query is seeking real-time news, current events, recent updates, live status, scores, or prices
     const isRealtimeQuery =
-      /\b(recent|updates?|latest|news|today|current|happening|developments?|score|price|rate|status|what happened|breaking)\b/i.test(engLower) ||
-      /(రీసెంట్|అప్డేట్|తాజా|వార్త|న్యూస్|ఈరోజు|విశేషాలు|ధర|స్కోర్|ఏమైంది|ఏం జరిగింది|ఏం జరుగుతోంది)/.test(queryLower) ||
-      /(ताजा|खबर|समाचार|अपडेट|हालिया|आज|भाव|दर|स्कोर|क्या हुआ)/.test(queryLower);
+      /\b(recent|updates?|latest|news|today|current|happening|developments?|score|scores?|price|prices?|rate|rates?|status|what happened|breaking|live|now|event|events|bulletin|headlines?|alerts?|trends?|trending|cyclone|weather)\b/i.test(engLower) ||
+      /(రీసెంట్|అప్డేట్|తాజా|వార్త|వార్తలు|న్యూస్|ఈరోజు|విశేషాలు|ధర|ధరలు|రేటు|స్కోర్|ఏమైంది|ఏం జరిగింది|ఏం జరుగుతోంది|సంగతులు|ముఖ్యాంశాలు|లైవ్|పరిస్థితి|తుఫాను)/.test(queryLower) ||
+      /(ताजा|ताज़ा|खबर|समाचार|अपडेट|हालिया|आज|भाव|दर|स्कोर|क्या हुआ|क्या चल रहा|लाइव|स्थिति|सुर्खियां)/.test(queryLower) ||
+      /(ಇತ್ತೀಚಿನ|ಸುದ್ದಿ|ತಾಜಾ|ಈಗ|ಇಂದು|ಅಪ್ಡೇಟ್ಸ್|ಬೆಲೆ|ಏನಾಗಿದೆ)/.test(queryLower) ||
+      /(சமீபத்திய|செய்திகள்|இன்றைய|தற்போதைய|நிலவரம்|விலை|நடந்தது|நேரலை)/.test(queryLower) ||
+      /(ताजी|बातमी|आजची|सध्याची|घडामोडी|दर|भाव|लाईव्ह)/.test(queryLower) ||
+      /(সাম্প্রতিক|খবর|আজকের|আপডেট|ঘটনা|পরিস্থিতি|লাইভ)/.test(queryLower) ||
+      /(તાજા|સમાચાર|આજના|ભાવ|અપડેટ|સ્થિતિ|લાઈવ)/.test(queryLower) ||
+      /(പുതിയ|വാർത്തകൾ|ഇന്നത്തെ|നിലവിലെ|അപ്‌ഡേറ്റ്|ലൈവ്)/.test(queryLower) ||
+      /(ਤਾਜ਼ਾ|ਖ਼ਬਰਾਂ|ਅੱਜ ਦੀਆਂ|ਰੇਟ|ਅਪਡੇਟ|ਲਾਈਵ)/.test(queryLower) ||
+      /(ତାଜା|ଖବର|ଆଜିର|ଅପଡେଟ୍|ସ୍ଥିତି|ଲାଇଭ)/.test(queryLower);
 
     if (!isRealtimeQuery && !forceSearch) {
       return null;
@@ -1133,13 +1141,21 @@ async function getRealtimeNewsOrCurrentEvents(
 
     // Clean entity for search
     const cleanEntity = engLower
-      .replace(/\b(what is|what are|tell me about|tell me|explain to me|explain|can you tell|details about|how is|who is|where is|which is|details of)\b/gi, " ")
-      .replace(/\b(recent updates?|latest updates?|recent news|latest news|updates?|news|today|current developments?|recent|breaking)\b/gi, " ")
+      .replace(/\b(what is|what are|tell me about|tell me|explain to me|explain|can you tell|details about|how is|who is|where is|which is|details of|can you provide|give me)\b/gi, " ")
+      .replace(/\b(recent updates?|latest updates?|recent news|latest news|updates?|news|today|current developments?|recent|breaking|live|today's|now)\b/gi, " ")
+      .replace(/\b(of|about|in|for|the|a|an|and)\b/gi, " ")
       .replace(/[?!.,;:'"()\[\]{}]+/g, " ")
       .replace(/\s+/g, " ")
       .trim();
 
-    const searchQuery = cleanEntity.length >= 3 ? `${cleanEntity} recent` : englishQuery;
+    // If query has a specific entity (e.g. "Lovely Professional University", "Gold price", "AP Cyclone"), search for it; otherwise fetch top headlines
+    let searchQuery = "India latest breaking news today";
+    if (cleanEntity.length >= 3) {
+      searchQuery = `${cleanEntity} recent news`;
+    } else if (engLower.includes("cyclone") || queryLower.includes("తుఫాను") || queryLower.includes("तूफान")) {
+      searchQuery = "Andhra Pradesh cyclone storm alert news";
+    }
+
     const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(searchQuery)}&hl=en-IN&gl=IN&ceid=IN:en`;
 
     const controller = new AbortController();

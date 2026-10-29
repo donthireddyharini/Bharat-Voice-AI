@@ -307,8 +307,7 @@ function AssistantContent() {
                 </div>
               )}
             </div>
-          )}
-        </main>
+          </main>
 
         {/* Desktop Right Panel */}
         <aside className="hidden lg:flex flex-col gap-5 border-l border-white/5 px-5 py-6 bg-void/40 backdrop-blur-md">
