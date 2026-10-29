@@ -140,6 +140,39 @@ interface ChatWindowProps {
   onNewChat?: () => void;
 }
 
+
+function getFullSpeechText(structured: any, content: string, lang: Language): string {
+  let full = "";
+  if (structured) {
+    const localized = structured.scheme_id ? getLocalizedScheme(structured.scheme_id, lang) : null;
+    full = localized?.summary || structured.summary || content || "";
+
+    const highlights = (localized?.eligibility || structured.eligibility || []).filter(
+      (h: string) => h && h.trim().length > 3
+    );
+    if (highlights.length > 0) {
+      const highlightsIntro =
+        lang === "te"
+          ? " ముఖ్య వివరాలు: "
+          : lang === "hi"
+          ? " मुख्य विवरण: "
+          : lang === "ta"
+          ? " முக்கிய விவரங்கள்: "
+          : lang === "kn"
+          ? " ಮುಖ್ಯ ವಿವರಗಳು: "
+          : " Key highlights: ";
+
+      const extra = highlights.filter((h: string) => !full.toLowerCase().includes(h.slice(0, 15).toLowerCase()));
+      if (extra.length > 0) {
+        full += highlightsIntro + extra.slice(0, 4).join(". ") + ".";
+      }
+    }
+  } else {
+    full = content || "";
+  }
+  return full.trim();
+}
+
 export default function ChatWindow({
   language,
   externalQuery,
@@ -174,6 +207,8 @@ export default function ChatWindow({
   const [isListening, setIsListening] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [activeSpokenMessageId, setActiveSpokenMessageId] = useState<string | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
   const speechStatus = useSpeechStatus();
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastFailedQuery = useRef<string | null>(null);
@@ -250,6 +285,117 @@ export default function ChatWindow({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [externalQuery?.nonce]);
+
+    async function editAndResendMessage(messageId: string, newText: string) {
+    const query = newText.trim();
+    if (!query) return;
+
+    const msgIndex = messages.findIndex((m) => m.id === messageId);
+    if (msgIndex === -1) return;
+
+    setEditingMessageId(null);
+    setEditingText("");
+    setErrorText("");
+    stopSpeaking();
+
+    // Replace the user message in place with edited text, cutting off any old responses after it
+    const updatedUserMessage: ChatMessage = {
+      ...messages[msgIndex],
+      content: query,
+    };
+
+    const trimmedMessages = [...messages.slice(0, msgIndex), updatedUserMessage];
+    setMessages(trimmedMessages);
+    setAssistantState("understanding");
+
+    try {
+      setAssistantState("searching");
+      let result;
+      try {
+        result = await sendChat(query, language, conversationId);
+      } catch (networkErr) {
+        console.warn("[ChatWindow] Network unavailable, using built-in knowledge engine:", networkErr);
+        result = generateKnowledgeResponse(query, language, conversationId);
+      }
+
+      if (!result || !result.answer) {
+        result = generateKnowledgeResponse(query, language, conversationId);
+      }
+
+      setAssistantState("generating");
+      const currentConvId = result.conversation_id || conversationId || `conv-${Date.now()}`;
+      setConversationId(currentConvId);
+
+      const assistantMessage: ChatMessage = {
+        id: result.message_id || uuidLike(),
+        role: "assistant",
+        content: result.answer?.summary || "Here is the verified information.",
+        language: result.language || language,
+        structured: result.answer,
+        sources: result.sources || [],
+        followups: result.suggested_followups || [],
+      };
+
+      const finalMessages = [...trimmedMessages, assistantMessage];
+      setMessages(finalMessages);
+
+      saveOrUpdateChatSession({
+        id: currentConvId,
+        messages: finalMessages,
+        language: result.language || language,
+        sources: result.sources || [],
+        followups: result.suggested_followups || [],
+        title: finalMessages[0]?.content ? finalMessages[0].content.slice(0, 50) : query.slice(0, 50),
+      });
+
+      onSourcesChange?.(result.sources || []);
+      onFollowupsChange?.(result.suggested_followups || []);
+
+      saveSearchToHistory({
+        query,
+        answerSummary: result.answer?.summary || "",
+        category: result.answer?.category || (result.sources?.[0]?.title),
+        language: result.language || language,
+        viaVoice: false,
+        sourcesCount: result.sources?.length || 0,
+      });
+
+      setAssistantState("speaking");
+      setActiveSpokenMessageId(assistantMessage.id);
+      const speechText = getFullSpeechText(result.answer, assistantMessage.content, result.language || language);
+      speak(speechText, result.language || language, () => {
+        setAssistantState("idle");
+        setActiveSpokenMessageId(null);
+      });
+      lastFailedQuery.current = null;
+    } catch (e: any) {
+      console.warn("[ChatWindow] Edit resend fallback recovery:", e);
+      try {
+        const fallback = generateKnowledgeResponse(query, language, conversationId);
+        const fallbackMessage: ChatMessage = {
+          id: uuidLike(),
+          role: "assistant",
+          content: fallback.answer.summary,
+          language: fallback.language || language,
+          structured: fallback.answer,
+          sources: fallback.sources,
+          followups: fallback.suggested_followups,
+        };
+        const finalMessages = [...trimmedMessages, fallbackMessage];
+        setMessages(finalMessages);
+        setAssistantState("speaking");
+        setActiveSpokenMessageId(fallbackMessage.id);
+        const speechText = getFullSpeechText(fallback.answer, fallbackMessage.content, fallback.language || language);
+        speak(speechText, fallback.language || language, () => {
+          setAssistantState("idle");
+          setActiveSpokenMessageId(null);
+        });
+      } catch {
+        setErrorText("Could not update response. Please try again.");
+        setAssistantState("error");
+      }
+    }
+  }
 
   async function sendMessage(text: string, viaVoice = false) {
     const query = text.trim();
@@ -351,10 +497,7 @@ export default function ChatWindow({
 
       setAssistantState("speaking");
       setActiveSpokenMessageId(assistantMessage.id);
-      const speechText =
-        (result.answer?.scheme_id ? getLocalizedScheme(result.answer.scheme_id, language)?.summary : null) ||
-        result.answer?.summary ||
-        "";
+      const speechText = getFullSpeechText(result.answer, assistantMessage.content, result.language || language);
       speak(speechText, result.language || language, () => {
         setAssistantState("idle");
         setActiveSpokenMessageId(null);
@@ -523,27 +666,72 @@ export default function ChatWindow({
 
         {messages.map((m) => (
           <div key={m.id} className={`w-full flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
-            <MessageBubble message={m} currentLanguage={language} />
-            {m.role === "user" && (
-              <div className="flex gap-1.5 mt-1 pr-1 items-center justify-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInput(m.content);
-                    setTimeout(() => {
-                      inputRef.current?.focus();
-                      inputRef.current?.select();
-                    }, 50);
-                  }}
-                  className="text-xs text-mist/80 hover:text-bone hover:bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 hover:border-saffron/40 transition-all duration-200 flex items-center gap-1 cursor-pointer active:scale-95 group"
-                  title={language === "te" ? "ప్రశ్నను సవరించండి" : language === "hi" ? "प्रश्न संपादित करें" : "Edit question"}
-                >
-                  <span className="text-xs group-hover:scale-110 transition-transform">✏️</span>
-                  <span className="text-[11px] font-medium">
-                    {language === "te" ? "సవరించు" : language === "hi" ? "संपादित करें" : "Edit"}
+            {m.role === "user" && editingMessageId === m.id ? (
+              <div className="w-full max-w-[95%] sm:max-w-[80%] flex flex-col items-end gap-2 my-2 animate-fadeIn">
+                <div className="w-full bg-panel2/95 border border-saffron/50 rounded-2xl p-3 shadow-glow flex flex-col gap-2">
+                  <span className="text-[11px] font-semibold text-saffron flex items-center gap-1.5">
+                    <span>✏️</span>
+                    <span>{language === "te" ? "ప్రశ్నను సవరించి మళ్లీ పంపండి (Edit & Resend)" : language === "hi" ? "प्रश्न संपादित कर पुनः भेजें" : "Edit & Resend Question"}</span>
                   </span>
-                </button>
+                  <textarea
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (editingText.trim()) {
+                          editAndResendMessage(m.id, editingText);
+                        }
+                      } else if (e.key === "Escape") {
+                        setEditingMessageId(null);
+                      }
+                    }}
+                    rows={2}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-xs sm:text-sm text-bone focus:outline-none focus:border-saffron/70 resize-none"
+                    autoFocus
+                  />
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditingMessageId(null)}
+                      className="text-xs px-3 py-1 rounded-full border border-white/20 text-mist hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                    >
+                      {language === "te" ? "రద్దు" : language === "hi" ? "रद्द करें" : "Cancel"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editAndResendMessage(m.id, editingText)}
+                      disabled={!editingText.trim()}
+                      className="text-xs px-3.5 py-1 rounded-full bg-gradient-to-r from-saffron to-gulal text-white font-semibold hover:brightness-110 disabled:opacity-40 transition-all flex items-center gap-1 cursor-pointer shadow-sm active:scale-95"
+                    >
+                      <span>✓</span>
+                      <span>{language === "te" ? "సవరించి పంపు" : language === "hi" ? "संपादित कर भेजें" : "Save & Resend"}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
+            ) : (
+              <>
+                <MessageBubble message={m} currentLanguage={language} />
+                {m.role === "user" && (
+                  <div className="flex gap-1.5 mt-1 pr-1 items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingMessageId(m.id);
+                        setEditingText(m.content);
+                      }}
+                      className="text-xs text-mist/80 hover:text-bone hover:bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 hover:border-saffron/40 transition-all duration-200 flex items-center gap-1 cursor-pointer active:scale-95 group"
+                      title={language === "te" ? "ఈ ప్రశ్నను సవరించండి" : language === "hi" ? "यह प्रश्न संपादित करें" : "Edit & resend this question"}
+                    >
+                      <span className="text-xs group-hover:scale-110 transition-transform">✏️</span>
+                      <span className="text-[11px] font-medium">
+                        {language === "te" ? "సవరించు" : language === "hi" ? "संपादित करें" : "Edit"}
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </>
             )}
             {m.role === "assistant" && (
               <div className="flex gap-1.5 sm:gap-2 mt-2 flex-wrap pl-1 sm:pl-11 max-w-full items-center">
@@ -594,9 +782,7 @@ export default function ChatWindow({
                   <button
                     type="button"
                     onClick={() => {
-                      const speechText =
-                        (m.structured?.scheme_id ? getLocalizedScheme(m.structured.scheme_id, language)?.summary : null) ||
-                        m.content;
+                      const speechText = getFullSpeechText(m.structured, m.content, language);
                       handleReadAloud(speechText, language, m.id);
                     }}
                     className="text-xs px-2.5 py-1 rounded-full border text-mist hover:text-bone hover:bg-white/5 border-white/10 hover:border-saffron/30 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"

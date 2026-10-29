@@ -111,21 +111,19 @@ function cleanTextForSpeech(text: string, language: Language = "en"): string {
       .replace(/Govt\.\s*/gi, "Government ");
   }
 
-  // Speak the primary conversational answer summary crisply without delay (up to 320 characters)
-  // This delivers instant sub-second playback while preserving full, natural sentences
-  if (cleaned.length > 320) {
-    const sub = cleaned.slice(0, 320);
+  // Speak the ENTIRE answer completely without cutting off (up to 3500 characters)
+  if (cleaned.length > 3500) {
+    const sub = cleaned.slice(0, 3500);
     const lastPunct = Math.max(
       sub.lastIndexOf(". "),
       sub.lastIndexOf("! "),
       sub.lastIndexOf("? "),
       sub.lastIndexOf("। ")
     );
-    if (lastPunct > 80) {
+    if (lastPunct > 500) {
       cleaned = sub.slice(0, lastPunct + 1);
     } else {
-      const lastSpace = sub.lastIndexOf(" ");
-      cleaned = (lastSpace > 80 ? sub.slice(0, lastSpace) : sub).trim() + "...";
+      cleaned = sub.trim();
     }
   }
 
