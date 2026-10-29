@@ -111,14 +111,21 @@ function cleanTextForSpeech(text: string, language: Language = "en"): string {
       .replace(/Govt\.\s*/gi, "Government ");
   }
 
-  // Speak the ENTIRE answer completely without cutting off sentences (up to 1600 characters)
-  if (cleaned.length > 1600) {
-    const sub = cleaned.slice(0, 1600);
-    const lastPunct = Math.max(sub.lastIndexOf("."), sub.lastIndexOf("!"), sub.lastIndexOf("?"), sub.lastIndexOf("।"));
-    if (lastPunct > 600) {
+  // Speak the primary conversational answer summary crisply without delay (up to 320 characters)
+  // This delivers instant sub-second playback while preserving full, natural sentences
+  if (cleaned.length > 320) {
+    const sub = cleaned.slice(0, 320);
+    const lastPunct = Math.max(
+      sub.lastIndexOf(". "),
+      sub.lastIndexOf("! "),
+      sub.lastIndexOf("? "),
+      sub.lastIndexOf("। ")
+    );
+    if (lastPunct > 80) {
       cleaned = sub.slice(0, lastPunct + 1);
     } else {
-      cleaned = sub.trim();
+      const lastSpace = sub.lastIndexOf(" ");
+      cleaned = (lastSpace > 80 ? sub.slice(0, lastSpace) : sub).trim() + "...";
     }
   }
 
@@ -142,7 +149,7 @@ async function generateNeuralTTS(text: string, voiceName: string): Promise<Buffe
         .then(() => {
           try {
             // Rate +2%: natural, comfortable human conversational flow
-            const stream = tts.toStream(text, { rate: "+2%", pitch: "+0Hz" });
+            const stream = tts.toStream(text, { rate: "+6%", pitch: "+0Hz" });
             const chunks: Buffer[] = [];
 
             stream.audioStream.on("data", (chunk: Buffer) => {
@@ -183,7 +190,7 @@ async function generateGoogleTTS(text: string, ttsLang: string): Promise<Buffer 
     )}&tl=${encodeURIComponent(ttsLang)}&client=tw-ob`;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 2000);
     const res = await fetch(googleTtsUrl, {
       headers: {
         "User-Agent":

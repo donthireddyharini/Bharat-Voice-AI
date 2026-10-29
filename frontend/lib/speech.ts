@@ -212,14 +212,21 @@ function cleanTextForSpeech(text: string, language: Language): string {
     cleaned = cleaned.replace(/[₹\u20B9]\s*/g, "Rupees ").replace(/Rs\.\s*/gi, "Rupees ").replace(/Rs\s+/gi, "Rupees ");
   }
 
-  // Speak the ENTIRE answer completely without cutting off sentences (up to 1600 characters)
-  if (cleaned.length > 1600) {
-    const sub = cleaned.slice(0, 1600);
-    const lastPunct = Math.max(sub.lastIndexOf("."), sub.lastIndexOf("!"), sub.lastIndexOf("?"), sub.lastIndexOf("।"));
-    if (lastPunct > 600) {
+  // Speak the primary conversational answer summary crisply without delay (up to 320 characters)
+  // This delivers instant sub-second playback while preserving full, natural sentences
+  if (cleaned.length > 320) {
+    const sub = cleaned.slice(0, 320);
+    const lastPunct = Math.max(
+      sub.lastIndexOf(". "),
+      sub.lastIndexOf("! "),
+      sub.lastIndexOf("? "),
+      sub.lastIndexOf("। ")
+    );
+    if (lastPunct > 80) {
       cleaned = sub.slice(0, lastPunct + 1);
     } else {
-      cleaned = sub.trim();
+      const lastSpace = sub.lastIndexOf(" ");
+      cleaned = (lastSpace > 80 ? sub.slice(0, lastSpace) : sub).trim() + "...";
     }
   }
 
@@ -437,12 +444,12 @@ export async function speak(text: string, language: Language, onEnd?: () => void
         setPlaybackStatus("playing");
       };
 
-      // Give neural TTS stream up to 7 seconds to load high-definition studio audio
+      // Give neural TTS stream up to 2.5 seconds to load audio; then fall back seamlessly
       const loadTimeout = setTimeout(() => {
         if (!ended && audio.readyState < 2) {
           triggerFallback();
         }
-      }, 7000);
+      }, 2500);
 
       audio.onplaying = () => {
         clearTimeout(loadTimeout);

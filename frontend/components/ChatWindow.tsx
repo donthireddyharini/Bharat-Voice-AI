@@ -525,45 +525,36 @@ export default function ChatWindow({
             <MessageBubble message={m} currentLanguage={language} />
             {m.role === "assistant" && (
               <div className="flex gap-1.5 sm:gap-2 mt-2 flex-wrap pl-1 sm:pl-11 max-w-full items-center">
-                {activeSpokenMessageId === m.id && (speechStatus === "playing" || assistantState === "speaking") ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        pauseSpeaking();
-                        setAssistantState("paused");
-                      }}
-                      className="text-xs px-3 py-1.5 rounded-full border bg-amber-500/20 border-amber-400 text-amber-300 font-bold shadow-glow flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
-                    >
-                      <span>⏸️</span>
-                      <span>{language === "te" ? "పాజ్" : language === "hi" ? "रोकें" : "Pause"}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        stopSpeaking();
-                        setAssistantState("idle");
-                        setActiveSpokenMessageId(null);
-                      }}
-                      className="text-xs px-3 py-1.5 rounded-full border bg-red-500/20 border-red-400 text-red-300 font-bold shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
-                    >
-                      <span>⏹️</span>
-                      <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
-                    </button>
-                  </>
-                ) : activeSpokenMessageId === m.id && (speechStatus === "paused" || assistantState === "paused") ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        resumeSpeaking();
-                        setAssistantState("speaking");
-                      }}
-                      className="text-xs px-3 py-1.5 rounded-full border bg-emerald-500/20 border-emerald-400 text-emerald-300 font-bold shadow-glow flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
-                    >
-                      <span>▶️</span>
-                      <span>{language === "te" ? "కొనసాగించు" : language === "hi" ? "जारी रखें" : "Resume"}</span>
-                    </button>
+                {activeSpokenMessageId === m.id && (speechStatus === "playing" || assistantState === "speaking" || speechStatus === "paused" || assistantState === "paused") ? (
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-panel2/90 border border-saffron/40 shadow-sm text-xs">
+                    {speechStatus === "paused" || assistantState === "paused" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resumeSpeaking();
+                          setAssistantState("speaking");
+                        }}
+                        className="flex items-center gap-1 text-emerald-300 hover:text-emerald-200 font-semibold cursor-pointer active:scale-95 transition-all"
+                        title="Resume"
+                      >
+                        <span>▶️</span>
+                        <span>{language === "te" ? "కొనసాగించు" : language === "hi" ? "जारी रखें" : "Resume"}</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          pauseSpeaking();
+                          setAssistantState("paused");
+                        }}
+                        className="flex items-center gap-1 text-amber-300 hover:text-amber-200 font-semibold cursor-pointer active:scale-95 transition-all"
+                        title="Pause"
+                      >
+                        <span>⏸️</span>
+                        <span>{language === "te" ? "పాజ్" : language === "hi" ? "रोकें" : "Pause"}</span>
+                      </button>
+                    )}
+                    <span className="text-white/20 select-none">|</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -571,12 +562,12 @@ export default function ChatWindow({
                         setAssistantState("idle");
                         setActiveSpokenMessageId(null);
                       }}
-                      className="text-xs px-3 py-1.5 rounded-full border bg-red-500/20 border-red-400 text-red-300 font-bold shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                      className="text-red-400 hover:text-red-300 font-medium cursor-pointer active:scale-95 transition-all px-0.5"
+                      title="Stop"
                     >
-                      <span>⏹️</span>
-                      <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
+                      ⏹️
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <button
                     type="button"
@@ -586,11 +577,11 @@ export default function ChatWindow({
                         m.content;
                       handleReadAloud(speechText, language, m.id);
                     }}
-                    className="text-xs px-3 py-1.5 rounded-full border text-mist hover:text-bone hover:bg-white/5 border-white/10 hover:border-saffron/30 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                    className="text-xs px-2.5 py-1 rounded-full border text-mist hover:text-bone hover:bg-white/5 border-white/10 hover:border-saffron/30 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"
                   >
                     <span>🔉</span>
                     <span>
-                      {language === "te" ? "వాయిస్ వినండి" : language === "hi" ? "आवाज सुनें" : "Listen Voice"}
+                      {language === "te" ? "వాయిస్" : language === "hi" ? "आवाज" : "Voice"}
                     </span>
                   </button>
                 )}
@@ -628,75 +619,6 @@ export default function ChatWindow({
           </div>
         )}
       </div>
-
-      {/* Floating Interactive Voice Playback Control Bar */}
-      {(speechStatus === "playing" || speechStatus === "paused" || assistantState === "speaking" || assistantState === "paused") && (
-        <div className="flex items-center justify-between gap-2.5 px-3.5 py-2 glass-strong bg-gradient-to-r from-saffron/20 via-panel2 to-amethyst/20 border border-saffron/40 rounded-2xl shadow-glow mb-1 animate-fadeIn shrink-0">
-          <div className="flex items-center gap-2 truncate">
-            <span
-              className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                speechStatus === "playing" || assistantState === "speaking"
-                  ? "bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"
-                  : "bg-amber-400"
-              }`}
-            />
-            <span className="text-xs font-bold text-bone truncate">
-              {speechStatus === "paused" || assistantState === "paused"
-                ? language === "te"
-                  ? "⏸️ వాయిస్ పాజ్ చేయబడింది"
-                  : language === "hi"
-                  ? "⏸️ आवाज रोक दी गई है"
-                  : "⏸️ Voice Paused"
-                : language === "te"
-                ? "🔊 భారతవాయిస్ మాట్లాడుతోంది..."
-                : language === "hi"
-                ? "🔊 भारतवॉयस बोल रहा है..."
-                : "🔊 BharathVoice Speaking..."}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {speechStatus === "paused" || assistantState === "paused" ? (
-              <button
-                type="button"
-                onClick={() => {
-                  resumeSpeaking();
-                  setAssistantState("speaking");
-                }}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-sm"
-              >
-                <span>▶️</span>
-                <span>{language === "te" ? "కొనసాగించు" : language === "hi" ? "जारी रखें" : "Resume"}</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  pauseSpeaking();
-                  setAssistantState("paused");
-                }}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-sm"
-              >
-                <span>⏸️</span>
-                <span>{language === "te" ? "పాజ్" : language === "hi" ? "रोकें" : "Pause"}</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
-                stopSpeaking();
-                setAssistantState("idle");
-                setActiveSpokenMessageId(null);
-              }}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-400/50 text-red-300 font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-sm"
-            >
-              <span>⏹️</span>
-              <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="border-t border-white/5 pt-3 sm:pt-4 mt-1 sm:mt-2">
         <div className="flex items-center gap-2 sm:gap-3">

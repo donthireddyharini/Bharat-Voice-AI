@@ -31,18 +31,23 @@ function sanitizeForSpeech(text: string): string {
 /**
  * Free universal Google translation helper for cross-lingual knowledge retrieval
  */
+const TRANSLATION_CACHE = new Map<string, string>();
+
 async function translateText(text: string, targetLang: Language | "en", sourceLang: string = "auto"): Promise<string> {
   if (!text || targetLang === sourceLang) return text;
+  const cacheKey = `${sourceLang}->${targetLang}:${text}`;
+  if (TRANSLATION_CACHE.has(cacheKey)) return TRANSLATION_CACHE.get(cacheKey)!;
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4500);
+    const timeout = setTimeout(() => controller.abort(), 2000);
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeout);
     if (!res.ok) return text;
     const data = await res.json();
     if (Array.isArray(data) && Array.isArray(data[0])) {
       const translated = data[0].map((s: any) => s[0]).join("");
+      if (translated) { if (TRANSLATION_CACHE.size > 500) { const k = TRANSLATION_CACHE.keys().next().value; if (k) TRANSLATION_CACHE.delete(k); } TRANSLATION_CACHE.set(cacheKey, translated); }
       return translated || text;
     }
   } catch {
@@ -1328,7 +1333,7 @@ async function callGemini(prompt: string, apiKey: string): Promise<string | null
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 3500);
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1356,7 +1361,7 @@ async function callGemini(prompt: string, apiKey: string): Promise<string | null
 async function callGroq(prompt: string, apiKey: string): Promise<string | null> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 3500);
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -1389,7 +1394,7 @@ async function callGroq(prompt: string, apiKey: string): Promise<string | null> 
 async function callOpenAI(prompt: string, apiKey: string): Promise<string | null> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 3500);
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -1574,12 +1579,16 @@ async function getIndianFestivalsAndCalendar(
   convId: string,
   msgId: string
 ): Promise<ChatResponse | null> {
+  // First check if query directly matches festival keywords (instant, 0ms)
+  let isFest = isFestivalQuery(query, query);
   let englishQuery = query;
-  if (language !== "en") {
+
+  if (!isFest && language !== "en") {
     englishQuery = await translateText(query, "en", language);
+    isFest = isFestivalQuery(query, englishQuery);
   }
 
-  if (!isFestivalQuery(query, englishQuery)) {
+  if (!isFest) {
     return null;
   }
 
@@ -1727,12 +1736,20 @@ async function getRealtimeNewsOrCurrentEvents(
   forceSearch: boolean = false
 ): Promise<ChatResponse | null> {
   try {
+    const queryLower = query.toLowerCase();
+
+    // Quick local regex check first before network translation
+    let isRealtime =
+      /(రీసెంట్|అప్డేట్|తాజా|వార్త|వార్తలు|న్యూస్|ఈరోజు|విశేషాలు|ధర|ధరలు|రేటు|స్కోర్|ఏమైంది|ఏం జరిగింది|ఏం జరుగుతోంది|సంగతులు|ముఖ్యాంశాలు|లైవ్|పరిస్థితి|తుఫాను)/.test(queryLower) ||
+      /(ताजा|ताज़ा|खबर|समाचार|अपडेट|हालिया|आज|भाव|दर|स्कोर|क्या हुआ|क्या चल रहा|लाइव|स्थिति|सुर्खियां)/.test(queryLower) ||
+      /(recent|updates?|latest|news|today|current|happening|developments?|score|scores?|price|prices?|rate|rates?|status|what happened|breaking|live|now|event|events|bulletin|headlines?|alerts?|trends?|trending)/i.test(queryLower);
+
     let englishQuery = query;
-    if (language !== "en") {
+    if (!isRealtime && language !== "en") {
       englishQuery = await translateText(query, "en", language);
+      isRealtime = /(recent|updates?|latest|news|today|current|happening|developments?|score|scores?|price|prices?|rate|rates?|status|what happened|breaking|live|now|event|events|bulletin|headlines?|alerts?|trends?|trending)/i.test(englishQuery.toLowerCase());
     }
 
-    const queryLower = query.toLowerCase();
     const engLower = englishQuery.toLowerCase();
 
     // Never route festival or calendar queries to news RSS (avoids promotional e-commerce sales like "Amazon Great Indian Festival")
