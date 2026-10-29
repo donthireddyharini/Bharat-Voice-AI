@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Language } from "./types";
 
 // BCP-47 locale codes used by the Web Speech recognition API.
@@ -18,6 +19,89 @@ export const SPEECH_LOCALES: Record<Language, string> = {
 };
 
 let currentAudio: HTMLAudioElement | null = null;
+
+export type SpeechPlaybackStatus = "idle" | "playing" | "paused";
+
+let speechStatus: SpeechPlaybackStatus = "idle";
+const speechListeners = new Set<(status: SpeechPlaybackStatus) => void>();
+
+export function getSpeechStatus(): SpeechPlaybackStatus {
+  return speechStatus;
+}
+
+export function subscribeSpeechStatus(callback: (status: SpeechPlaybackStatus) => void): () => void {
+  speechListeners.add(callback);
+  callback(speechStatus);
+  return () => {
+    speechListeners.delete(callback);
+  };
+}
+
+function setPlaybackStatus(status: SpeechPlaybackStatus) {
+  if (speechStatus !== status) {
+    speechStatus = status;
+    speechListeners.forEach((fn) => {
+      try {
+        fn(status);
+      } catch {}
+    });
+  }
+}
+
+/**
+ * React hook to observe speech status ("idle" | "playing" | "paused")
+ */
+export function useSpeechStatus(): SpeechPlaybackStatus {
+  const [status, setStatus] = useState<SpeechPlaybackStatus>(speechStatus);
+  useEffect(() => {
+    return subscribeSpeechStatus(setStatus);
+  }, []);
+  return status;
+}
+
+export function pauseSpeaking(): boolean {
+  if (currentAudio && !currentAudio.paused && !currentAudio.ended) {
+    try {
+      currentAudio.pause();
+      setPlaybackStatus("paused");
+      return true;
+    } catch {}
+  }
+  if (isSpeechSynthesisSupported() && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+    try {
+      window.speechSynthesis.pause();
+      setPlaybackStatus("paused");
+      return true;
+    } catch {}
+  }
+  return false;
+}
+
+export function resumeSpeaking(): boolean {
+  if (currentAudio && currentAudio.paused && !currentAudio.ended) {
+    try {
+      currentAudio.play();
+      setPlaybackStatus("playing");
+      return true;
+    } catch {}
+  }
+  if (isSpeechSynthesisSupported() && window.speechSynthesis.paused) {
+    try {
+      window.speechSynthesis.resume();
+      setPlaybackStatus("playing");
+      return true;
+    } catch {}
+  }
+  return false;
+}
+
+export function isSpeakingPaused(): boolean {
+  return speechStatus === "paused";
+}
+
+export function isSpeaking(): boolean {
+  return speechStatus === "playing";
+}
 
 export function isSpeechRecognitionSupported(): boolean {
   if (typeof window === "undefined") return false;
@@ -300,11 +384,13 @@ export function startListening(
  */
 export async function speak(text: string, language: Language, onEnd?: () => void) {
   if (!text || !text.trim()) {
+    setPlaybackStatus("idle");
     onEnd?.();
     return;
   }
 
   stopSpeaking();
+  setPlaybackStatus("playing");
   const cleanedText = cleanTextForSpeech(text, language);
 
   let ended = false;
@@ -312,6 +398,7 @@ export async function speak(text: string, language: Language, onEnd?: () => void
     if (!ended) {
       ended = true;
       currentAudio = null;
+      setPlaybackStatus("idle");
       onEnd?.();
     }
   };
@@ -341,6 +428,14 @@ export async function speak(text: string, language: Language, onEnd?: () => void
       audio.onerror = () => {
         triggerFallback();
       };
+      audio.onpause = () => {
+        if (!ended && !audio.ended && audio.currentTime > 0 && speechStatus === "paused") {
+          setPlaybackStatus("paused");
+        }
+      };
+      audio.onplay = () => {
+        setPlaybackStatus("playing");
+      };
 
       // Give neural TTS stream up to 7 seconds to load high-definition studio audio
       const loadTimeout = setTimeout(() => {
@@ -351,6 +446,7 @@ export async function speak(text: string, language: Language, onEnd?: () => void
 
       audio.onplaying = () => {
         clearTimeout(loadTimeout);
+        setPlaybackStatus("playing");
       };
 
       const playPromise = audio.play();
@@ -373,6 +469,7 @@ export async function speak(text: string, language: Language, onEnd?: () => void
 
 function fallbackBrowserSpeak(cleanedText: string, language: Language, onEnd?: () => void) {
   if (!isSpeechSynthesisSupported()) {
+    setPlaybackStatus("idle");
     onEnd?.();
     return;
   }
@@ -381,12 +478,14 @@ function fallbackBrowserSpeak(cleanedText: string, language: Language, onEnd?: (
   const finish = () => {
     if (!ended) {
       ended = true;
+      setPlaybackStatus("idle");
       onEnd?.();
     }
   };
 
   try {
     window.speechSynthesis.cancel();
+    setPlaybackStatus("playing");
     const utterance = new SpeechSynthesisUtterance(cleanedText);
     utterance.lang = SPEECH_LOCALES[language] || "en-IN";
     utterance.volume = 1.0;
@@ -442,6 +541,7 @@ function fallbackBrowserSpeak(cleanedText: string, language: Language, onEnd?: (
 }
 
 export function stopSpeaking() {
+  setPlaybackStatus("idle");
   if (currentAudio) {
     try {
       currentAudio.pause();

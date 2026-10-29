@@ -14,7 +14,7 @@ import { Language, SourceRef } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/useLanguage";
 import { getSearchHistory, deleteSearchHistoryItem, clearSearchHistory, SearchHistoryEntry, HISTORY_UPDATED_EVENT } from "@/lib/history";
-import { getChatSessions, deleteChatSession, clearAllChatSessions, ChatSession, CHAT_SESSIONS_UPDATED_EVENT } from "@/lib/chatSessions";
+import { getChatSessions, deleteChatSession, clearAllChatSessions, ChatSession, CHAT_SESSIONS_UPDATED_EVENT, countQAPairs } from "@/lib/chatSessions";
 
 const LANGUAGE_ONBOARDING_KEY = "bharathvoice_onboarded";
 
@@ -271,7 +271,7 @@ function AssistantContent() {
                             <span className="font-mono text-cyber/90">📅 {session.formattedDate}</span>
                             <div className="flex items-center gap-1.5">
                               <span className="px-1.5 py-0.2 rounded bg-white/5 text-[9px] uppercase font-bold text-bone">
-                                {session.messages.length} msgs
+                                {countQAPairs(session.messages)} {countQAPairs(session.messages) === 1 ? "Q&A" : "Q&As"}
                               </span>
                               <button
                                 type="button"
@@ -427,7 +427,7 @@ function AssistantContent() {
                             </span>
                             <div className="flex items-center gap-1.5">
                               <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 uppercase text-[9px] font-bold text-bone">
-                                {session.messages.length} msgs
+                                {countQAPairs(session.messages)} {countQAPairs(session.messages) === 1 ? "Q&A" : "Q&As"}
                               </span>
                               <button
                                 type="button"

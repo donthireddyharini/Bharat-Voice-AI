@@ -6,10 +6,10 @@ import { ChatMessage, AssistantState, Language, SourceRef } from "@/lib/types";
 import { sendChat, sendVoiceTranscript } from "@/lib/api";
 import { generateKnowledgeResponse } from "@/lib/knowledgeEngine";
 import { getLocalizedScheme } from "@/lib/schemeLocalization";
-import { startListening, speak, isSpeechRecognitionSupported } from "@/lib/speech";
+import { startListening, speak, pauseSpeaking, resumeSpeaking, stopSpeaking, isSpeakingPaused, useSpeechStatus, isSpeechRecognitionSupported } from "@/lib/speech";
 import { isSupabaseConfigured, storeConversationInSupabase, storeMessageInSupabase } from "@/lib/supabase";
 import { saveSearchToHistory } from "@/lib/history";
-import { getChatSessionById, saveOrUpdateChatSession } from "@/lib/chatSessions";
+import { getChatSessionById, saveOrUpdateChatSession, countQAPairs } from "@/lib/chatSessions";
 import MessageBubble from "./MessageBubble";
 import ThinkingAnimation from "./ThinkingAnimation";
 import VoiceButton from "./VoiceButton";
@@ -173,8 +173,22 @@ export default function ChatWindow({
   const [assistantState, setAssistantState] = useState<AssistantState>("idle");
   const [isListening, setIsListening] = useState(false);
   const [errorText, setErrorText] = useState("");
+  const [activeSpokenMessageId, setActiveSpokenMessageId] = useState<string | null>(null);
+  const speechStatus = useSpeechStatus();
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastFailedQuery = useRef<string | null>(null);
+
+  // Sync assistantState with global speech status
+  useEffect(() => {
+    if (speechStatus === "idle" && (assistantState === "speaking" || assistantState === "paused")) {
+      setAssistantState("idle");
+      setActiveSpokenMessageId(null);
+    } else if (speechStatus === "paused" && assistantState === "speaking") {
+      setAssistantState("paused");
+    } else if (speechStatus === "playing" && assistantState === "paused") {
+      setAssistantState("speaking");
+    }
+  }, [speechStatus, assistantState]);
 
   // Sync sources and followups on initial mount from persisted active session
   useEffect(() => {
@@ -208,6 +222,9 @@ export default function ChatWindow({
   }, [activeSessionId]);
 
   function handleNewChat() {
+    stopSpeaking();
+    setAssistantState("idle");
+    setActiveSpokenMessageId(null);
     setMessages([]);
     setConversationId(undefined);
     onSourcesChange?.([]);
@@ -332,11 +349,15 @@ export default function ChatWindow({
       }
 
       setAssistantState("speaking");
+      setActiveSpokenMessageId(assistantMessage.id);
       const speechText =
         (result.answer?.scheme_id ? getLocalizedScheme(result.answer.scheme_id, language)?.summary : null) ||
         result.answer?.summary ||
         "";
-      speak(speechText, result.language || language, () => setAssistantState("idle"));
+      speak(speechText, result.language || language, () => {
+        setAssistantState("idle");
+        setActiveSpokenMessageId(null);
+      });
       lastFailedQuery.current = null;
     } catch (e: any) {
       console.warn("[ChatWindow] Fallback recovery:", e);
@@ -380,13 +401,18 @@ export default function ChatWindow({
         });
 
         setAssistantState("speaking");
+        setActiveSpokenMessageId(fallbackMessage.id);
         const fallbackSpeechText =
           (fallback.answer?.scheme_id ? getLocalizedScheme(fallback.answer.scheme_id, language)?.summary : null) ||
           fallback.answer.summary ||
           "";
-        speak(fallbackSpeechText, fallback.language || language, () => setAssistantState("idle"));
+        speak(fallbackSpeechText, fallback.language || language, () => {
+          setAssistantState("idle");
+          setActiveSpokenMessageId(null);
+        });
       } catch {
         setAssistantState("idle");
+        setActiveSpokenMessageId(null);
       }
       lastFailedQuery.current = null;
     }
@@ -420,10 +446,26 @@ export default function ChatWindow({
     setAssistantState("idle");
   }
 
-  function handleReadAloud(text: string, msgLanguage?: Language) {
+  function handleReadAloud(text: string, msgLanguage?: Language, messageId?: string) {
+    if (activeSpokenMessageId === messageId && (assistantState === "speaking" || speechStatus === "playing")) {
+      pauseSpeaking();
+      setAssistantState("paused");
+      return;
+    }
+    if (activeSpokenMessageId === messageId && (assistantState === "paused" || speechStatus === "paused")) {
+      resumeSpeaking();
+      setAssistantState("speaking");
+      return;
+    }
     setAssistantState("speaking");
-    speak(text, msgLanguage || language, () => setAssistantState("idle"));
+    if (messageId) setActiveSpokenMessageId(messageId);
+    speak(text, msgLanguage || language, () => {
+      setAssistantState("idle");
+      setActiveSpokenMessageId(null);
+    });
   }
+
+  const qaCount = countQAPairs(messages);
 
   return (
     <div className="flex flex-col h-full">
@@ -432,7 +474,12 @@ export default function ChatWindow({
           <div className="flex items-center gap-2 truncate pr-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_#34d399]" />
             <span className="text-mist font-medium truncate">
-              {messages.length} {language === "te" ? "సందేశాలు (సేవ్ చేయబడింది)" : "messages (Saved)"}
+              {qaCount}{" "}
+              {language === "te"
+                ? `${qaCount === 1 ? "ప్రశ్నోత్తరం (Q&A)" : "ప్రశ్నోత్తరాలు (Q&A)"} (సేవ్ చేయబడింది)`
+                : language === "hi"
+                ? `${qaCount === 1 ? "बातचीत (Q&A)" : "बातचीतें (Q&A)"} (सुरक्षित)`
+                : `${qaCount} ${qaCount === 1 ? "Q&A Interaction" : "Q&A Interactions"} (Saved)`}
             </span>
           </div>
           <button
@@ -477,26 +524,76 @@ export default function ChatWindow({
           <div key={m.id} className={`w-full flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
             <MessageBubble message={m} currentLanguage={language} />
             {m.role === "assistant" && (
-              <div className="flex gap-1.5 sm:gap-2 mt-2 flex-wrap pl-1 sm:pl-11 max-w-full">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const speechText = (m.structured?.scheme_id ? getLocalizedScheme(m.structured.scheme_id, language)?.summary : null) || m.content;
-                    handleReadAloud(speechText, language);
-                  }}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                    assistantState === "speaking"
-                      ? "bg-saffron/20 border-saffron text-saffron font-bold shadow-glow"
-                      : "text-mist hover:text-bone hover:bg-white/5 border-white/10 hover:border-saffron/30"
-                  }`}
-                >
-                  <span>{assistantState === "speaking" ? "🔊" : "🔉"}</span>
-                  <span>
-                    {assistantState === "speaking"
-                      ? language === "te" ? "మాట్లాడుతోంది..." : language === "hi" ? "बोल रहा है..." : "Speaking..."
-                      : language === "te" ? "వాయిస్ వినండి" : language === "hi" ? "आवाज सुनें" : "Listen Voice"}
-                  </span>
-                </button>
+              <div className="flex gap-1.5 sm:gap-2 mt-2 flex-wrap pl-1 sm:pl-11 max-w-full items-center">
+                {activeSpokenMessageId === m.id && (speechStatus === "playing" || assistantState === "speaking") ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        pauseSpeaking();
+                        setAssistantState("paused");
+                      }}
+                      className="text-xs px-3 py-1.5 rounded-full border bg-amber-500/20 border-amber-400 text-amber-300 font-bold shadow-glow flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                    >
+                      <span>⏸️</span>
+                      <span>{language === "te" ? "పాజ్" : language === "hi" ? "रोकें" : "Pause"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        stopSpeaking();
+                        setAssistantState("idle");
+                        setActiveSpokenMessageId(null);
+                      }}
+                      className="text-xs px-3 py-1.5 rounded-full border bg-red-500/20 border-red-400 text-red-300 font-bold shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                    >
+                      <span>⏹️</span>
+                      <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
+                    </button>
+                  </>
+                ) : activeSpokenMessageId === m.id && (speechStatus === "paused" || assistantState === "paused") ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        resumeSpeaking();
+                        setAssistantState("speaking");
+                      }}
+                      className="text-xs px-3 py-1.5 rounded-full border bg-emerald-500/20 border-emerald-400 text-emerald-300 font-bold shadow-glow flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                    >
+                      <span>▶️</span>
+                      <span>{language === "te" ? "కొనసాగించు" : language === "hi" ? "जारी रखें" : "Resume"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        stopSpeaking();
+                        setAssistantState("idle");
+                        setActiveSpokenMessageId(null);
+                      }}
+                      className="text-xs px-3 py-1.5 rounded-full border bg-red-500/20 border-red-400 text-red-300 font-bold shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                    >
+                      <span>⏹️</span>
+                      <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const speechText =
+                        (m.structured?.scheme_id ? getLocalizedScheme(m.structured.scheme_id, language)?.summary : null) ||
+                        m.content;
+                      handleReadAloud(speechText, language, m.id);
+                    }}
+                    className="text-xs px-3 py-1.5 rounded-full border text-mist hover:text-bone hover:bg-white/5 border-white/10 hover:border-saffron/30 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  >
+                    <span>🔉</span>
+                    <span>
+                      {language === "te" ? "వాయిస్ వినండి" : language === "hi" ? "आवाज सुनें" : "Listen Voice"}
+                    </span>
+                  </button>
+                )}
                 {(m.followups || []).map((f) => (
                   <button
                     key={f}
@@ -531,6 +628,75 @@ export default function ChatWindow({
           </div>
         )}
       </div>
+
+      {/* Floating Interactive Voice Playback Control Bar */}
+      {(speechStatus === "playing" || speechStatus === "paused" || assistantState === "speaking" || assistantState === "paused") && (
+        <div className="flex items-center justify-between gap-2.5 px-3.5 py-2 glass-strong bg-gradient-to-r from-saffron/20 via-panel2 to-amethyst/20 border border-saffron/40 rounded-2xl shadow-glow mb-1 animate-fadeIn shrink-0">
+          <div className="flex items-center gap-2 truncate">
+            <span
+              className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                speechStatus === "playing" || assistantState === "speaking"
+                  ? "bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"
+                  : "bg-amber-400"
+              }`}
+            />
+            <span className="text-xs font-bold text-bone truncate">
+              {speechStatus === "paused" || assistantState === "paused"
+                ? language === "te"
+                  ? "⏸️ వాయిస్ పాజ్ చేయబడింది"
+                  : language === "hi"
+                  ? "⏸️ आवाज रोक दी गई है"
+                  : "⏸️ Voice Paused"
+                : language === "te"
+                ? "🔊 భారతవాయిస్ మాట్లాడుతోంది..."
+                : language === "hi"
+                ? "🔊 भारतवॉयस बोल रहा है..."
+                : "🔊 BharathVoice Speaking..."}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {speechStatus === "paused" || assistantState === "paused" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  resumeSpeaking();
+                  setAssistantState("speaking");
+                }}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-sm"
+              >
+                <span>▶️</span>
+                <span>{language === "te" ? "కొనసాగించు" : language === "hi" ? "जारी रखें" : "Resume"}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  pauseSpeaking();
+                  setAssistantState("paused");
+                }}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-sm"
+              >
+                <span>⏸️</span>
+                <span>{language === "te" ? "పాజ్" : language === "hi" ? "रोकें" : "Pause"}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                stopSpeaking();
+                setAssistantState("idle");
+                setActiveSpokenMessageId(null);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-400/50 text-red-300 font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-sm"
+            >
+              <span>⏹️</span>
+              <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="border-t border-white/5 pt-3 sm:pt-4 mt-1 sm:mt-2">
         <div className="flex items-center gap-2 sm:gap-3">

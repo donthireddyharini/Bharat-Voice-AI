@@ -59,6 +59,7 @@ export type AssistantState =
   | "searching"
   | "generating"
   | "speaking"
+  | "paused"
   | "error";
 
 export interface CategoryItem {

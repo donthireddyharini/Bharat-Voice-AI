@@ -9,10 +9,10 @@ import DashboardLanguageSelector from "@/components/DashboardLanguageSelector";
 import { fetchConversations } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/useLanguage";
-import { speak, stopSpeaking, startListening } from "@/lib/speech";
+import { speak, stopSpeaking, pauseSpeaking, resumeSpeaking, useSpeechStatus, startListening } from "@/lib/speech";
 import { Language } from "@/lib/types";
 import { getSearchHistory, deleteSearchHistoryItem, clearSearchHistory, SearchHistoryEntry, HISTORY_UPDATED_EVENT } from "@/lib/history";
-import { getChatSessions, deleteChatSession, clearAllChatSessions, ChatSession, CHAT_SESSIONS_UPDATED_EVENT } from "@/lib/chatSessions";
+import { getChatSessions, deleteChatSession, clearAllChatSessions, ChatSession, CHAT_SESSIONS_UPDATED_EVENT, countQAPairs } from "@/lib/chatSessions";
 
 type DashboardTab = "overview" | "voice" | "schemes" | "history";
 
@@ -57,6 +57,14 @@ function DashboardContent() {
   // Voice playing state
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
   const [expandedVoiceId, setExpandedVoiceId] = useState<string | null>(null);
+  const speechStatus = useSpeechStatus();
+
+  // Reset playing voice ID when audio finishes
+  useEffect(() => {
+    if (speechStatus === "idle") {
+      setPlayingVoiceId(null);
+    }
+  }, [speechStatus]);
 
   // Live microphone listening state
   const [isListening, setIsListening] = useState(false);
@@ -107,9 +115,16 @@ function DashboardContent() {
     };
   }, []);
 
-  // 1-Tap Voice Playback toggle
+  // 1-Tap Voice Playback toggle (Supports Play, Pause, Resume, and Stop)
   const togglePlayVoiceAnswer = (item: VoicePromptItem) => {
     if (playingVoiceId === item.id) {
+      if (speechStatus === "playing") {
+        pauseSpeaking();
+        return;
+      } else if (speechStatus === "paused") {
+        resumeSpeaking();
+        return;
+      }
       stopSpeaking();
       setPlayingVoiceId(null);
       return;
@@ -120,6 +135,11 @@ function DashboardContent() {
     speak(item.spokenAnswer, language, () => {
       setPlayingVoiceId(null);
     });
+  };
+
+  const handleStopVoiceAnswer = () => {
+    stopSpeaking();
+    setPlayingVoiceId(null);
   };
 
   // Live Microphone Listening on Dashboard
@@ -986,6 +1006,8 @@ function DashboardContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {VOICE_PROMPTS.map((item) => {
                   const isPlaying = playingVoiceId === item.id;
+                  const isAudioPlaying = isPlaying && speechStatus === "playing";
+                  const isAudioPaused = isPlaying && speechStatus === "paused";
                   const isExpanded = expandedVoiceId === item.id;
 
                   return (
@@ -1032,26 +1054,60 @@ function DashboardContent() {
                         </div>
                       </div>
 
-                      {/* Action Buttons: 1-Tap Listen Audio + Ask AI Assistant */}
+                      {/* Action Buttons: 1-Tap Play/Pause/Resume/Stop Audio + Ask AI Assistant */}
                       <div className="flex items-center gap-2 pt-3 border-t border-white/5">
-                        <button
-                          type="button"
-                          onClick={() => togglePlayVoiceAnswer(item)}
-                          className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-95 ${
-                            isPlaying
-                              ? "bg-red-500/90 hover:bg-red-600 text-white shadow-glow"
-                              : "bg-white/10 hover:bg-white/20 text-bone border border-white/15 hover:border-cyber/40"
-                          }`}
-                        >
-                          <span className={isPlaying ? "animate-spin" : ""}>
-                            {isPlaying ? "⏹️" : "🔊"}
-                          </span>
-                          <span>
-                            {isPlaying
-                              ? language === "te" ? "ఆపండి (Stop)" : language === "hi" ? "रोकें (Stop)" : "Stop Audio"
-                              : language === "te" ? "వినండి (Listen)" : language === "hi" ? "सुनें (Listen)" : "Listen Answer"}
-                          </span>
-                        </button>
+                        {isAudioPlaying ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => pauseSpeaking()}
+                              className="flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400 text-amber-300"
+                            >
+                              <span>⏸️</span>
+                              <span>{language === "te" ? "పాజ్ (Pause)" : language === "hi" ? "रोकें (Pause)" : "Pause"}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleStopVoiceAnswer}
+                              className="py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer shadow-sm active:scale-95 bg-red-500/20 hover:bg-red-500/30 border border-red-400 text-red-300"
+                              title="Stop Audio"
+                            >
+                              <span>⏹️</span>
+                              <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
+                            </button>
+                          </>
+                        ) : isAudioPaused ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => resumeSpeaking()}
+                              className="flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400 text-emerald-300"
+                            >
+                              <span>▶️</span>
+                              <span>{language === "te" ? "కొనసాగించు (Resume)" : language === "hi" ? "जारी रखें (Resume)" : "Resume"}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleStopVoiceAnswer}
+                              className="py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer shadow-sm active:scale-95 bg-red-500/20 hover:bg-red-500/30 border border-red-400 text-red-300"
+                              title="Stop Audio"
+                            >
+                              <span>⏹️</span>
+                              <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => togglePlayVoiceAnswer(item)}
+                            className="flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-95 bg-white/10 hover:bg-white/20 text-bone border border-white/15 hover:border-cyber/40"
+                          >
+                            <span>🔊</span>
+                            <span>
+                              {language === "te" ? "వినండి (Listen)" : language === "hi" ? "सुनें (Listen)" : "Listen Answer"}
+                            </span>
+                          </button>
+                        )}
 
                         <Link
                           href={`/assistant?q=${encodeURIComponent(item.query)}&lang=${language}&voice=1`}
@@ -1346,8 +1402,13 @@ function DashboardContent() {
                             <span>{session.formattedDate}</span>
                           </span>
                           <div className="flex items-center gap-1.5">
-                            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase font-bold text-bone">
-                              {session.messages.length} messages
+                            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-bone">
+                              {countQAPairs(session.messages)}{" "}
+                              {language === "te"
+                                ? `${countQAPairs(session.messages) === 1 ? "ప్రశ్నోత్తరం (Q&A)" : "ప్రశ్నోత్తరాలు (Q&A)"}`
+                                : language === "hi"
+                                ? `${countQAPairs(session.messages) === 1 ? "बातचीत" : "बातचीतें"}`
+                                : `${countQAPairs(session.messages) === 1 ? "interaction" : "interactions"}`}
                             </span>
                             <button
                               type="button"
@@ -1493,19 +1554,61 @@ function DashboardContent() {
 
             {/* Modal Bottom Actions */}
             <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  speak(
-                    `${selectedSchemeDetail.title}. ${selectedSchemeDetail.desc}. ${selectedSchemeDetail.benefit}`,
-                    language
-                  );
-                }}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl glass border border-white/15 text-xs font-bold text-bone hover:border-cyber flex items-center justify-center gap-2 transition-all cursor-pointer"
-              >
-                <span>🔊</span>
-                <span>{language === "te" ? "సారాంశం వినండి" : language === "hi" ? "विवरण सुनें" : "Listen Overview"}</span>
-              </button>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                {speechStatus === "playing" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => pauseSpeaking()}
+                      className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                    >
+                      <span>⏸️</span>
+                      <span>{language === "te" ? "పాజ్ (Pause)" : language === "hi" ? "रोकें (Pause)" : "Pause"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => stopSpeaking()}
+                      className="px-3.5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-400 text-red-300 text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer shadow-sm active:scale-95"
+                    >
+                      <span>⏹️</span>
+                      <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
+                    </button>
+                  </>
+                ) : speechStatus === "paused" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => resumeSpeaking()}
+                      className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400 text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                    >
+                      <span>▶️</span>
+                      <span>{language === "te" ? "కొనసాగించు (Resume)" : language === "hi" ? "जारी रखें (Resume)" : "Resume"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => stopSpeaking()}
+                      className="px-3.5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-400 text-red-300 text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer shadow-sm active:scale-95"
+                    >
+                      <span>⏹️</span>
+                      <span>{language === "te" ? "ఆపు" : language === "hi" ? "बंद करें" : "Stop"}</span>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      speak(
+                        `${selectedSchemeDetail.title}. ${selectedSchemeDetail.desc}. ${selectedSchemeDetail.benefit}`,
+                        language
+                      );
+                    }}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl glass border border-white/15 text-xs font-bold text-bone hover:border-cyber flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  >
+                    <span>🔊</span>
+                    <span>{language === "te" ? "సారాంశం వినండి" : language === "hi" ? "विवरण सुनें" : "Listen Overview"}</span>
+                  </button>
+                )}
+              </div>
 
               <Link
                 href={`/assistant?q=${encodeURIComponent(

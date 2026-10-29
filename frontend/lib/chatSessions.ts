@@ -105,3 +105,14 @@ export function clearAllChatSessions(): void {
     console.error("Failed to clear chat sessions:", e);
   }
 }
+
+/**
+ * Counts user-assistant Q&A interactions.
+ * Treats 1 user input + 1 assistant output as 1 single interaction (not 2 separate items).
+ */
+export function countQAPairs(messages?: { role?: string }[]): number {
+  if (!messages || messages.length === 0) return 0;
+  const userCount = messages.filter((m) => m.role === "user").length;
+  if (userCount > 0) return userCount;
+  return Math.max(1, Math.floor(messages.length / 2));
+}

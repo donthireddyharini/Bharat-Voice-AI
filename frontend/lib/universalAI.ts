@@ -129,8 +129,8 @@ const WEATHER_CYCLONE_KEYWORDS = [
   "cyclone", "cyclones", "hurricane", "typhoon", "storm", "depression", "weather", "rain", "raining", "rainfall",
   "temperature", "forecast", "climate", "monsoon", "thunderstorm", "heatwave", "coldwave", "wind", "winds", "flood", "floods", "drought",
   // Telugu
-  "తుఫాను", "తుపాను", "సైక్లోన్", "వర్షం", "వాన", "వర్షపాతం", "వాతావరణం", "ఉష్ణోగ్రత", "ఎండ", "చలి", "గాలులు", "వరద", "పిడుగు", "మేఘాలు",
-  "చక్రవాతం",
+  "తుఫాను", "తుఫాన్", "తుపాను", "తుపాన్", "సైక్లోన్", "వర్షం", "వాన", "వర్షపాతం", "వాతావరణం", "ఉష్ణోగ్రత", "ఎండ", "చలి", "గాలులు", "వరద", "పిడుగు", "మేఘాలు",
+  "చక్రవాతం", "వాయుగుండం", "అల్పపీడనం",
   // Hindi
   "चक्रवात", "तूफान", "मौसम", "बारिश", "वर्षा", "तापमान", "आंधी", "बाढ़", "लू", "ठंड", "हवा", "मेघ", "बादल",
   // Other Indian Languages
@@ -152,7 +152,14 @@ function isWeatherOrCycloneQuery(query: string): boolean {
 function resolveLocation(query: string): LocationCoord {
   const lower = query.toLowerCase();
   for (const loc of INDIAN_LOCATIONS) {
-    if (loc.aliases.some((alias) => lower.includes(alias.toLowerCase()))) {
+    if (loc.aliases.some((alias) => {
+      const a = alias.toLowerCase();
+      if (a.length <= 2) {
+        const regex = new RegExp(`\\b${a}\\b`, "i");
+        return regex.test(lower);
+      }
+      return lower.includes(a);
+    })) {
       return loc;
     }
   }
@@ -249,8 +256,17 @@ async function getRealtimeWeatherOrCyclone(
 
     const isCycloneInquiry =
       queryLower.includes("cyclone") ||
+      queryLower.includes("cyclones") ||
+      queryLower.includes("arnab") ||
+      queryLower.includes("depression") ||
+      queryLower.includes("storm") ||
       query.includes("తుఫాను") ||
+      query.includes("తుఫాన్") ||
       query.includes("తుపాను") ||
+      query.includes("తుపాన్") ||
+      query.includes("సైక్లోన్") ||
+      query.includes("వాయుగుండం") ||
+      query.includes("అల్పపీడనం") ||
       query.includes("చక్రవాతం") ||
       query.includes("చక్రవాత్") ||
       query.includes("चक्रवात") ||
@@ -261,8 +277,8 @@ async function getRealtimeWeatherOrCyclone(
       b.affectedStates.some((st) => loc.name.toLowerCase().includes(st) || queryLower.includes(st) || loc.state.toLowerCase().includes(st))
     );
 
-    // If active cyclone matches (like Cyclone Arnab in Andhra Pradesh), return official IMD cyclone bulletin immediately!
-    if (activeBulletin && (isCycloneInquiry || loc.state === "Andhra Pradesh" || loc.name.includes("Andhra"))) {
+    // If active cyclone matches (like Cyclone Arnab in Andhra Pradesh) and query is about cyclone/storm/alert, return official IMD cyclone bulletin immediately!
+    if (activeBulletin && (isCycloneInquiry || queryLower.includes("arnab") || queryLower.includes("alert") || query.includes("హెచ్చరిక"))) {
       let title = activeBulletin.name;
       let summary = activeBulletin.summaryEn;
       let p1 = activeBulletin.precautionsEn.slice(0, 2);
@@ -1147,9 +1163,13 @@ async function queryGlobalKnowledge(query: string, language: Language): Promise<
       const extract = sumData.extract;
 
       if (extract && extract.length > 30) {
-        let localizedExtract = extract;
+        // Keep to 2-3 most relevant, crisp sentences to avoid unnecessary fluff
+        const sentences = extract.split(/(?<=[.!?।])\s+/);
+        const conciseExtract = sentences.slice(0, 3).join(" ").trim() || extract;
+
+        let localizedExtract = conciseExtract;
         if (language !== "en") {
-          localizedExtract = await translateText(extract, language, "en");
+          localizedExtract = await translateText(conciseExtract, language, "en");
         }
 
         let localizedTitle = title;
