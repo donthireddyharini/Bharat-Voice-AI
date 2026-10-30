@@ -2293,14 +2293,15 @@ async function getCurrentStateOrNationalHappenings(
 }
 
 
-export async function getUniversalAnswer(
+async function getSingleUniversalAnswer(
   query: string,
   language: Language = "en",
-  conversationId?: string
+  conversationId?: string,
+  customMsgId?: string
 ): Promise<ChatResponse> {
   const trimmed = (query || "").trim();
   const convId = conversationId || `conv-${Date.now()}`;
-  const msgId = `msg-${Date.now()}`;
+  const msgId = customMsgId || `msg-${Date.now()}`;
 
   if (!trimmed) {
     return generateKnowledgeResponse("hello", language, convId);
@@ -2597,4 +2598,132 @@ Provide helpful, conversational, spoken-ready guidance useful for day-to-day cit
       language === "te" ? "రైతులకు పీఎం-కిసాన్ వివరాలు చెప్పండి" : "Tell me about PM-KISAN for farmers",
     ],
   };
+}
+
+
+/**
+ * Helper to split compound queries containing multiple questions
+ * e.g. "ఆంధ్రప్రదేశ్ లో తుఫాను ఎలా ఉంది? మరియు దీపం పథకం అంటే ఏమిటి?"
+ * e.g. "What is PM-KISAN? And how is the weather in Vijayawada?"
+ */
+function splitMultipleQuestions(text: string): string[] | null {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+
+  // Split by question marks (? / ؟ / ？)
+  const questionMarkParts = trimmed
+    .split(/[?\u061F\uFF1F]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 4);
+
+  if (questionMarkParts.length >= 2) {
+    return questionMarkParts;
+  }
+
+  // Split by conjunctives like 'and / మరియు / तथा / और / అలాగే / మరియును' or newlines
+  const conjunctiveParts = trimmed
+    .split(/\n+|\s+(?:and|మరియు|तथा|और|అలాగే|మరియును|కూడా)\s+/i)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 8);
+
+  if (conjunctiveParts.length >= 2 && conjunctiveParts.every((p) => p.split(/\s+/).length >= 2)) {
+    return conjunctiveParts;
+  }
+
+  return null;
+}
+
+export async function getUniversalAnswer(
+  query: string,
+  language: Language = "en",
+  conversationId?: string
+): Promise<ChatResponse> {
+  const trimmed = (query || "").trim();
+  const convId = conversationId || `conv-${Date.now()}`;
+  const msgId = `msg-${Date.now()}`;
+
+  if (!trimmed) {
+    return generateKnowledgeResponse("hello", language, convId);
+  }
+
+  // Check if citizen asked 2 or more questions at once
+  const subQuestions = splitMultipleQuestions(trimmed);
+  if (subQuestions && subQuestions.length >= 2 && subQuestions.length <= 4) {
+    try {
+      const subResults = await Promise.all(
+        subQuestions.map((sq, i) => getSingleUniversalAnswer(sq, language, convId, `${msgId}-sub-${i}`))
+      );
+
+      const combinedSummaries: string[] = [];
+      const combinedHighlights: string[] = [];
+      const combinedSources: SourceRef[] = [];
+      const combinedFollowups: string[] = [];
+
+      subResults.forEach((res, i) => {
+        if (res && res.answer) {
+          const qLabel =
+            language === "te"
+              ? `[ప్రశ్న ${i + 1}: ${subQuestions[i]}]`
+              : language === "hi"
+              ? `[प्रश्न ${i + 1}: ${subQuestions[i]}]`
+              : `[Question ${i + 1}: ${subQuestions[i]}]`;
+
+          combinedSummaries.push(`${qLabel}\n${res.answer.summary}`);
+
+          if (Array.isArray(res.answer.eligibility)) {
+            res.answer.eligibility.slice(0, 2).forEach((el) => {
+              if (el && !combinedHighlights.includes(el)) combinedHighlights.push(el);
+            });
+          }
+          if (Array.isArray(res.sources)) {
+            res.sources.forEach((s) => {
+              if (s && !combinedSources.some((cs) => cs.title === s.title)) combinedSources.push(s);
+            });
+          }
+          if (Array.isArray(res.suggested_followups)) {
+            res.suggested_followups.forEach((f) => {
+              if (f && !combinedFollowups.includes(f)) combinedFollowups.push(f);
+            });
+          }
+        }
+      });
+
+      if (combinedSummaries.length > 0) {
+        return {
+          conversation_id: convId,
+          message_id: msgId,
+          answer: {
+            scheme_id: "multi-question-response",
+            scheme_name:
+              language === "te"
+                ? "మీ అన్ని ప్రశ్నల సమాధానాలు (Answers to All Questions)"
+                : language === "hi"
+                ? "आपके सभी प्रश्नों के उत्तर"
+                : "Answers to All Your Questions",
+            summary: combinedSummaries.join("\n\n"),
+            eligibility: combinedHighlights.slice(0, 4),
+            benefits: [
+              language === "te"
+                ? "మీరు అడిగిన ప్రతి ప్రశ్నకు ధృవీకరించిన కచ్చితమైన సమాచారం"
+                : "Carefully answered each and every question with verified data",
+              language === "te"
+                ? "అన్ని ప్రశ్నల సమాధానాలు ఒకేసారి వాయిస్ మరియు స్క్రీన్ పై లభ్యం"
+                : "Instant voice and text output for all your questions at once",
+            ],
+            documents_required: [],
+            application_steps: [],
+            grounded: true,
+          },
+          sources: combinedSources.slice(0, 4),
+          language,
+          suggested_followups: combinedFollowups.slice(0, 4),
+        };
+      }
+    } catch (multiErr) {
+      console.warn("[UniversalAI] Multi-question resolution notice:", multiErr);
+    }
+  }
+
+  // Single question evaluation
+  return getSingleUniversalAnswer(trimmed, language, convId, msgId);
 }

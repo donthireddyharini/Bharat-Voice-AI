@@ -213,6 +213,7 @@ export default function ChatWindow({
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastFailedQuery = useRef<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   // Sync assistantState with global speech status
   useEffect(() => {
@@ -568,26 +569,42 @@ export default function ChatWindow({
       setErrorText("Voice input is not supported in this browser. Please try Chrome, or type your question instead.");
       return;
     }
+    stopSpeaking();
     setIsListening(true);
     setAssistantState("listening");
-    startListening(
+
+    recognitionRef.current = startListening(
       language,
       (transcript) => {
-        setIsListening(false);
-        sendMessage(transcript, true);
+        // Populate text input continuously while user is speaking so they can inspect, edit, and click Enter/Send
+        setInput(transcript);
       },
       (message) => {
         setIsListening(false);
         setAssistantState("error");
         setErrorText(message);
       },
-      () => setIsListening(false)
+      () => {
+        setIsListening(false);
+        setAssistantState("idle");
+        inputRef.current?.focus();
+      }
     );
   }
 
   function handleVoiceStop() {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {}
+      recognitionRef.current = null;
+    }
     setIsListening(false);
     setAssistantState("idle");
+    // Ensure the input field receives immediate focus so user can hit Enter or click Send
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
   }
 
   function handleReadAloud(text: string, msgLanguage?: Language, messageId?: string) {
@@ -836,7 +853,7 @@ export default function ChatWindow({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-            placeholder="Ask in your language…"
+            placeholder={isListening ? (language === "te" ? "🎙️ మాట్లాడండి... వింటున్నాం (పూర్తయ్యాక ఎంటర్‌/Send నొక్కండి)" : language === "hi" ? "🎙️ बोलें... सुन रहे हैं (पूरा होने पर Enter/Send दबाएं)" : "🎙️ Listening... speak now, then hit Enter or Send") : (language === "te" ? "మీ ప్రశ్నను ఇక్కడ అడగండి (Enter నొక్కండి)…" : language === "hi" ? "अपना प्रश्न यहाँ पूछें (Enter दबाएं)…" : "Ask in your language (press Enter to send)…")}
             className="flex-1 bg-panel2 border border-white/10 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm outline-none focus:border-saffron/50 placeholder:text-mist/70"
           />
           <button

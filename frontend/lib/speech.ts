@@ -333,7 +333,7 @@ export function getMatchingVoice(language: Language): SpeechSynthesisVoice | nul
  */
 export function startListening(
   language: Language,
-  onResult: (transcript: string) => void,
+  onResult: (transcript: string, isFinal?: boolean) => void,
   onError: (message: string) => void,
   onEnd?: () => void
 ) {
@@ -347,17 +347,21 @@ export function startListening(
 
   const recognition = new SpeechRecognitionCtor();
   recognition.lang = SPEECH_LOCALES[language] || "en-IN";
-  recognition.interimResults = false;
+  recognition.interimResults = true;
   recognition.maxAlternatives = 1;
-  recognition.continuous = false;
+  recognition.continuous = true;
 
   recognition.onresult = (event: any) => {
-    if (event.results && event.results[0] && event.results[0][0]) {
-      const transcript = event.results[0][0].transcript;
-      if (transcript && transcript.trim()) {
-        playAssistantChime("end");
-        onResult(transcript.trim());
+    let fullTranscript = "";
+    for (let i = 0; i < event.results.length; ++i) {
+      const res = event.results[i];
+      if (res && res[0] && res[0].transcript) {
+        fullTranscript += res[0].transcript + " ";
       }
+    }
+    const cleanTranscript = fullTranscript.trim();
+    if (cleanTranscript) {
+      onResult(cleanTranscript, false);
     }
   };
 
