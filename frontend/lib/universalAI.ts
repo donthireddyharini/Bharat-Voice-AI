@@ -1533,11 +1533,11 @@ function getConversationalResponse(query: string, language: Language): string | 
 function extractCleanSearchTopic(rawText: string): string {
   let s = rawText
     .replace(/\b(he said that|they said that|someone said that|i heard that|people are saying that|is it true that|is it happening|it is said that)\b/gi, " ")
-    .replace(/\b(can you tell me|can you explain|tell me about|tell me|explain to me|explain about|explain this|please explain|explain|what is this|what is that|what are|what is|who is|where is|when was|how does|why does|which is)\b/gi, " ")
-    .replace(/\b(so please explain|please explain|so explain|details please|give details|in detail|details of)\b/gi, " ")
+    .replace(/\b(can you tell me|can you explain|tell me about|tell me|explain to me|explain about|explain this|please explain|explain|what is this|what is that|what are|what is|what a|what's|what was|who is|where is|when was|how does|why does|which is|what)\b/gi, " ")
+    .replace(/\b(so please explain|please explain|so explain|details please|give details|in detail|details of|information on|information about)\b/gi, " ")
     .replace(/\b(recent updates?|latest updates?|recent news|latest news|updates?|news|today|current developments?|recent|breaking)\b/gi, " ")
     .replace(/\b(going on in|happening in|taking place in)\b/gi, " in ")
-    .replace(/\b(the|a|an|that|this|these|those)\b/gi, " ")
+    .replace(/\b(the|a|an|that|this|these|those|is|are|was|were|about|of|for|in)\b/gi, " ")
     .replace(/[?!.,;:'"()\[\]{}]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -1775,14 +1775,8 @@ async function getRealtimeNewsOrCurrentEvents(
       return null;
     }
 
-    // Clean entity for search
-    const cleanEntity = engLower
-      .replace(/\b(what is|what are|tell me about|tell me|explain to me|explain|can you tell|details about|how is|who is|where is|which is|details of|can you provide|give me)\b/gi, " ")
-      .replace(/\b(recent updates?|latest updates?|recent news|latest news|updates?|news|today|current developments?|recent|breaking|live|today's|now)\b/gi, " ")
-      .replace(/\b(of|about|in|for|the|a|an|and)\b/gi, " ")
-      .replace(/[?!.,;:'"()\[\]{}]+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+    // Clean entity for search (strip filler tokens like "what a", "what is", "updates", etc.)
+    const cleanEntity = extractCleanSearchTopic(engLower);
 
     // If query has a specific entity (e.g. "Lovely Professional University", "Gold price", "AP Cyclone"), search for it; otherwise fetch top headlines
     let searchQuery = "India latest breaking news today";
@@ -1829,11 +1823,12 @@ async function getRealtimeNewsOrCurrentEvents(
           continue;
         }
 
-        // If specific entity was searched, verify title relevance
+        // If specific entity was searched, verify title relevance (support full words and acronyms like LPU for Lovely Professional University)
         if (cleanEntity.length >= 3) {
-          const entityTokens = cleanEntity.toLowerCase().split(/\s+/).filter((t) => t.length > 2);
+          const entityTokens = cleanEntity.toLowerCase().split(/\s+/).filter((t) => t.length > 2 && !["what", "recent", "news", "updates"].includes(t));
+          const entityAcronym = entityTokens.length >= 2 ? entityTokens.map((w) => w[0]).join("") : "";
           const titleLower = cleanTitle.toLowerCase();
-          const hasTokenMatch = entityTokens.some((tok) => titleLower.includes(tok));
+          const hasTokenMatch = entityTokens.some((tok) => titleLower.includes(tok)) || (entityAcronym && titleLower.includes(entityAcronym));
           if (entityTokens.length > 0 && !hasTokenMatch) {
             continue;
           }
@@ -1961,13 +1956,16 @@ async function queryGlobalKnowledge(query: string, language: Language): Promise<
         const titleMatches = queryTokens.filter((tok: string) => titleLower.includes(tok)).length;
         const snippetMatches = queryTokens.filter((tok: string) => snippetLower.includes(tok)).length;
 
-        // Strongly weight title match
-        const score = titleMatches * 3 + snippetMatches;
-
-        // Never choose an article if title has 0 match with multi-token query
-        if (queryTokens.length >= 2 && titleMatches === 0) {
+        // Minimum keyword overlap requirement:
+        // If user searched a multi-word entity (e.g. "Lovely Professional University"),
+        // the article MUST match at least 50% of the keywords (not just 1 generic word like "Lovely" matching "My Lovely Liar")
+        const overlapRatio = queryTokens.length > 0 ? titleMatches / queryTokens.length : 0;
+        if (queryTokens.length >= 2 && (titleMatches < 2 || overlapRatio < 0.5)) {
           continue;
         }
+
+        // Strongly weight title match
+        const score = titleMatches * 10 + snippetMatches;
 
         if (score > maxScore) {
           maxScore = score;
